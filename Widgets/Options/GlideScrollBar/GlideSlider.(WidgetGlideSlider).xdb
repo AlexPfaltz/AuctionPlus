@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WidgetGlideSlider>
+	<discreteStep>32</discreteStep>
+	<sliderButton href="ScrollButtonSlider.(WidgetButton).xdb" />
+	<moveArrangement>WIDGETS_ARRANGEMENT_T2B</moveArrangement>
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_BOTH</Align>
+			<Pos>8</Pos>
+			<HighPos>6</HighPos>
+		</X>
+		<Y>
+			<Align>WIDGET_ALIGN_BOTH</Align>
+			<Pos>40</Pos>
+			<HighPos>40</HighPos>
+		</Y>
+	</Placement>
+	<PickChildrenOnly>false</PickChildrenOnly>
+	<IgnoreDblClick>true</IgnoreDblClick>
+</WidgetGlideSlider>

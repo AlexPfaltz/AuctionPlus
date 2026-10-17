@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WidgetButton>
+	<Variants>
+		<Item>
+			<Reaction>HeaderStylePrev</Reaction>
+		</Item>
+	</Variants>
+	<Name>BtnLeft</Name>
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_HIGH</Align>
+			<HighPos>225</HighPos>
+		</X>
+		<Y>
+			<Align>WIDGET_ALIGN_CENTER</Align>
+			<Pos>0</Pos>
+		</Y>
+	</Placement>
+	<Header>
+		<Prototype href="../../../Buttons/CommonPinBtn/PinBtnLeft.Prototype.(WidgetButton).xdb" />
+	</Header>
+</WidgetButton>

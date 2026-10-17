@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WidgetGlideScrollBar>
+	<slider href="GlideSlider.(WidgetGlideSlider).xdb" />
+	<decButton href="ScrollButtonUp.(WidgetButton).xdb" />
+	<incButton href="ScrollButtonDown.(WidgetButton).xdb" />
+	<BackLayer href="Textures/ScrollBar.(WidgetLayerTiledTexture).xdb" />
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_HIGH</Align>
+			<HighPos>-5</HighPos>
+			<Size>39</Size>
+		</X>
+		<Y>
+			<Align>WIDGET_ALIGN_CENTER</Align>
+			<Pos>-5</Pos>
+			<Size>537</Size>
+		</Y>
+	</Placement>
+</WidgetGlideScrollBar>

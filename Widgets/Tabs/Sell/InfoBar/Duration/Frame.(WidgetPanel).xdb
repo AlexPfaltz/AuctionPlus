@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WidgetPanel>
+	<Name>Frame</Name>
+	<Children>
+		<Item href="12h.(WidgetPanel).xdb" />
+		<Item href="24h.(WidgetPanel).xdb" />
+		<Item href="36h.(WidgetPanel).xdb" />
+		<Item href="48h.(WidgetPanel).xdb" />
+	</Children>
+	<BackLayer href="../Textures/AuctionPanelDropDown.(WidgetLayerTiledTexture).xdb" />
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_LOW</Align>
+			<Pos>0</Pos>
+			<Size>144</Size>
+		</X>
+		<Y>
+			<Align>WIDGET_ALIGN_BOTH</Align>
+			<Pos>22</Pos>
+			<HighPos>0</HighPos>
+		</Y>
+	</Placement>
+	<Visible>true</Visible>
+	<TransparentInput>false</TransparentInput>
+</WidgetPanel>

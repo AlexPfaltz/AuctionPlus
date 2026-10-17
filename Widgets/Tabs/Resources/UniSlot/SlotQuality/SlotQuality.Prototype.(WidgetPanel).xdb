@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WidgetPanel>
+	<Name>Quality</Name>
+	<Priority>40</Priority>
+	<BackLayer href="SlotQualityDown.(WidgetLayerSimpleTexture).xdb" />
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_BOTH</Align>
+		</X>
+		<Y>
+			<Align>WIDGET_ALIGN_BOTH</Align>
+		</Y>
+	</Placement>
+	<Visible>false</Visible>
+	<TransparentInput>true</TransparentInput>
+	<FrontLayer href="SlotQualityUp.(WidgetLayerSimpleTexture).xdb" />
+	<Header>
+		<isPrototype>true</isPrototype>
+	</Header>
+</WidgetPanel>

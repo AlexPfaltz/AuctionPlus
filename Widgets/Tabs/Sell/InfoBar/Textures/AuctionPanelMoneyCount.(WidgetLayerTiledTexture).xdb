@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WidgetLayerTiledTexture>
+	<!--<textureItem href="/Interface/Ingame/ContextAuction/AuctionPanelMoneyCount.(UISingleTexture).xdb" />-->
+	<textureItem href="AuctionPanelMoneyCount/AuctionPanelMoneyCount.(UISingleTexture).xdb" />
+	<Layout>
+		<LeftX>15</LeftX>
+		<MiddleX>15</MiddleX>
+		<RightX>130</RightX>
+		<TopY>0</TopY>
+		<MiddleY>30</MiddleY>
+		<BottomY>0</BottomY>
+	</Layout>
+	<layoutTypeX>WIDGET_LAYER_TILED_LAYOUT_TYPE_TILED</layoutTypeX>
+	<layoutTypeY>WIDGET_LAYER_TILED_LAYOUT_TYPE_TILED</layoutTypeY>
+	<flatPlacement>false</flatPlacement>
+	<lazyLoad>false</lazyLoad>
+	<Color>0xffffffff</Color>
+	<Grayed>false</Grayed>
+	<BlendEffect>BLEND_EFFECT_ALPHABLND</BlendEffect>
+</WidgetLayerTiledTexture>

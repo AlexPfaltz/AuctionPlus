@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WidgetButton>
+	<Variants>
+		<Item>
+			<LayerHighlight href="CornerCrossHighlight.(WidgetLayerSimpleTexture).xdb" />
+			<StateNormal>
+				<LayerMain href="CornerCrossNormal.(WidgetLayerSimpleTexture).xdb" />
+			</StateNormal>
+			<StatePushed>
+				<LayerMain href="CornerCrossPressed.(WidgetLayerSimpleTexture).xdb" />
+			</StatePushed>
+			<ReactionOnUp>true</ReactionOnUp>
+		</Item>
+	</Variants>
+	<Name>CornerCross</Name>
+	<Priority>10</Priority>
+	<BackLayer href="GoldenCorner.(WidgetLayerSimpleTexture).xdb" />
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_HIGH</Align>
+			<HighPos>3</HighPos>
+			<Size>37</Size>
+		</X>
+		<Y>
+			<Pos>3</Pos>
+			<Size>37</Size>
+		</Y>
+	</Placement>
+	<Visible>true</Visible>
+	<IgnoreDblClick>true</IgnoreDblClick>
+	<Header>
+		<isPrototype>true</isPrototype>
+	</Header>
+</WidgetButton>

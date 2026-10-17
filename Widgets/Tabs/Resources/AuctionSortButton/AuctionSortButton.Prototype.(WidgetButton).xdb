@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WidgetButton>
+	<TextTag>button_label</TextTag>
+	<Variants>
+		<Item>
+			<LayerHighlight href="AuctionSortButtonHighlight.(WidgetLayerTiledTexture).xdb" />
+			<PushedOffset x="-2" y="2" />
+			<StateNormal>
+				<LayerMain href="AuctionSortButtonNormal.(WidgetLayerTiledTexture).xdb" />
+				<FormatFileRef href="ButtonFormatNormal.txt" />
+			</StateNormal>
+			<StatePushed>
+				<LayerMain href="AuctionSortButtonPressed.(WidgetLayerTiledTexture).xdb" />
+			</StatePushed>
+			<StateDisabled>
+				<LayerMain href="AuctionSortButtonDisabled.(WidgetLayerTiledTexture).xdb" />
+				<FormatFileRef href="ButtonFormatDisabled.txt" />
+			</StateDisabled>
+			<ReactionOnUp>true</ReactionOnUp>
+		</Item>
+	</Variants>
+	<TextStyle>
+		<Align>ALIGNY_MIDDLE</Align>
+	</TextStyle>
+	<Priority>250</Priority>
+	<Placement>
+		<X>
+			<Size>128</Size>
+		</X>
+		<Y>
+			<Size>32</Size>
+		</Y>
+	</Placement>
+	<IgnoreDblClick>true</IgnoreDblClick>
+	<Header>
+		<isPrototype>true</isPrototype>
+	</Header>
+</WidgetButton>

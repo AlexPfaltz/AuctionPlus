@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WidgetPanel>
+	<Name>HeaderStyle</Name>
+	<Children>
+		<Item href="HeaderStyle/Text.(WidgetTextView).xdb" />
+		<Item href="HeaderStyle/BtnLeft.(WidgetButton).xdb" />
+		<Item href="HeaderStyle/BtnRight.(WidgetButton).xdb" />
+		<Item href="HeaderStyle/Value.(WidgetTextView).xdb" />
+	</Children>
+	<BackLayer href="../Textures/OptionFrame.(WidgetLayerTiledTexture).xdb" />
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_CENTER</Align>
+			<Pos>0</Pos>
+			<Size>572</Size>
+		</X>
+		<Y>
+			<Pos>135</Pos>
+			<Size>30</Size>
+		</Y>
+	</Placement>
+	<Visible>true</Visible>
+</WidgetPanel>

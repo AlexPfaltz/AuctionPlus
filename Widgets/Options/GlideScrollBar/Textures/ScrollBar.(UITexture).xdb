@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<UITexture>
+	<mipSW>-1</mipSW>
+	<mipsNumber>1</mipsNumber>
+	<generateMipChain>false</generateMipChain>
+	<type>DXT5</type>
+	<width>64</width>
+	<height>1024</height>
+	<realWidth>39</realWidth>
+	<realHeight>537</realHeight>
+	<disableLODControl>false</disableLODControl>
+	<alphaTex>true</alphaTex>
+	<binaryFileSize>6697</binaryFileSize>
+	<binaryFile href="ScrollBar.(UITexture).bin" />
+	<binaryFileSize2>0</binaryFileSize2>
+	<binaryFile2 href="" />
+	<sourceFile href="ScrollBar.tga" />
+	<sourceFileCRC>-1571547868</sourceFileCRC>
+	<wrap>false</wrap>
+	<LocalizationInfo />
+	<atlasPart>true</atlasPart>
+	<pool>UNDEFINED</pool>
+</UITexture>

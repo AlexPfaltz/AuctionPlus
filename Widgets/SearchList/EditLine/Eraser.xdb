@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WidgetButton>
+	<Variants>
+		<Item>
+			<LayerHighlight href="../Textures/ButtonHighlight.(WidgetLayerSimpleTexture).xdb" />
+			<Reaction>ClearLine</Reaction>
+			<ReactionOnUp>true</ReactionOnUp>
+		</Item>
+	</Variants>
+	<Name>Eraser</Name>
+	<BackLayer href="../Textures/Eraser.(WidgetLayerSimpleTexture).xdb" />
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_HIGH</Align>
+			<HighPos>8</HighPos>
+			<Size>20</Size>
+		</X>
+		<Y>
+			<Align>WIDGET_ALIGN_CENTER</Align>
+			<Pos>2</Pos>
+			<Size>20</Size>
+		</Y>
+	</Placement>
+	<Visible>true</Visible>
+	<IgnoreDblClick>true</IgnoreDblClick>
+</WidgetButton>

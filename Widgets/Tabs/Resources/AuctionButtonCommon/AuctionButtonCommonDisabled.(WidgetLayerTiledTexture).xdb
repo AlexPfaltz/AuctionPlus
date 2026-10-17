@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WidgetLayerTiledTexture>
+	<!--<textureItem href="/Interface/Ingame/ContextAuction/AuctionButtonDisabled.(UISingleTexture).xdb" />-->
+	<textureItem href="AuctionButtonDisabled/AuctionButtonDisabled.(UISingleTexture).xdb" />
+	<Layout>
+		<LeftX>43</LeftX>
+		<MiddleX>42</MiddleX>
+		<RightX>43</RightX>
+		<TopY>10</TopY>
+		<MiddleY>18</MiddleY>
+		<BottomY>10</BottomY>
+	</Layout>
+	<layoutTypeX>WIDGET_LAYER_TILED_LAYOUT_TYPE_TILED</layoutTypeX>
+	<layoutTypeY>WIDGET_LAYER_TILED_LAYOUT_TYPE_TILED</layoutTypeY>
+	<flatPlacement>false</flatPlacement>
+	<lazyLoad>false</lazyLoad>
+	<Color>0xffffffff</Color>
+	<Grayed>false</Grayed>
+	<BlendEffect>BLEND_EFFECT_ALPHABLND</BlendEffect>
+</WidgetLayerTiledTexture>

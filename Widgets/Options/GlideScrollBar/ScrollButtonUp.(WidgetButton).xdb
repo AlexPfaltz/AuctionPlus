@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WidgetButton>
+	<Variants>
+		<Item>
+			<LayerHighlight href="Textures/ScrollButtonHighlight.(WidgetLayerSimpleTexture).xdb" />
+			<StateNormal>
+				<LayerMain href="Textures/ScrollButtonUpNormal.(WidgetLayerSimpleTexture).xdb" />
+			</StateNormal>
+			<StatePushed>
+				<LayerMain href="Textures/ScrollButtonUpPressed.(WidgetLayerSimpleTexture).xdb" />
+			</StatePushed>
+			<StateDisabled>
+				<LayerMain href="Textures/ScrollButtonUpDisabled.(WidgetLayerSimpleTexture).xdb" />
+			</StateDisabled>
+			<ReactionOnUp>true</ReactionOnUp>
+		</Item>
+	</Variants>
+	<Name>ScrollButtonUp</Name>
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_CENTER</Align>
+			<Pos>0</Pos>
+			<Size>22</Size>
+		</X>
+		<Y>
+			<Align>WIDGET_ALIGN_LOW</Align>
+			<Pos>15</Pos>
+			<Size>22</Size>
+		</Y>
+	</Placement>
+	<Visible>true</Visible>
+	<IgnoreDblClick>true</IgnoreDblClick>
+</WidgetButton>

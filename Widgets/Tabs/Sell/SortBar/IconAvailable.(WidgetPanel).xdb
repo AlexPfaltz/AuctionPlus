@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WidgetPanel>
+	<Name>IconAvailable</Name>
+	<BackLayer href="SortIcon.(WidgetLayerSimpleTexture).xdb" />
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_HIGH</Align>
+			<HighPos>4</HighPos>
+			<Size>16</Size>
+		</X>
+		<Y>
+			<Align>WIDGET_ALIGN_CENTER</Align>
+			<Pos>0</Pos>
+			<Size>16</Size>
+		</Y>
+	</Placement>
+	<Visible>true</Visible>
+	<TransparentInput>true</TransparentInput>
+</WidgetPanel>

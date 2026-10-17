@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WidgetPanel>
+	<Name>SortBar</Name>
+	<Children>
+		<Item href="SortBar/NumLots.(WidgetButton).xdb" />
+		<Item href="SortBar/ItemName.(WidgetButton).xdb" />
+		<Item href="SortBar/PricePerUnit.(WidgetButton).xdb" />
+		<Item href="SortBar/PriceBuyOut.(WidgetButton).xdb" />
+		<Item href="SortBar/IconNumLots.(WidgetPanel).xdb" />
+		<Item href="SortBar/IconPricePerUnit.(WidgetPanel).xdb" />
+		<Item href="SortBar/IconBuyOut.(WidgetPanel).xdb" />
+	</Children>
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_BOTH</Align>
+			<Pos>34</Pos>
+			<HighPos>42</HighPos>
+		</X>
+		<Y>
+			<Align>WIDGET_ALIGN_LOW</Align>
+			<Pos>182</Pos>
+			<Size>32</Size>
+		</Y>
+	</Placement>
+	<Visible>true</Visible>
+	<PickChildrenOnly>true</PickChildrenOnly>
+</WidgetPanel>

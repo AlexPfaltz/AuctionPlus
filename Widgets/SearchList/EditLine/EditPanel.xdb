@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WidgetPanel>
+	<Name>EditPanel</Name>
+	<Children>
+		<Item href="EditLine.xdb" />
+		<Item href="Eraser.xdb" />
+		<Item href="Pencil.xdb" />
+	</Children>
+	<BackLayer href="../Textures/Separator.(WidgetLayerTiledTexture).xdb" />
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_BOTH</Align>
+			<Pos>15</Pos>
+			<HighPos>45</HighPos>
+		</X>
+		<Y>
+			<Align>WIDGET_ALIGN_HIGH</Align>
+			<HighPos>20</HighPos>
+			<Size>26</Size>
+		</Y>
+	</Placement>
+	<Visible>false</Visible>
+</WidgetPanel>

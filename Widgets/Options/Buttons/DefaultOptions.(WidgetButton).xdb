@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WidgetButton>
+	<Variants>
+		<Item>
+			<Reaction>DefaultOptions</Reaction>
+		</Item>
+	</Variants>
+	<Name>DefaultOptions</Name>
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_LOW</Align>
+			<Pos>40</Pos>
+			<Size>130</Size>
+		</X>
+		<Y>
+			<Align>WIDGET_ALIGN_HIGH</Align>
+			<HighPos>18</HighPos>
+		</Y>
+	</Placement>
+	<Header>
+		<Prototype href="RegularButton/ButtonRegular.Prototype.(WidgetButton).xdb" />
+	</Header>
+</WidgetButton>

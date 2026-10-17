@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WidgetPanel>
+	<Name>UniSlot</Name>
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_LOW</Align>
+			<Pos>25</Pos>
+			<Size>64</Size>
+		</X>
+		<Y>
+			<Align>WIDGET_ALIGN_CENTER</Align>
+			<Pos>0</Pos>
+			<Size>64</Size>
+		</Y>
+	</Placement>
+	<Visible>true</Visible>
+	<Enabled>false</Enabled>
+	<Header>
+		<Prototype href="../../Resources/UniSlot/Slot.Prototype.(WidgetPanel).xdb" />
+	</Header>
+</WidgetPanel>

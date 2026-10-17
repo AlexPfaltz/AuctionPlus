@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WidgetButton>
+	<Variants>
+		<Item>
+			<Reaction>BuySelected</Reaction>
+		</Item>
+	</Variants>
+	<Name>BuySelected</Name>
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_HIGH</Align>
+			<HighPos>32</HighPos>
+			<Size>190</Size>
+		</X>
+		<Y>
+			<Align>WIDGET_ALIGN_HIGH</Align>
+			<HighPos>60</HighPos>
+			<Size>38</Size>
+		</Y>
+	</Placement>
+	<Visible>false</Visible>
+	<Enabled>false</Enabled>
+	<Header>
+		<Prototype href="../Resources/AuctionButtonCommon/AuctionButtonCommon.Prototype.(WidgetButton).xdb" />
+	</Header>
+</WidgetButton>

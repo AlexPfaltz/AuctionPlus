@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WidgetForm>
+	<Name>Auction+</Name>
+	<Priority>15100</Priority>
+	<Children>
+		<Item href="Buttons/Settings.(WidgetButton).xdb" />
+		<Item href="Buttons/TabBuy.(WidgetButton).xdb" />
+		<Item href="Buttons/TabSell.(WidgetButton).xdb" />
+		<Item href="Buttons/TabScan.(WidgetButton).xdb" />
+		<Item href="Options/Options.(WidgetPanel).xdb" />
+		<Item href="PriceInTooltip/PriceInTooltip.(WidgetPanel).xdb" />
+		<Item href="SearchList/SearchList.xdb" />
+		<Item href="Tabs/Buy/ListBuy.(WidgetPanel).xdb" />
+		<Item href="Tabs/Sell/ListSell.(WidgetPanel).xdb" />
+		<Item href="Tooltip/Tooltip.(WidgetPanel).xdb" />
+	</Children>
+	<Placement>
+		<QuantumScale>false</QuantumScale>
+		<X>
+			<Align>WIDGET_ALIGN_BOTH</Align>
+			<Sizing>WIDGET_SIZING_DEFAULT</Sizing>
+			<Pos>0</Pos>
+			<HighPos>0</HighPos>
+			<Size>0</Size>
+		</X>
+		<Y>
+			<Align>WIDGET_ALIGN_BOTH</Align>
+			<Sizing>WIDGET_SIZING_DEFAULT</Sizing>
+			<Pos>0</Pos>
+			<HighPos>0</HighPos>
+			<Size>0</Size>
+		</Y>
+	</Placement>
+	<TransparentInput>false</TransparentInput>
+	<PickChildrenOnly>true</PickChildrenOnly>
+</WidgetForm>

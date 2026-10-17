@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WidgetPanel>
+	<Name>DateStyle</Name>
+	<Children>
+		<Item href="DateStyle/Text.(WidgetTextView).xdb" />
+		<Item href="DateStyle/BtnLeft.(WidgetButton).xdb" />
+		<Item href="DateStyle/BtnRight.(WidgetButton).xdb" />
+		<Item href="DateStyle/Value.(WidgetTextView).xdb" />
+	</Children>
+	<BackLayer href="../Textures/OptionFrame.(WidgetLayerTiledTexture).xdb" />
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_CENTER</Align>
+			<Pos>0</Pos>
+			<Size>572</Size>
+		</X>
+		<Y>
+			<Pos>165</Pos>
+			<Size>30</Size>
+		</Y>
+	</Placement>
+	<Visible>true</Visible>
+</WidgetPanel>

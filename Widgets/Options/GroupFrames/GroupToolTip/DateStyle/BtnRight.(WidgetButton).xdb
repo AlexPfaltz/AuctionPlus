@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WidgetButton>
+	<Variants>
+		<Item>
+			<Reaction>DateStyleNext</Reaction>
+		</Item>
+	</Variants>
+	<Name>BtnRight</Name>
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_HIGH</Align>
+			<HighPos>30</HighPos>
+		</X>
+		<Y>
+			<Align>WIDGET_ALIGN_CENTER</Align>
+			<Pos>0</Pos>
+		</Y>
+	</Placement>
+	<Header>
+		<Prototype href="../../../Buttons/CommonPinBtn/PinBtnRight.Prototype.(WidgetButton).xdb" />
+	</Header>
+</WidgetButton>

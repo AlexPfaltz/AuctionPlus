@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WidgetPanel>
+	<Name>BlockFrame</Name>
+	<Children>
+		<Item href="ScanBy.(WidgetPanel).xdb" />
+		<Item href="ShowSearchList.xdb" />
+		<Item href="ShowSearchListNow.xdb" />
+		<Item href="ClearBase.(WidgetPanel).xdb" />
+	</Children>
+	<BackLayer href="../Textures/BlockFrame.(WidgetLayerTiledTexture).xdb" />
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_CENTER</Align>
+			<Pos>0</Pos>
+			<Size>592</Size>
+		</X>
+		<Y>
+			<Pos>38</Pos>
+			<Size>145</Size>
+		</Y>
+	</Placement>
+	<Visible>true</Visible>
+</WidgetPanel>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WidgetScrollableContainer>
+	<scrollBar href="ScrollBar/GlideScrollBar.xdb" />
+	<border href="Paper.xdb" />
+	<widgetsArrangement>WIDGETS_ARRANGEMENT_T2B</widgetsArrangement>
+	<Name>ContainerForBag</Name>
+	<BackLayer href="Textures/PaperTile.(WidgetLayerTiledTexture).xdb" />
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_BOTH</Align>
+			<Pos>15</Pos>
+			<HighPos>15</HighPos>
+		</X>
+		<Y>
+			<Align>WIDGET_ALIGN_BOTH</Align>
+			<Pos>15</Pos>
+			<HighPos>15</HighPos>
+		</Y>
+	</Placement>
+	<Visible>false</Visible>
+	<TransparentInput>false</TransparentInput>
+	<PickChildrenOnly>true</PickChildrenOnly>
+	<IgnoreDblClick>true</IgnoreDblClick>
+	<clipContent>false</clipContent>
+</WidgetScrollableContainer>

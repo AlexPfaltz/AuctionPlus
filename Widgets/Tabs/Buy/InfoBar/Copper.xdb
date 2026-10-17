@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WidgetTextView>
+	<FormatFileRef href="Copper.txt" />
+	<Name>Copper</Name>
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_HIGH</Align>
+			<HighPos>16</HighPos>
+			<Size>24</Size>
+		</X>
+		<Y>
+			<Align>WIDGET_ALIGN_HIGH</Align>
+			<HighPos>0</HighPos>
+			<Size>22</Size>
+		</Y>
+	</Placement>
+	<Visible>true</Visible>
+</WidgetTextView>

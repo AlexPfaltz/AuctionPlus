@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WidgetPanel>
+	<Name>Line</Name>
+	<Children>
+		<Item href="Line/Button.(WidgetButton).xdb" />
+		<Item href="Line/Available.(WidgetTextView).xdb" />
+		<Item href="Line/Price.(WidgetPanel).xdb" />
+	</Children>
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_LOW</Align>
+			<Pos>0</Pos>
+			<Size>778</Size>
+		</X>
+		<Y>
+			<Align>WIDGET_ALIGN_LOW</Align>
+			<Pos>0</Pos>
+			<Size>34</Size>
+		</Y>
+	</Placement>
+	<Visible>false</Visible>
+</WidgetPanel>

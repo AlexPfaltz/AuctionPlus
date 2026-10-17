@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WidgetTextView>
+	<FormatFileRef href="HeaderNumLots.txt" />
+	<TextStyle>
+		<multiline>true</multiline>
+		<wrapText>true</wrapText>
+		<showClippedSymbol>false</showClippedSymbol>
+		<showClippedLine>false</showClippedLine>
+		<ellipsis>false</ellipsis>
+		<Align>ALIGNY_TOP</Align>
+	</TextStyle>
+	<Name>HeaderNumLots</Name>
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_CENTER</Align>
+			<Pos>4</Pos>
+			<HighPos>0</HighPos>
+			<Size>94</Size>
+		</X>
+		<Y>
+			<Align>WIDGET_ALIGN_LOW</Align>
+			<Pos>0</Pos>
+			<Size>30</Size>
+		</Y>
+	</Placement>
+	<TransparentInput>true</TransparentInput>
+</WidgetTextView>

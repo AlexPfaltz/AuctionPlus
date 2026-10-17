@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WidgetPanel>
+	<Name>SearchList</Name>
+	<Children>
+		<Item href="ButtonCornerCross.xdb" />
+		<Item href="ContainerForBag.xdb" />
+		<Item href="ContainerYourList.xdb" />
+		<Item href="Line.xdb" />
+		<Item href="EditLine/EditPanel.xdb" />
+	</Children>
+	<BackLayer href="Textures/LeatherTile.(WidgetLayerTiledTexture).xdb" />
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_CENTER</Align>
+			<Size>350</Size>
+		</X>
+		<Y>
+			<Align>WIDGET_ALIGN_CENTER</Align>
+			<Size>322</Size>
+		</Y>
+	</Placement>
+	<Visible>false</Visible>
+	<clipContent>false</clipContent>
+</WidgetPanel>

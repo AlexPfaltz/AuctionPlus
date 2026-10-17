@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WidgetPanel>
+	<Name>ShowSearchListNow</Name>
+	<Children>
+		<Item href="ShowSearchListNow/Text.xdb" />
+		<Item href="ShowSearchListNow/Button.xdb" />
+	</Children>
+	<BackLayer href="../Textures/OptionFrame.(WidgetLayerTiledTexture).xdb" />
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_CENTER</Align>
+			<Pos>0</Pos>
+			<Size>572</Size>
+		</X>
+		<Y>
+			<Pos>75</Pos>
+			<Size>30</Size>
+		</Y>
+	</Placement>
+	<Visible>true</Visible>
+</WidgetPanel>

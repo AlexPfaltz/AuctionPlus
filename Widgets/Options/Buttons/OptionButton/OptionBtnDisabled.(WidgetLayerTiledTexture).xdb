@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WidgetLayerTiledTexture>
+	<textureItem href="OptionBtnDisabled.(UISingleTexture).xdb" />
+	<Layout>
+		<LeftX>27</LeftX>
+		<MiddleX>28</MiddleX>
+		<RightX>27</RightX>
+		<TopY>10</TopY>
+		<MiddleY>10</MiddleY>
+		<BottomY>10</BottomY>
+	</Layout>
+	<layoutTypeX>WIDGET_LAYER_TILED_LAYOUT_TYPE_TILED</layoutTypeX>
+	<layoutTypeY>WIDGET_LAYER_TILED_LAYOUT_TYPE_TILED</layoutTypeY>
+	<flatPlacement>false</flatPlacement>
+	<lazyLoad>false</lazyLoad>
+	<Color>0xffffffff</Color>
+	<Grayed>false</Grayed>
+	<BlendEffect>BLEND_EFFECT_ALPHABLND</BlendEffect>
+</WidgetLayerTiledTexture>

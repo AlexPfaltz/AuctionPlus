@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WidgetPanel>
+	<Name>Options</Name>
+	<Priority>1</Priority>
+	<Children>
+		<Item href="Header/Header.(WidgetPanel).xdb" />
+		<Item href="Buttons/ButtonCornerCross.(WidgetButton).xdb" />
+		<Item href="Buttons/DefaultOptions.(WidgetButton).xdb" />
+		<Item href="Container.(WidgetScrollableContainer).xdb" />
+		<Item href="GroupFrames/GroupMain.(WidgetPanel).xdb" />
+		<Item href="GroupFrames/GroupToolTip.(WidgetPanel).xdb" />
+	</Children>
+	<BackLayer href="Textures/MainFrame.(WidgetLayerTiledTexture).xdb" />
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_CENTER</Align>
+			<Pos>0</Pos>
+			<Size>700</Size>
+		</X>
+		<Y>
+			<Align>WIDGET_ALIGN_CENTER</Align>
+			<Pos>0</Pos>
+			<Size>630</Size>
+		</Y>
+	</Placement>
+	<Visible>false</Visible>
+	<clipContent>false</clipContent>
+</WidgetPanel>

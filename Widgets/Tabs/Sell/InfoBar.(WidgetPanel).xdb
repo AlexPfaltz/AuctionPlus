@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WidgetPanel>
+	<Name>InfoBar</Name>
+	<Children>
+		<Item href="InfoBar/Name.(WidgetPanel).xdb" />
+		<Item href="InfoBar/UniSlot.(WidgetPanel).xdb" />
+		<Item href="InfoBar/Quantity.(WidgetPanel).xdb" />
+		<Item href="InfoBar/StartPrice.(WidgetPanel).xdb" />
+		<Item href="InfoBar/BuyoutPrice.(WidgetPanel).xdb" />
+		<Item href="InfoBar/Duration.(WidgetPanel).xdb" />
+		<Item href="InfoBar/Deposit.(WidgetPanel).xdb" />
+		<Item href="InfoBar/Totalprice.(WidgetPanel).xdb" />
+		<Item href="InfoBar/Post.(WidgetButton).xdb" />
+	</Children>
+	<BackLayer href="Textures/AuctionSearchbarBackground.(WidgetLayerSimpleTexture).xdb" />
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_BOTH</Align>
+			<Pos>32</Pos>
+			<HighPos>28</HighPos>
+		</X>
+		<Y>
+			<Align>WIDGET_ALIGN_LOW</Align>
+			<Pos>32</Pos>
+			<Size>178</Size>
+		</Y>
+	</Placement>
+	<Visible>true</Visible>
+	<Enabled>true</Enabled>
+</WidgetPanel>

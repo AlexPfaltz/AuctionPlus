@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WidgetLayerTiledTexture>
+	<textureItem href="MainFrame.(UISingleTexture).xdb" />
+	<Layout>
+		<LeftX>135</LeftX>
+		<MiddleX>124</MiddleX>
+		<RightX>136</RightX>
+		<TopY>0</TopY>
+		<MiddleY>630</MiddleY>
+		<BottomY>0</BottomY>
+	</Layout>
+	<layoutTypeX>WIDGET_LAYER_TILED_LAYOUT_TYPE_TILED</layoutTypeX>
+	<layoutTypeY>WIDGET_LAYER_TILED_LAYOUT_TYPE_TILED</layoutTypeY>
+	<flatPlacement>false</flatPlacement>
+	<lazyLoad>false</lazyLoad>
+	<Color>0xffffffff</Color>
+	<Grayed>false</Grayed>
+	<BlendEffect>BLEND_EFFECT_ALPHABLND</BlendEffect>
+</WidgetLayerTiledTexture>

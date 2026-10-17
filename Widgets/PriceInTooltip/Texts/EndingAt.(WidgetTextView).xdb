@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WidgetTextView>
+	<FormatFileRef href="EndingAt.txt" />
+	<Name>EndingAt</Name>
+	<Placement>
+		<X>
+			<Sizing>WIDGET_SIZING_INTERNAL</Sizing>
+			<Pos>0</Pos>
+		</X>
+		<Y>
+			<Align>WIDGET_ALIGN_LOW</Align>
+			<Sizing>WIDGET_SIZING_INTERNAL</Sizing>
+			<Pos>0</Pos>
+		</Y>
+	</Placement>
+	<Visible>true</Visible>
+</WidgetTextView>

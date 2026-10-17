@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WidgetTextView>
+	<FormatFileRef href="ItemName.txt" />
+	<TextStyle>
+		<multiline>true</multiline>
+	</TextStyle>
+	<Name>ItemName</Name>
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_LOW</Align>
+			<Pos>146</Pos>
+			<Size>248</Size>
+		</X>
+		<Y>
+			<Align>WIDGET_ALIGN_LOW</Align>
+			<Pos>0</Pos>
+			<Size>44</Size>
+		</Y>
+	</Placement>
+	<TransparentInput>true</TransparentInput>
+</WidgetTextView>

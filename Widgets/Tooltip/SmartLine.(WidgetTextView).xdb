@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WidgetTextView>
+	<FormatFileRef href="Texts/Default.txt" />
+	<Name>SmartLine</Name>
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_LOW</Align>
+			<Sizing>WIDGET_SIZING_DEFAULT</Sizing>
+			<Pos>0</Pos>
+			<Size>300</Size>
+		</X>
+		<Y>
+			<Align>WIDGET_ALIGN_LOW</Align>
+			<Sizing>WIDGET_SIZING_INTERNAL</Sizing>
+			<Pos>0</Pos>
+		</Y>
+	</Placement>
+	<Visible>true</Visible>
+</WidgetTextView>

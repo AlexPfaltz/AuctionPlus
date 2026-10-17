@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WidgetPanel>
+	<Name>Lots</Name>
+	<Children>
+		<Item href="EditLine/EditLine.xdb" />
+		<Item href="HeaderNumLots.(WidgetTextView).xdb" />
+	</Children>
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_LOW</Align>
+			<Pos>0</Pos>
+			<Size>92</Size>
+		</X>
+		<Y>
+			<Align>WIDGET_ALIGN_LOW</Align>
+			<Pos>0</Pos>
+			<Size>52</Size>
+		</Y>
+	</Placement>
+	<Visible>true</Visible>
+	<TransparentInput>false</TransparentInput>
+</WidgetPanel>

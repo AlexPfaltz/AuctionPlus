@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UIAddon>
+	<Name>AuctionPlus</Name>
+	<AutoStart>true</AutoStart>
+	<ScriptFileRefs>
+		<Item href="Scripts/ContainerRemoveFix.lua"/>
+		<Item href="Scripts/LibDnD.lua"/>
+		<Item href="Scripts/Localization.lua"/>
+		<Item href="Scripts/Common.lua"/>
+		<Item href="Scripts/ListBuy.lua"/>
+		<Item href="Scripts/ListSell.lua"/>
+		<Item href="Scripts/ScanAuction.lua"/>
+		<Item href="Scripts/PriceInTooltip.lua"/>
+		<Item href="Scripts/Options.lua"/>
+		<Item href="Scripts/SearchList.lua"/>
+		<Item href="Scripts/Tooltip.lua"/>
+	</ScriptFileRefs>
+	<Form href="Widgets/Main.(WidgetForm).xdb"/>
+	<texturesGroups>
+		<Item>
+			<groupName>Group01</groupName>
+			<textures href="Textures/Textures.(UIRelatedTextures).xdb"/>
+		</Item>
+	</texturesGroups>
+	<textsGroups>
+		<Item>
+			<groupName>UniSlotCountFormat</groupName>
+			<texts href="Widgets/Tabs/Resources/UniSlot/SlotTextLabel/SlotCountFormat.(UIRelatedTexts).xdb"/>
+		</Item>
+	</textsGroups>
+	<addon_name>AuctionPlus</addon_name>
+	<addon_date>1746187702</addon_date>
+	<addon_link>https://alloder.pro/files/file/703-auction/</addon_link>
+	<localizedNameFileRef href="name.txt"/>
+	<localizedDescFileRef href="desc.txt"/>
+	<userAddonInfo>
+		<name href="name.txt"/>
+		<description href="desc.txt"/>
+		<sourceLink href="link.txt"/>
+		<supportLink href="link.txt"/>
+		<author>AlexPfaltz</author>
+		<version>3</version>
+		<buildTime>1746187702</buildTime>
+	</userAddonInfo>
+</UIAddon>

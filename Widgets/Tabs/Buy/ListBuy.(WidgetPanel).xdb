@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WidgetPanel>
+	<Name>ListBuy</Name>
+	<Priority>5</Priority>
+	<Children>
+		<Item href="ButtonSearch.(WidgetButton).xdb" />
+		<Item href="Container.(WidgetScrollableContainer).xdb" />
+		<Item href="ItemLine.(WidgetPanel).xdb" />
+		<Item href="BuySelected.(WidgetButton).xdb" />
+		<Item href="SortBar.(WidgetPanel).xdb" />
+		<Item href="StatusBar.(WidgetButton).xdb" />
+		<Item href="InfoBar.(WidgetPanel).xdb" />
+	</Children>
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_BOTH</Align>
+			<Pos>0</Pos>
+			<HighPos>0</HighPos>
+		</X>
+		<Y>
+			<Align>WIDGET_ALIGN_BOTH</Align>
+			<Pos>0</Pos>
+			<HighPos>0</HighPos>
+		</Y>
+	</Placement>
+	<Visible>false</Visible>
+	<PickChildrenOnly>true</PickChildrenOnly>
+</WidgetPanel>

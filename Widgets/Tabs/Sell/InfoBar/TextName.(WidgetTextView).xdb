@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WidgetTextView>
+	<Name>Text</Name>
+	<FormatFileRef href="TextName.txt" />
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_BOTH</Align>
+			<Sizing>WIDGET_SIZING_DEFAULT</Sizing>
+			<Pos>10</Pos>
+			<HighPos>10</HighPos>
+		</X>
+		<Y>
+			<Align>WIDGET_ALIGN_CENTER</Align>
+			<Sizing>WIDGET_SIZING_DEFAULT</Sizing>
+			<Pos>0</Pos>
+			<Size>32</Size>
+		</Y>
+	</Placement>
+	<TextStyle>
+		<multiline>false</multiline>
+		<wrapText>true</wrapText>
+		<showClippedSymbol>false</showClippedSymbol>
+		<showClippedLine>true</showClippedLine>
+		<lineSpacing>0</lineSpacing>
+		<ellipsis>true</ellipsis>
+		<Align>ALIGNY_MIDDLE</Align>
+	</TextStyle>
+	<TransparentInput>true</TransparentInput>
+</WidgetTextView>

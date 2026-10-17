@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WidgetPanel>
+	<Name>ShowHeader</Name>
+	<Children>
+		<Item href="ShowHeader/Text.(WidgetTextView).xdb" />
+		<Item href="ShowHeader/CheckBox.(WidgetButton).xdb" />
+	</Children>
+	<BackLayer href="../Textures/OptionFrame.(WidgetLayerTiledTexture).xdb" />
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_CENTER</Align>
+			<Pos>0</Pos>
+			<Size>572</Size>
+		</X>
+		<Y>
+			<Pos>15</Pos>
+			<Size>30</Size>
+		</Y>
+	</Placement>
+	<Visible>true</Visible>
+</WidgetPanel>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WidgetPanel>
+	<Name>DoubleLine</Name>
+	<Children>
+		<Item href="LineLeft.(WidgetTextView).xdb" />
+		<Item href="LineRight.(WidgetTextView).xdb" />
+	</Children>
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_LOW</Align>
+			<Pos>0</Pos>
+			<Size>300</Size>
+		</X>
+		<Y>
+			<Align>WIDGET_ALIGN_LOW</Align>
+			<Pos>0</Pos>
+			<Size>20</Size>
+			<Sizing>WIDGET_SIZING_INTERNAL</Sizing>
+		</Y>
+	</Placement>
+	<Visible>true</Visible>
+</WidgetPanel>

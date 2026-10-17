@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WidgetPanel>
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_BOTH</Align>
+		</X>
+		<Y>
+			<Align>WIDGET_ALIGN_BOTH</Align>
+		</Y>
+	</Placement>
+	<Header>
+		<Prototype href="../SlotIcon/SlotIcon.Prototype.(WidgetPanel).xdb" />
+	</Header>
+</WidgetPanel>

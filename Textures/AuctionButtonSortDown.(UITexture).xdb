@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<UITexture>
+	<mipSW>-1</mipSW>
+	<mipsNumber>1</mipsNumber>
+	<generateMipChain>false</generateMipChain>
+	<type>DXT5</type>
+	<width>16</width>
+	<height>16</height>
+	<realWidth>16</realWidth>
+	<realHeight>16</realHeight>
+	<disableLODControl>false</disableLODControl>
+	<alphaTex>true</alphaTex>
+	<binaryFileSize>137</binaryFileSize>
+	<binaryFile href="AuctionButtonSortDown.(UITexture).bin" />
+	<binaryFileSize2>0</binaryFileSize2>
+	<binaryFile2 href="" />
+	<sourceFile href="AuctionButtonSortDown.tga" />
+	<sourceFileCRC>885548957</sourceFileCRC>
+	<wrap>false</wrap>
+	<LocalizationInfo />
+	<atlasPart>true</atlasPart>
+	<pool>UNDEFINED</pool>
+</UITexture>

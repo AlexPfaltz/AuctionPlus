@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<UITexture>
+	<mipSW>-1</mipSW>
+	<mipsNumber>1</mipsNumber>
+	<generateMipChain>false</generateMipChain>
+	<type>DXT5</type>
+	<width>32</width>
+	<height>256</height>
+	<realWidth>32</realWidth>
+	<realHeight>194</realHeight>
+	<disableLODControl>false</disableLODControl>
+	<alphaTex>true</alphaTex>
+	<binaryFileSize>1449</binaryFileSize>
+	<binaryFile href="ScrollTile.(UITexture).bin" />
+	<binaryFileSize2>0</binaryFileSize2>
+	<binaryFile2 href="" />
+	<sourceFile href="ScrollTile.tga" />
+	<sourceFileCRC>-1479609741</sourceFileCRC>
+	<wrap>false</wrap>
+	<LocalizationInfo />
+	<atlasPart>true</atlasPart>
+	<pool>UNDEFINED</pool>
+</UITexture>

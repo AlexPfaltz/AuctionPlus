@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WidgetPanel>
+	<Name>PriceEdit</Name>
+	<Children>
+		<Item href="PriceEdit/Gold.(WidgetEditLine).xdb" />
+		<Item href="PriceEdit/Silver.(WidgetEditLine).xdb" />
+		<Item href="PriceEdit/Copper.(WidgetEditLine).xdb" />
+	</Children>
+	<BackLayer href="Textures/AuctionPanelMoneyEditable.(WidgetLayerTiledTexture).xdb" />
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_HIGH</Align>
+			<HighPos>0</HighPos>
+			<Size>190</Size>
+		</X>
+		<Y>
+			<Align>WIDGET_ALIGN_HIGH</Align>
+			<HighPos>0</HighPos>
+			<Size>30</Size>
+		</Y>
+	</Placement>
+	<Visible>true</Visible>
+	<TransparentInput>false</TransparentInput>
+</WidgetPanel>

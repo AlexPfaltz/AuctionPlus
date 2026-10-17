@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WidgetEditLine>
+	<Name>QuantityEdit</Name>
+	<Header>
+		<Prototype href="EditLine/EditLine.xdb" />
+	</Header>
+	<BackLayer href="Textures/AuctionPanelEditable.(WidgetLayerTiledTexture).xdb" />
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_HIGH</Align>
+			<Sizing>WIDGET_SIZING_DEFAULT</Sizing>
+			<HighPos>0</HighPos>
+			<Size>60</Size>
+		</X>
+		<Y>
+			<Align>WIDGET_ALIGN_CENTER</Align>
+			<Sizing>WIDGET_SIZING_DEFAULT</Sizing>
+			<Pos>0</Pos>
+			<Size>32</Size>
+		</Y>
+	</Placement>
+	<maxSymbolsCount>4</maxSymbolsCount>
+	<globalClassName>EditLineGlobalCenter</globalClassName>
+	<Visible>true</Visible>
+</WidgetEditLine>

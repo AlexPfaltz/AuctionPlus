@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WidgetPanel>
+	<Name>ContainerBackground</Name>
+	<Priority>1</Priority>
+	<BackLayer href="Textures/AuctionListBackground.(WidgetLayerSimpleTexture).xdb" />
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_BOTH</Align>
+			<Pos>32</Pos>
+			<HighPos>29</HighPos>
+		</X>
+		<Y>
+			<Align>WIDGET_ALIGN_BOTH</Align>
+			<Pos>210</Pos>
+			<HighPos>54</HighPos>
+		</Y>
+	</Placement>
+	<Visible>true</Visible>
+	<PickChildrenOnly>true</PickChildrenOnly>
+	<clipContent>false</clipContent>
+</WidgetPanel>

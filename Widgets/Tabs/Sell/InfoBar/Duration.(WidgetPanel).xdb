@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WidgetPanel>
+	<Name>Duration</Name>
+	<Children>
+		<Item href="TextAlignCenter.(WidgetTextView).xdb" />
+		<Item href="Duration/Frame.(WidgetPanel).xdb" />
+	</Children>
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_LOW</Align>
+			<Pos>434</Pos>
+			<Size>144</Size>
+		</X>
+		<Y>
+			<Align>WIDGET_ALIGN_LOW</Align>
+			<Pos>36</Pos>
+			<Size>102</Size>
+		</Y>
+	</Placement>
+	<Visible>true</Visible>
+	<Enabled>false</Enabled>
+	<TransparentInput>true</TransparentInput>
+</WidgetPanel>

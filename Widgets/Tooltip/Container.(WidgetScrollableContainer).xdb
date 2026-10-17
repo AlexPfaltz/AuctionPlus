@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WidgetScrollableContainer>
+	<border href="Border.(WidgetPanel).xdb" />
+	<widgetsArrangement>WIDGETS_ARRANGEMENT_T2B</widgetsArrangement>
+	<Name>Container</Name>
+	<Placement>
+		<QuantumScale>true</QuantumScale>
+		<X>
+			<Align>WIDGET_ALIGN_LOW</Align>
+			<Sizing>WIDGET_SIZING_INTERNAL</Sizing>
+			<Pos>25</Pos>
+			<HighPos>25</HighPos>
+		</X>
+		<Y>
+			<Align>WIDGET_ALIGN_LOW</Align>
+			<Sizing>WIDGET_SIZING_INTERNAL</Sizing>
+			<Pos>25</Pos>
+			<HighPos>25</HighPos>
+		</Y>
+	</Placement>
+	<Visible>false</Visible>
+</WidgetScrollableContainer>

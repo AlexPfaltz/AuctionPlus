@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WidgetLayerTiledTexture>
+	<textureItem href="ScrollTile.(UISingleTexture).xdb" />
+	<Layout>
+		<LeftX>0</LeftX>
+		<MiddleX>32</MiddleX>
+		<RightX>0</RightX>
+		<TopY>89</TopY>
+		<MiddleY>16</MiddleY>
+		<BottomY>89</BottomY>
+	</Layout>
+	<layoutTypeX>WIDGET_LAYER_TILED_LAYOUT_TYPE_TILED</layoutTypeX>
+	<layoutTypeY>WIDGET_LAYER_TILED_LAYOUT_TYPE_TILED</layoutTypeY>
+	<flatPlacement>false</flatPlacement>
+	<lazyLoad>false</lazyLoad>
+	<Color>0xffffffff</Color>
+	<Grayed>false</Grayed>
+	<BlendEffect>BLEND_EFFECT_ALPHABLND</BlendEffect>
+</WidgetLayerTiledTexture>

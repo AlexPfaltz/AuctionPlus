@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WidgetButton>
+	<Variants>
+		<Item>
+			<Reaction>ClosePanel</Reaction>
+		</Item>
+	</Variants>
+	<Name>ButtonCornerCross</Name>
+	<Visible>true</Visible>
+	<IgnoreDblClick>true</IgnoreDblClick>
+	<Header>
+		<Prototype href="GoldenCorner/CornerCross.(WidgetButton).xdb" />
+	</Header>
+</WidgetButton>

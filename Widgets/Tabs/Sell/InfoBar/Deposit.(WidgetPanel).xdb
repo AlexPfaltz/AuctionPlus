@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WidgetPanel>
+	<Name>Deposit</Name>
+	<Children>
+		<Item href="TextAlignCenter.(WidgetTextView).xdb" />
+		<Item href="Price.(WidgetPanel).xdb" />
+	</Children>
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_HIGH</Align>
+			<HighPos>4</HighPos>
+			<Size>190</Size>
+		</X>
+		<Y>
+			<Align>WIDGET_ALIGN_LOW</Align>
+			<Pos>36</Pos>
+			<Size>50</Size>
+		</Y>
+	</Placement>
+	<Visible>true</Visible>
+	<Enabled>false</Enabled>
+	<TransparentInput>true</TransparentInput>
+</WidgetPanel>

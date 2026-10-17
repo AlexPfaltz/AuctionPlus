@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WidgetPanel>
+	<Name>GroupMain</Name>
+	<Children>
+		<Item href="GroupMain/BlockFrame.(WidgetPanel).xdb" />
+		<Item href="GroupMain/GroupLabel.(WidgetTextView).xdb" />
+	</Children>
+	<BackLayer href="Textures/GroupFrame.(WidgetLayerTiledTexture).xdb" />
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_LOW</Align>
+			<Pos>0</Pos>
+			<Size>610</Size>
+		</X>
+		<Y>
+			<Pos>0</Pos>
+			<Size>185</Size>
+		</Y>
+	</Placement>
+	<Visible>true</Visible>
+	<FrontLayer href="Textures/GroupShade.(WidgetLayerTiledTexture).xdb" />
+</WidgetPanel>

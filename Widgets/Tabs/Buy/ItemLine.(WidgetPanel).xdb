@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WidgetPanel>
+	<Name>ItemLine</Name>
+	<Children>
+		<Item href="Line/Button.xdb" />
+		<Item href="Line/Lots.xdb" />
+		<Item href="Line/ItemName.xdb" />
+		<Item href="Line/ItemSlot.(WidgetPanel).xdb" />
+		<Item href="Line/PricePerUnit.xdb" />
+		<Item href="Line/PriceBuyOut.xdb" />
+	</Children>
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_LOW</Align>
+			<Pos>0</Pos>
+			<Size>778</Size>
+		</X>
+		<Y>
+			<Align>WIDGET_ALIGN_LOW</Align>
+			<Pos>0</Pos>
+			<Size>44</Size>
+		</Y>
+	</Placement>
+	<Visible>false</Visible>
+</WidgetPanel>

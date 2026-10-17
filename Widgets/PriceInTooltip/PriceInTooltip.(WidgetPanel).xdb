@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WidgetPanel>
+	<Name>PriceInTooltip</Name>
+	<Children>
+		<Item href="Texts/Header.(WidgetTextView).xdb" />
+		<Item href="Texts/Update.(WidgetTextView).xdb" />
+		<Item href="Texts/StartingAt.(WidgetTextView).xdb" />
+		<Item href="Texts/EndingAt.(WidgetTextView).xdb" />
+		<Item href="Prices.(WidgetPanel).xdb" />
+		<Item href="Separator.xdb" />
+		<Item href="ContainerPrice.(WidgetScrollableContainer).xdb" />
+	</Children>
+</WidgetPanel>

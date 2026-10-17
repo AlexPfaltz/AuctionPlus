@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WidgetButton>
+	<Variants>
+		<Item>
+			<LayerHighlight href="Settings/SettingsHighlighted.(WidgetLayerSimpleTexture).xdb" />
+			<PushedOffset x="-2" y="2" />
+			<StateNormal>
+				<LayerMain href="Settings/SettingsNormal.(WidgetLayerSimpleTexture).xdb" />
+			</StateNormal>
+			<StatePushed>
+				<LayerMain href="Settings/SettingsPressed.(WidgetLayerSimpleTexture).xdb" />
+			</StatePushed>
+			<Reaction>ShowOptionsPanel</Reaction>
+			<ReactionOnUp>true</ReactionOnUp>
+		</Item>
+	</Variants>
+	<Name>Settings</Name>
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_HIGH</Align>
+			<HighPos>160</HighPos>
+			<Size>30</Size>
+		</X>
+		<Y>
+			<Align>WIDGET_ALIGN_CENTER</Align>
+			<Pos>0</Pos>
+			<Size>30</Size>
+		</Y>
+	</Placement>
+	<Visible>false</Visible>
+	<IgnoreDblClick>true</IgnoreDblClick>
+</WidgetButton>

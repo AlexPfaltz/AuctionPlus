@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WidgetPanel>
+	<Name>48h</Name>
+	<Children>
+		<Item href="CheckBox/CheckBox.(WidgetButton).xdb" />
+		<Item href="../TextAlignHigh.(WidgetTextView).xdb" />
+	</Children>
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_CENTER</Align>
+			<Pos>30</Pos>
+			<Size>60</Size>
+		</X>
+		<Y>
+			<Align>WIDGET_ALIGN_CENTER</Align>
+			<Pos>20</Pos>
+			<Size>32</Size>
+		</Y>
+	</Placement>
+	<Visible>true</Visible>
+	<TransparentInput>false</TransparentInput>
+</WidgetPanel>

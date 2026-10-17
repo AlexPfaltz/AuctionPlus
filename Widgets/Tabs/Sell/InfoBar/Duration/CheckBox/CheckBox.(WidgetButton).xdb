@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WidgetButton>
+	<Name>CheckBox</Name>
+	<Variants>
+		<Item>
+			<LayerHighlight href="Highlight.(WidgetLayerSimpleTexture).xdb" />
+			<StateNormal>
+				<LayerMain href="MetalUnchecked.(WidgetLayerSimpleTexture).xdb" />
+			</StateNormal>
+			<ReactionOnUp>true</ReactionOnUp>
+			<Reaction>checkbox_pressed</Reaction>
+		</Item>
+		<Item>
+			<LayerHighlight href="Highlight.(WidgetLayerSimpleTexture).xdb" />
+			<StateNormal>
+				<LayerMain href="MetalChecked.(WidgetLayerSimpleTexture).xdb" />
+			</StateNormal>
+			<ReactionOnUp>true</ReactionOnUp>
+			<Reaction>checkbox_pressed</Reaction>
+		</Item>
+	</Variants>
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_LOW</Align>
+			<Sizing>WIDGET_SIZING_DEFAULT</Sizing>
+			<Pos>0</Pos>
+			<HighPos>0</HighPos>
+			<Size>32</Size>
+		</X>
+		<Y>
+			<Align>WIDGET_ALIGN_LOW</Align>
+			<Sizing>WIDGET_SIZING_DEFAULT</Sizing>
+			<Pos>0</Pos>
+			<HighPos>0</HighPos>
+			<Size>32</Size>
+		</Y>
+	</Placement>
+	<IgnoreDblClick>true</IgnoreDblClick>
+	<Enabled>true</Enabled>
+	<reactionOnPointing>checkbox_over</reactionOnPointing>
+</WidgetButton>

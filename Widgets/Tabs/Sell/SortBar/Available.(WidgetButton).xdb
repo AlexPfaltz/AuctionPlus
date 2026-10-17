@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WidgetButton>
+	<Variants>
+		<Item>
+			<Reaction>sort_pressed</Reaction>
+		</Item>
+	</Variants>
+	<Name>Available</Name>
+	<Priority>0</Priority>
+	<Children>
+		<Item href="IconAvailable.(WidgetPanel).xdb" />
+	</Children>
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_BOTH</Align>
+			<Pos>389</Pos>
+			<HighPos>0</HighPos>
+			<!--Size>96</Size-->
+		</X>
+		<Y>
+			<Align>WIDGET_ALIGN_CENTER</Align>
+			<Pos>0</Pos>
+			<Size>32</Size>
+		</Y>
+	</Placement>
+	<Header>
+		<Prototype href="../../Resources/AuctionSortButton/AuctionSortButton.Prototype.(WidgetButton).xdb" />
+	</Header>
+</WidgetButton>

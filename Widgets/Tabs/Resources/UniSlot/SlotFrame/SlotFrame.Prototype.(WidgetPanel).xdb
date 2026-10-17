@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WidgetPanel>
+	<Name>Frame</Name>
+	<Children>
+		<Item href="SlotIcon.(WidgetPanel).xdb" />
+	</Children>
+	<BackLayer href="SlotDisabled.(WidgetLayerSimpleTexture).xdb" />
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_BOTH</Align>
+		</X>
+		<Y>
+			<Align>WIDGET_ALIGN_BOTH</Align>
+		</Y>
+	</Placement>
+	<TransparentInput>true</TransparentInput>
+	<FrontLayer href="SlotFrame.(WidgetLayerSimpleTexture).xdb" />
+	<Header>
+		<isPrototype>true</isPrototype>
+	</Header>
+</WidgetPanel>

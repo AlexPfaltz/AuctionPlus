@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WidgetTextView>
+	<FormatFileRef href="Value.txt" />
+	<Name>Value</Name>
+	<BackLayer href="../../Textures/ContentFrame.(WidgetLayerTiledTexture).xdb" />
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_HIGH</Align>
+			<HighPos>60</HighPos>
+			<Size>164</Size>
+		</X>
+		<Y>
+			<Align>WIDGET_ALIGN_CENTER</Align>
+			<Pos>0</Pos>
+			<Size>22</Size>
+		</Y>
+	</Placement>
+	<Enabled>false</Enabled>
+</WidgetTextView>

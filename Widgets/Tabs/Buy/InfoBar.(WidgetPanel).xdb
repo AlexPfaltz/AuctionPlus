@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WidgetPanel>
+	<Name>InfoBar</Name>
+	<Children>
+		<Item href="InfoBar/Lots.(WidgetPanel).xdb" />
+		<Item href="InfoBar/Name.(WidgetTextView).xdb" />
+		<Item href="InfoBar/Slot.(WidgetPanel).xdb" />
+		<Item href="InfoBar/Price.(WidgetPanel).xdb" />
+	</Children>
+	<BackLayer href="InfoBar/Textures/AuctionLineSelection.(WidgetLayerSimpleTexture).xdb" />
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_CENTER</Align>
+			<Pos>0</Pos>
+			<Size>794</Size>
+		</X>
+		<Y>
+			<Align>WIDGET_ALIGN_HIGH</Align>
+			<HighPos>110</HighPos>
+			<Size>52</Size>
+		</Y>
+	</Placement>
+	<Visible>false</Visible>
+</WidgetPanel>

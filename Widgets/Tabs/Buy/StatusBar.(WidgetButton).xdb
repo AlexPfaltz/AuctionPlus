@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WidgetButton>
+	<TextTag>value</TextTag>
+	<Variants>
+		<Item>
+			<StateNormal>
+				<LayerMain href="../Resources/AuctionSortButton/AuctionSortButtonNormal.(WidgetLayerTiledTexture).xdb" />
+				<FormatFileRef href="StatusBarText.txt" />
+			</StateNormal>
+		</Item>
+	</Variants>
+	<TextStyle>
+		<Align>ALIGNY_MIDDLE</Align>
+	</TextStyle>
+	<Name>StatusBar</Name>
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_BOTH</Align>
+			<Pos>34</Pos>
+			<HighPos>42</HighPos>
+		</X>
+		<Y>
+			<Align>WIDGET_ALIGN_HIGH</Align>
+			<HighPos>166</HighPos>
+			<Size>33</Size>
+		</Y>
+	</Placement>
+	<Visible>true</Visible>
+	<IgnoreDblClick>true</IgnoreDblClick>
+</WidgetButton>

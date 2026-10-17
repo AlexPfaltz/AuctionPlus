@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<UITexture>
+	<mipSW>-1</mipSW>
+	<mipsNumber>1</mipsNumber>
+	<generateMipChain>false</generateMipChain>
+	<type>DXT5</type>
+	<width>32</width>
+	<height>32</height>
+	<realWidth>32</realWidth>
+	<realHeight>32</realHeight>
+	<disableLODControl>false</disableLODControl>
+	<alphaTex>true</alphaTex>
+	<binaryFileSize>320</binaryFileSize>
+	<binaryFile href="MetalUnchecked.(UITexture).bin" />
+	<binaryFileSize2>0</binaryFileSize2>
+	<binaryFile2 href="" />
+	<sourceFile href="MetalUnchecked.tga" />
+	<sourceFileCRC>-882708607</sourceFileCRC>
+	<wrap>false</wrap>
+	<atlasPart>true</atlasPart>
+	<pool>UNDEFINED</pool>
+</UITexture>

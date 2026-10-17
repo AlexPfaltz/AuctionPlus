@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WidgetPanel>
+	<Name>Prices</Name>
+	<Children>
+		<Item href="Texts/ValueGold.(WidgetTextView).xdb" />
+		<Item href="Texts/ValueSilver.(WidgetTextView).xdb" />
+		<Item href="Texts/ValueCopper.(WidgetTextView).xdb" />
+		<Item href="Textures/IconGold.(WidgetPanel).xdb" />
+		<Item href="Textures/IconSilver.(WidgetPanel).xdb" />
+		<Item href="Textures/IconCopper.(WidgetPanel).xdb" />
+		<Item href="Space.(WidgetPanel).xdb" />
+	</Children>
+</WidgetPanel>

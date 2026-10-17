@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WidgetTextView>
+	<FormatFileRef href="Silver.txt" />
+	<Name>Silver</Name>
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_HIGH</Align>
+			<HighPos>62</HighPos>
+			<Size>24</Size>
+		</X>
+		<Y>
+			<Align>WIDGET_ALIGN_HIGH</Align>
+			<HighPos>0</HighPos>
+			<Size>22</Size>
+		</Y>
+	</Placement>
+	<Visible>true</Visible>
+</WidgetTextView>

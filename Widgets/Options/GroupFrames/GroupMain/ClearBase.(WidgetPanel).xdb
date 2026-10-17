@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WidgetPanel>
+	<Name>ClearBase</Name>
+	<Children>
+		<Item href="ClearBase/Text.(WidgetTextView).xdb" />
+		<Item href="ClearBase/ClearButton.(WidgetButton).xdb" />
+	</Children>
+	<BackLayer href="../Textures/OptionFrame.(WidgetLayerTiledTexture).xdb" />
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_CENTER</Align>
+			<Pos>0</Pos>
+			<Size>572</Size>
+		</X>
+		<Y>
+			<Pos>105</Pos>
+			<Size>30</Size>
+		</Y>
+	</Placement>
+	<Visible>true</Visible>
+</WidgetPanel>

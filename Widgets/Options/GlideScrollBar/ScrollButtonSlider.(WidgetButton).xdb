@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WidgetButton>
+	<Variants>
+		<Item>
+			<LayerHighlight href="Textures/ScrollButtonSliderHighlight.(WidgetLayerTiledTexture).xdb" />
+			<StateNormal>
+				<LayerMain href="Textures/ScrollButtonSliderNormal.(WidgetLayerTiledTexture).xdb" />
+			</StateNormal>
+			<StatePushed>
+				<LayerMain href="Textures/ScrollButtonSliderPressed.(WidgetLayerTiledTexture).xdb" />
+			</StatePushed>
+			<StateDisabled>
+				<LayerMain href="Textures/ScrollButtonSliderDisabled.(WidgetLayerTiledTexture).xdb" />
+			</StateDisabled>
+			<ReactionOnUp>true</ReactionOnUp>
+		</Item>
+	</Variants>
+	<Name>ScrollButtonSlider</Name>
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_BOTH</Align>
+			<Pos>0</Pos>
+			<HighPos>0</HighPos>
+		</X>
+		<Y>
+			<Pos>0</Pos>
+			<Size>28</Size>
+		</Y>
+	</Placement>
+	<Visible>true</Visible>
+	<IgnoreDblClick>true</IgnoreDblClick>
+</WidgetButton>

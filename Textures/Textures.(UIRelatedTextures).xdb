@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UIRelatedTextures>
+	<Items>
+		<Item>
+			<name>CoinGold</name>
+			<textureItem href="CoinGold.(UISingleTexture).xdb" />
+		</Item>
+		<Item>
+			<name>CoinSilver</name>
+			<textureItem href="CoinSilver.(UISingleTexture).xdb" />
+		</Item>
+		<Item>
+			<name>CoinCopper</name>
+			<textureItem href="CoinCopper.(UISingleTexture).xdb" />
+		</Item>
+		<Item>
+			<name>StrikeOut</name>
+			<textureItem href="../Widgets/SearchList/Textures/strikeout.(UISingleTexture).xdb" />
+		</Item>
+		<Item>
+			<name>DoubleStrikethrough</name>
+			<textureItem href="../Widgets/SearchList/Textures/DoubleStrikethrough.(UISingleTexture).xdb" />
+		</Item>
+		<Item>
+			<name>TripleStrikeout</name>
+			<textureItem href="../Widgets/SearchList/Textures/TripleStrikeout.(UISingleTexture).xdb" />
+		</Item>
+		<Item>
+			<name>ClearBlockFrame</name>
+			<textureItem href="../Widgets/SearchList/Textures/ClearBlockFrame.(UISingleTexture).xdb" />
+		</Item>
+		<Item>
+			<name>AuctionButtonSortNone</name>
+			<textureItem href="AuctionButtonSortNone.(UISingleTexture).xdb" />
+		</Item>
+		<Item>
+			<name>AuctionButtonSortUp</name>
+			<textureItem href="AuctionButtonSortUp.(UISingleTexture).xdb" />
+		</Item>
+		<Item>
+			<name>AuctionButtonSortDown</name>
+			<textureItem href="AuctionButtonSortDown.(UISingleTexture).xdb" />
+		</Item>
+		<Item>
+			<name>PlaceholderOrange</name>
+			<textureItem href="PlaceholderOrange.(UITextureElement).xdb" />
+		</Item>
+	</Items>
+</UIRelatedTextures>

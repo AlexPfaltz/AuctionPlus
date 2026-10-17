@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WidgetPanel>
+	<Name>Icon</Name>
+	<BackLayer href="SlotIcon.(WidgetLayerSimpleTexture).xdb" />
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_BOTH</Align>
+		</X>
+		<Y>
+			<Align>WIDGET_ALIGN_BOTH</Align>
+		</Y>
+	</Placement>
+	<Visible>true</Visible>
+	<TransparentInput>true</TransparentInput>
+	<FrontLayer href="SlotIconShade.(WidgetLayerSimpleTexture).xdb" />
+	<Header>
+		<isPrototype>true</isPrototype>
+	</Header>
+	<Enabled>true</Enabled>
+</WidgetPanel>

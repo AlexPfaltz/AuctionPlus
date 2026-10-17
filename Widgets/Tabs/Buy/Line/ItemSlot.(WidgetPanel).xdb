@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WidgetPanel>
+	<Name>ItemSlot</Name>
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_LOW</Align>
+			<Pos>99</Pos>
+			<Size>40</Size>
+		</X>
+		<Y>
+			<Align>WIDGET_ALIGN_CENTER</Align>
+			<Pos>0</Pos>
+			<Size>40</Size>
+		</Y>
+	</Placement>
+	<Header>
+		<Prototype href="../../Resources/UniSlot/Slot.Prototype.(WidgetPanel).xdb" />
+	</Header>
+</WidgetPanel>

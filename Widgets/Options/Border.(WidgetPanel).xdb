@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WidgetPanel>
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_BOTH</Align>
+			<Pos>0</Pos>
+			<HighPos>25</HighPos>
+		</X>
+		<Y>
+			<Align>WIDGET_ALIGN_BOTH</Align>
+			<Pos>0</Pos>
+			<HighPos>10</HighPos>
+		</Y>
+	</Placement>
+	<Visible>true</Visible>
+	<TransparentInput>false</TransparentInput>
+	<PickChildrenOnly>false</PickChildrenOnly>
+</WidgetPanel>

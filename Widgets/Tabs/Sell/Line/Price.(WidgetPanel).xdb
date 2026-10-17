@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WidgetPanel>
+	<Name>Price</Name>
+	<Children>
+		<Item href="Price/Gold.(WidgetTextView).xdb" />
+		<Item href="Price/Silver.(WidgetTextView).xdb" />
+		<Item href="Price/Copper.(WidgetTextView).xdb" />
+	</Children>
+	<BackLayer href="Textures/AuctionPanelMoneyFlat.(WidgetLayerTiledTexture).xdb" />
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_LOW</Align>
+			<Pos>99</Pos>
+			<Size>190</Size>
+		</X>
+		<Y>
+			<Align>WIDGET_ALIGN_CENTER</Align>
+			<Pos>0</Pos>
+			<Size>30</Size>
+		</Y>
+	</Placement>
+	<TransparentInput>true</TransparentInput>
+</WidgetPanel>

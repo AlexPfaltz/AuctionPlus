@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WidgetTextView>
+	<FormatFileRef href="Gold.txt" />
+	<Name>Gold</Name>
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_BOTH</Align>
+			<Pos>0</Pos>
+			<HighPos>105</HighPos>
+		</X>
+		<Y>
+			<Align>WIDGET_ALIGN_HIGH</Align>
+			<HighPos>0</HighPos>
+			<Size>22</Size>
+		</Y>
+	</Placement>
+	<Visible>true</Visible>
+</WidgetTextView>

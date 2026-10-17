@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WidgetScrollableContainer>
+	<border href="Border.(WidgetPanel).xdb" />
+	<widgetsArrangement>WIDGETS_ARRANGEMENT_L2R</widgetsArrangement>
+	<Name>ContainerPrice</Name>
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_LOW</Align>
+			<Pos>0</Pos>
+			<Size>330</Size>
+		</X>
+		<Y>
+			<Align>WIDGET_ALIGN_LOW</Align>
+			<Pos>0</Pos>
+			<Size>20</Size>
+		</Y>
+	</Placement>
+	<PickChildrenOnly>true</PickChildrenOnly>
+	<IgnoreDblClick>true</IgnoreDblClick>
+	<clipContent>false</clipContent>
+</WidgetScrollableContainer>

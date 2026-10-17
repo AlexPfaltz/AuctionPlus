@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WidgetLayerSimpleTexture>
+	<Scaling>true</Scaling>
+	<!--<textureItem href="/Interface/Ingame/ContextGuild/RelatedTextures/Hall/RadioUnchecked.(UISingleTexture).xdb" />-->
+	<textureItem href="RadioUnchecked/RadioUnchecked.(UISingleTexture).xdb" />
+	<flatPlacement>false</flatPlacement>
+	<lazyLoad>false</lazyLoad>
+	<Color>0xffffffff</Color>
+	<Grayed>false</Grayed>
+	<BlendEffect>BLEND_EFFECT_ALPHABLND</BlendEffect>
+</WidgetLayerSimpleTexture>

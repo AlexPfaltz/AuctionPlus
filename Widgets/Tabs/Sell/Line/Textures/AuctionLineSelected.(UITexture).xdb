@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<UITexture>
+	<mipSW>-1</mipSW>
+	<mipsNumber>1</mipsNumber>
+	<generateMipChain>false</generateMipChain>
+	<type>DXT1</type>
+	<width>1024</width>
+	<height>64</height>
+	<realWidth>778</realWidth>
+	<realHeight>52</realHeight>
+	<disableLODControl>false</disableLODControl>
+	<alphaTex>true</alphaTex>
+	<binaryFileSize>3911</binaryFileSize>
+	<binaryFile href="AuctionLineSelected.(UITexture).bin" />
+	<binaryFileSize2>0</binaryFileSize2>
+	<binaryFile2 href="" />
+	<sourceFile href="AuctionLineSelected.tga" />
+	<sourceFileCRC>-662492321</sourceFileCRC>
+	<wrap>false</wrap>
+	<atlasPart>true</atlasPart>
+	<pool>UNDEFINED</pool>
+</UITexture>

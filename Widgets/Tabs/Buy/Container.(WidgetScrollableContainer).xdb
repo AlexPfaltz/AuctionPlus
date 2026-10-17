@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WidgetScrollableContainer>
+	<scrollBar href="../Resources/ScrollBar/GlideScrollBar.xdb" />
+	<border href="Border.xdb" />
+	<widgetsArrangement>WIDGETS_ARRANGEMENT_T2B</widgetsArrangement>
+	<Name>Container</Name>
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_BOTH</Align>
+			<Pos>34</Pos>
+			<HighPos>5</HighPos>
+		</X>
+		<Y>
+			<Align>WIDGET_ALIGN_BOTH</Align>
+			<Pos>182</Pos>
+			<HighPos>166</HighPos>
+		</Y>
+	</Placement>
+	<Visible>true</Visible>
+	<TransparentInput>false</TransparentInput>
+	<PickChildrenOnly>true</PickChildrenOnly>
+	<IgnoreDblClick>true</IgnoreDblClick>
+	<clipContent>true</clipContent>
+</WidgetScrollableContainer>

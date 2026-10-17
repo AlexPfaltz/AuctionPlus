@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WidgetPanel>
+	<Name>Autocast</Name>
+	<Priority>50</Priority>
+	<BackLayer href="SlotAutocast.(WidgetLayerSimpleTexture).xdb" />
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_BOTH</Align>
+		</X>
+		<Y>
+			<Align>WIDGET_ALIGN_BOTH</Align>
+		</Y>
+	</Placement>
+	<Visible>false</Visible>
+	<TransparentInput>true</TransparentInput>
+	<Header>
+		<isPrototype>true</isPrototype>
+	</Header>
+</WidgetPanel>
