@@ -74,14 +74,17 @@ Global("SearchBar", {
     ["buyoutMax"] = ContextAuction:GetChildChecked("BuyOutMax", true)
 })
 
+local wtTabOverlay = mainForm:GetChildChecked("TabOverlay", false)
 local PlaceholderOrange = common.GetAddonRelatedTextureGroup("Group01"):GetTexture("PlaceholderOrange")
 local UAMContainer = common.GetAddonMainForm("UserAddonManager"):GetChildChecked("List", true)
 local btSettings = mainForm:GetChildChecked("Settings", false)
 local btSettingsFound = false
+local lastStockTab = nil
 
 TabAll:SetSmartPlacementPlain({alignX = WIDGET_ALIGN_LOW, posX = 30})
 TabBids:SetSmartPlacementPlain({alignX = WIDGET_ALIGN_LOW, posX = 190})
 TabOwner:SetSmartPlacementPlain({alignX = WIDGET_ALIGN_LOW, posX = 350})
+AuctionMainPanel:AddChild(wtTabOverlay)
 
 function GetItemQualityCSSClass( itemId )
 	local quality, isCursed
@@ -390,7 +393,61 @@ function SafeGetAuctions()
     return auctions
 end
 
+function DestroyWidgetsInContainer(container)
+    if not container then return end
+    local cached_widgets = {}
+    local items_count = container:GetElementCount()
+    if items_count > 0 then
+        for i = 0, items_count - 1 do
+            local w = container:At(i)
+            if w then
+                -- IsValid может упасть на InvalidWidgetSafe — оборачиваем в pcall
+                local ok, valid = pcall(function() return w:IsValid() end)
+                if ok and valid then
+                    cached_widgets[#cached_widgets + 1] = w
+                end
+            end
+        end
+    end
+
+    container:RemoveItems()
+
+    for i = 1, #cached_widgets do
+        local w = cached_widgets[i]
+        pcall(function() w:DestroyWidget() end)
+    end
+end
+
+local function GetActiveStockTab()
+    for _, tab in ipairs({ TabAll, TabBids, TabOwner }) do
+        if tab:GetVariant() == 1 then return tab end
+    end
+end
+
+function ShowTabOverlay()
+    lastStockTab = GetActiveStockTab() or lastStockTab
+    if not lastStockTab then return end
+    wtTabOverlay:SetPlacementPlain(lastStockTab:GetPlacementPlain())
+    wtTabOverlay:Show(true)
+	lastStockTab:SetVariant(0)
+end
+
+function HideTabOverlay()
+    wtTabOverlay:Show(false)
+end
+
+function TabOverlayPressed()
+	HideTabOverlay()
+	lastStockTab:SetVariant(1)
+    if btTabBuy:GetVariant() == 1 then
+        CloseTabBuy()
+    elseif btTabSell:GetVariant() == 1 then
+        CloseTabSell()
+    end
+end
+
 function Init()
+	common.RegisterReactionHandler(TabOverlayPressed, "TabOverlayPressed")
 	common.RegisterEventHandler(WIDGET_SHOW_CHANGED, "EVENT_WIDGET_SHOW_CHANGED")
 	common.RegisterEventHandler(SlashCMD, "EVENT_UNKNOWN_SLASH_COMMAND")
 	AuctionMainPanel:SetOnShowNotification(true)

@@ -147,7 +147,7 @@ ListBuy.CreateLine = function(auctionInfo, WoD)
 		Lines[name].widget:Show(true)
 	else
     	local GS, SumSpecStats, SumStats = GetStatsFromID(itemInfo.id)
-    	local name = MakeWoDKey(itemName, GS, SumSpecStats, SumStats, BuyoutPrice)
+    	local name = MakeWoDKey(itemName, GS, SumSpecStats, SumStats, buyoutPrice)
     	line.button:SetName(name)
     	line.widget:SetName(name)
     	line.widget:GetChildChecked("ItemSlot", false):SetName(name)
@@ -592,11 +592,8 @@ function OpenTabBuy()
 	if StartFullScan or StartScanForList then
 		StopScan()
 	end
+	ShowTabOverlay()
 	if btTabSell:GetVariant() == 1 then CloseTabSell() end
-	TabAll:SetVariant(0)
-	TabBids:SetVariant(0)
-	TabOwner:SetVariant(0)
-	--btTabSell:SetVariant(0)
 	AuctionMainPanel:GetChildChecked("List", false):Show(false)
 	AuctionMainPanel:GetChildChecked("Selection", false):Show(false)
 	AuctionMainPanel:GetChildChecked("Search", true):GetChildChecked("ButtonSearch", false):Show(false)
@@ -615,6 +612,7 @@ function CloseTabBuy()
 	AuctionMainPanel:GetChildChecked("List", false):Show(true)
 	AuctionMainPanel:GetChildChecked("Selection", false):Show(true)
 	AuctionMainPanel:GetChildChecked("Search", true):GetChildChecked("ButtonSearch", false):Show(true)
+	HideTabOverlay()
 end
 
 ListBuy.AuctionIsVisible = function(params)
@@ -644,7 +642,7 @@ ListBuy.Init = function()
 	common.RegisterReactionHandler(ListBuy.BuySelected, "BuySelected")
 	common.RegisterReactionHandler(ListBuy.StartSearch, "StartSearch")
 	common.RegisterReactionHandler(OpenTabBuy, "OpenTabBuy")
-	common.RegisterReactionHandler(CloseTabBuy, "CloseTabBuy")
+	--common.RegisterReactionHandler(CloseTabBuy, "CloseTabBuy")
 	FindCategoryId()
 end
 

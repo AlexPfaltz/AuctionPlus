@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WidgetButton>
+	<Variants>
+		<Item>
+			<LayerHighlight href="Tab/TabHighlight.(WidgetLayerTiledTexture).xdb" />
+			<Reaction>TabOverlayPressed</Reaction>
+			<ReactionOnUp>true</ReactionOnUp>
+		</Item>
+	</Variants>
+	<Name>TabOverlay</Name>
+	<Priority>500</Priority>
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_LOW</Align>
+			<Pos>30</Pos>
+			<Size>150</Size>
+		</X>
+		<Y>
+			<Align>WIDGET_ALIGN_HIGH</Align>
+			<Pos>0</Pos>
+			<Size>40</Size>
+		</Y>
+	</Placement>
+	<Visible>false</Visible>
+	<IgnoreDblClick>true</IgnoreDblClick>
+</WidgetButton>

@@ -7,6 +7,7 @@
 		<Item href="Buttons/TabBuy.(WidgetButton).xdb" />
 		<Item href="Buttons/TabSell.(WidgetButton).xdb" />
 		<Item href="Buttons/TabScan.(WidgetButton).xdb" />
+		<Item href="Buttons/TabOverlay.(WidgetButton).xdb" />
 		<Item href="Options/Options.(WidgetPanel).xdb" />
 		<Item href="PriceInTooltip/PriceInTooltip.(WidgetPanel).xdb" />
 		<Item href="SearchList/SearchList.xdb" />

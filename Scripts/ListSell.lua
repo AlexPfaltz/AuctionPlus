@@ -608,10 +608,8 @@ function OpenTabSell()
 	if StartFullScan or StartScanForList then
 		StopScan()
 	end
+	ShowTabOverlay()
 	if btTabBuy:GetVariant() == 1 then CloseTabBuy() end
-	TabAll:SetVariant(0)
-	TabBids:SetVariant(0)
-	TabOwner:SetVariant(0)
 	AuctionMainPanel:GetChildChecked("List", false):Show(false)
 	AuctionMainPanel:GetChildChecked("Selection", false):Show(false)
 	AuctionMainPanel:GetChildChecked("Search", true):Show(false)
@@ -631,6 +629,7 @@ function CloseTabSell()
 	AuctionMainPanel:GetChildChecked("Money", true):Show(true)
 	InfoBar.DIsable()
 	StatusBar:SetVal("value", common.GetEmptyWString())
+	HideTabOverlay()
 end
 
 function DropInAuction(params)
@@ -736,7 +735,7 @@ ListSell.Init = function()
 	common.RegisterReactionHandler(ListSell.button_pressed, "button_pressed")
 	common.RegisterReactionHandler(SortBar.sort_pressed, "sort_pressed")
 	common.RegisterReactionHandler(OpenTabSell, "OpenTabSell")
-	common.RegisterReactionHandler(CloseTabSell, "CloseTabSell")
+	--common.RegisterReactionHandler(CloseTabSell, "CloseTabSell")
 	ListSell.RegWIdgetsIDs()
 end
 

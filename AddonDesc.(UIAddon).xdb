@@ -3,7 +3,6 @@
 	<Name>AuctionPlus</Name>
 	<AutoStart>true</AutoStart>
 	<ScriptFileRefs>
-		<Item href="Scripts/ContainerRemoveFix.lua"/>
 		<Item href="Scripts/LibDnD.lua"/>
 		<Item href="Scripts/Localization.lua"/>
 		<Item href="Scripts/Common.lua"/>
