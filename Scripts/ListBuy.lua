@@ -90,6 +90,7 @@ ListBuy.CreateLine = function(auctionInfo, WoD)
 
 	--Закинем всю инфу в таблицу для дальнейшего использования, что бы не искать заного
 	local infoForBuy = {}
+	infoForBuy.itemId = auctionInfo.itemId
 	infoForBuy.name = itemInfo.name
 	infoForBuy.icon = itemInfo.icon
 	infoForBuy.quality = quality
@@ -548,17 +549,18 @@ ListBuy.SortItemName = function()
 end
 
 ListBuy.slot_over = function(params)
-	if btTabBuy:GetVariant() == 0 then return end
-	local sender = params.sender
-	local wtParent = params.widget:GetParent()
-	local nameParent = wtParent:GetName()
-	local content = Lines[nameParent].infoForTooltip or {}
-	
-	if params.active then
-		CallTooltipItem(content, params.widget)
-	else
-		HideTooltip()
-	end
+    if btTabBuy:GetVariant() == 0 then return end
+    local wtParent = params.widget:GetParent()
+    local nameParent = wtParent:GetName()
+    local line = Lines[nameParent]
+    if not line then return end
+    local content = line.infoForTooltip or {}
+
+    if params.active then
+        CallTooltipItem(content, params.widget)
+    else
+        HideTooltip()
+    end
 end
 
 ListBuy.BuySelected = function()
