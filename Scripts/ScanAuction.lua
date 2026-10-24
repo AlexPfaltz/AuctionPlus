@@ -2,7 +2,7 @@ Global("ItemsDB", userMods.GetGlobalConfigSection("ItemsDB") or {})
 Global("StartFullScan", false)
 Global("StartScanForList", false)
 
-local btTabScan = mainForm:GetChildChecked("TabScan", false)
+local wtScanButton = mainForm:GetChildChecked("ScanButton", false)
 
 local auctionsCount = nil
 local auctionsPage = nil
@@ -11,8 +11,8 @@ local ManualScan = false
 local CurItem = 1
 local ScanAuction = {}
 
-btTabScan:SetVal("button_label", userMods.ToWString(GetLocalizedText("StartScan")))
-AuctionMainPanel:AddChild(btTabScan)
+--wtScanButton:SetVal("button_label", userMods.ToWString(GetLocalizedText("StartScan")))
+--AuctionMainPanel:AddChild(wtScanButton)
 
 function CheckBag()
 	local AllBagSlot = containerLib.GetItems( ITEM_CONT_INVENTORY )
@@ -128,12 +128,9 @@ end
 
 function StartScan()
 	ManualScan = false
-	btTabScan:SetVariant(1)
-	btTabScan:SetVal("button_label", userMods.ToWString(GetLocalizedText("StopScan")))
-	if btTabBuy:GetVariant() == 1 then
-		CloseTabBuy()
-	elseif btTabSell:GetVariant() == 1 then
-		CloseTabSell()
+	wtScanButton:SetVariant(1)
+	if btTabBuy:GetVariant() == 1 or btTabSell:GetVariant() == 1 then
+		TabOverlayPressed()
 	end
 	if Options.ScanBy == 1 then
 		StartFullScan = true
@@ -150,8 +147,7 @@ function StopScan()
 	StartFullScan = false
 	StartScanForList = false
 	ManualScan = true
-	btTabScan:SetVariant(0)
-	btTabScan:SetVal("button_label", userMods.ToWString(GetLocalizedText("StartScan")))
+	wtScanButton:SetVariant(0)
 	userMods.SetGlobalConfigSection("ItemsDB", ItemsDB)
 	ClearStrikeOutLine()
 end
@@ -164,11 +160,8 @@ end
 function CheckTabVariant()
 	if not AuctionMainPanel or not AuctionMainPanel:IsVisible() then return end
 	if TabAll:GetVariant() == 1 or TabBids:GetVariant() == 1 or TabOwner:GetVariant() == 1 then
-		if btTabBuy:GetVariant() == 1 then
-			CloseTabBuy()
-		end
-		if btTabSell:GetVariant() == 1 then
-			CloseTabSell()
+		if btTabBuy:GetVariant() == 1 or btTabSell:GetVariant() == 1 then
+			TabOverlayPressed()
 		end
 	end
 end
@@ -176,6 +169,7 @@ end
 ScanAuction.AuctionIsVisible = function(params)
 	if params.addonName == "ContextAuction" and params.widget:GetName() == "Main" then
 		if params.widget:IsVisible() then
+			wtScanButton:Show(true)
 			ManualScan = true
 			if OpenSearchListFromOptions then
 				HideSearchList()
@@ -191,6 +185,7 @@ ScanAuction.AuctionIsVisible = function(params)
 			end
 			DisableButtonShowList()
 		else
+			wtScanButton:Show(false)
 			if StartFullScan or StartScanForList or ManualScan then
 				StopScan()
 			end
@@ -205,6 +200,7 @@ ScanAuction.Init = function()
 	common.RegisterEventHandler(ScanAuction.AuctionSearch, "EVENT_AUCTION_SEARCH_RESULT")
 	common.RegisterReactionHandler(StartScan, "StartScan")
 	common.RegisterReactionHandler(StopScan, "StopScan")
+	DnD.Init(wtScanButton, wtScanButton, true, true)
 end
 
 ScanAuction.Init()

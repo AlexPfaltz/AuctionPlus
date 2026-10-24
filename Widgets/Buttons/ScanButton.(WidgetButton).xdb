@@ -1,0 +1,67 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<WidgetButton>
+	<Name>ScanButton</Name>
+	<Priority>1000</Priority>
+	<Placement>
+		<QuantumScale>false</QuantumScale>
+		<X>
+			<Align>WIDGET_ALIGN_LOW</Align>
+			<Sizing>WIDGET_SIZING_DEFAULT</Sizing>
+			<Pos>780</Pos>
+			<HighPos>0</HighPos>
+			<Size>48</Size>
+		</X>
+		<Y>
+			<Align>WIDGET_ALIGN_LOW</Align>
+			<Sizing>WIDGET_SIZING_DEFAULT</Sizing>
+			<Pos>5</Pos>
+			<HighPos>0</HighPos>
+			<Size>48</Size>
+		</Y>
+	</Placement>
+	<Visible>false</Visible>
+	<Enabled>true</Enabled>
+	<TabOrder>0</TabOrder>
+	<bindSections />
+	<TransparentInput>false</TransparentInput>
+	<IgnoreDblClick>false</IgnoreDblClick>
+	<fade>1</fade>
+	<Variants>
+		<Item>
+			<LayerHighlight href="ScanButton/ScanButtonHighlighted.(WidgetLayerSimpleTexture).xdb" />
+			<PushedOffset x="2" y="-2" />
+			<StateNormal>
+				<LayerMain href="ScanButton/ScanButtonNormal.(WidgetLayerSimpleTexture).xdb" />
+				<FormatFileRef href="" />
+			</StateNormal>
+			<StatePushed>
+				<LayerMain href="ScanButton/ScanButtonPressed.(WidgetLayerSimpleTexture).xdb" />
+				<FormatFileRef href="" />
+			</StatePushed>
+			<StateHighlighted>
+				<LayerMain href="ScanButton/ScanButtonHighlighted.(WidgetLayerSimpleTexture).xdb" />
+				<FormatFileRef href="" />
+			</StateHighlighted>
+			<Reaction>StartScan</Reaction>
+			<ReactionOnUp>true</ReactionOnUp>
+		</Item>
+		<Item>
+			<LayerHighlight href="ScanButton/ScanButtonHighlighted.(WidgetLayerSimpleTexture).xdb" />
+			<StateNormal>
+				<LayerMain href="ScanButton/ScanButtonScanning.(WidgetLayerSimpleTexture).xdb" />
+				<FormatFileRef href="" />
+			</StateNormal>
+			<StatePushed>
+				<LayerMain href="ScanButton/ScanButtonPressed.(WidgetLayerSimpleTexture).xdb" />
+				<FormatFileRef href="" />
+			</StatePushed>
+			<StateHighlighted>
+				<LayerMain href="ScanButton/ScanButtonHighlighted.(WidgetLayerSimpleTexture).xdb" />
+				<FormatFileRef href="" />
+			</StateHighlighted>
+			<Reaction>StopScan</Reaction>
+			<ReactionOnUp>true</ReactionOnUp>
+		</Item>
+	</Variants>
+	<useDefaultSounds>true</useDefaultSounds>
+</WidgetButton>
