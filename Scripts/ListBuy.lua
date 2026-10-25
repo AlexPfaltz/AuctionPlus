@@ -20,6 +20,7 @@ local btSortPriceBuyOut = wtSortBar:GetChildChecked("PriceBuyOut", false)
 local iconNumLots = wtSortBar:GetChildChecked("IconNumLots", false)
 local iconPricePerUnit = wtSortBar:GetChildChecked("IconPricePerUnit", false)
 local iconBuyOut = wtSortBar:GetChildChecked("IconBuyOut", false)
+local iconItemName = wtSortBar:GetChildUnchecked("IconItemName", false)
 local txSortNone = common.GetAddonRelatedTextureGroup("Group01"):GetTexture("AuctionButtonSortNone")
 local txSortUp = common.GetAddonRelatedTextureGroup("Group01"):GetTexture("AuctionButtonSortUp")
 local txSortDown = common.GetAddonRelatedTextureGroup("Group01"):GetTexture("AuctionButtonSortDown")
@@ -29,6 +30,7 @@ local CurrentSelectedLine = false
 local SortBuyOutInAscendingOrder = false
 local SortPricePerUnitInAscendingOrder = false
 local SortNumLotsInAscendingOrder = false
+local SortItemNameInAscendingOrder = false
 local Lines = {}
 local LotForBuy = {}
 local BuyoutSelected = false
@@ -294,6 +296,26 @@ function UpdPriceOnNumLots(price, numLots)
 	wtInfoBarPrice:GetChildChecked("Copper", false):SetVal("value", common.FormatInt(SplitMoney[3], "%d"))
 end
 
+-- Иконка может отсутствовать (если не установлен IconItemName.xdb)
+local function SetItemNameIcon(texture)
+	if iconItemName then iconItemName:SetBackgroundTexture(texture) end
+end
+
+local function ResetItemNameSort()
+	SortItemNameInAscendingOrder = false
+	SetItemNameIcon(txSortNone)
+end
+
+-- Ключ для сортировки по имени: регистр не учитывается (cp1251: А-Я -> а-я, Ё -> е)
+local function NameSortKey(name)
+	name = string.lower(name or "")
+	return (string.gsub(name, "[\168\184\192-\223]", function(c)
+		local code = string.byte(c)
+		if code == 168 or code == 184 then return string.char(229) end
+		return string.char(code + 32)
+	end))
+end
+
 ListBuy.FillSortBar = function()
 	btSortNumLots:SetVal("button_label", userMods.ToWString(GetLocalizedText("NumLots")))
 	btSortItemName:SetVal("button_label", userMods.ToWString(GetLocalizedText("ItemName")))
@@ -302,6 +324,7 @@ ListBuy.FillSortBar = function()
 	iconNumLots:SetBackgroundTexture(txSortNone)
 	iconPricePerUnit:SetBackgroundTexture(txSortNone)
 	iconBuyOut:SetBackgroundTexture(txSortNone)
+	SetItemNameIcon(txSortNone)
 end
 
 ListBuy.FillInfoBar = function(line)
@@ -365,6 +388,7 @@ ListBuy.reloadSortIcon = function()
 	iconNumLots:SetBackgroundTexture(txSortNone)
 	iconBuyOut:SetBackgroundTexture(txSortNone)
 	iconPricePerUnit:SetBackgroundTexture(txSortNone)
+	ResetItemNameSort()
 end
 
 function ClearTabBuy()
@@ -461,6 +485,7 @@ end
 
 ListBuy.SortNumLots = function()
 	if Container:GetElementCount() <=1 then return end
+	ResetItemNameSort()
 	SortBuyOutInAscendingOrder = false
 	SortPricePerUnitInAscendingOrder = false
 	iconBuyOut:SetBackgroundTexture(txSortNone)
@@ -489,6 +514,7 @@ end
 
 ListBuy.SortPriceBuyOut = function()
 	if Container:GetElementCount() <=1 then return end
+	ResetItemNameSort()
 	SortPricePerUnitInAscendingOrder = false
 	SortNumLotsInAscendingOrder = false
 	iconPricePerUnit:SetBackgroundTexture(txSortNone)
@@ -517,6 +543,7 @@ end
 
 ListBuy.SortPricePerUnit = function()
 	if Container:GetElementCount() <=1 then return end
+	ResetItemNameSort()
 	SortBuyOutInAscendingOrder = false
 	SortNumLotsInAscendingOrder = false
 	iconBuyOut:SetBackgroundTexture(txSortNone)
@@ -544,7 +571,54 @@ ListBuy.SortPricePerUnit = function()
 end
 
 ListBuy.SortItemName = function()
+	local count = Container:GetElementCount()
+	if count <= 1 then return end
 
+	-- сбрасываем сортировки по остальным колонкам
+	SortBuyOutInAscendingOrder = false
+	SortPricePerUnitInAscendingOrder = false
+	SortNumLotsInAscendingOrder = false
+	iconNumLots:SetBackgroundTexture(txSortNone)
+	iconPricePerUnit:SetBackgroundTexture(txSortNone)
+	iconBuyOut:SetBackgroundTexture(txSortNone)
+
+	-- первый клик: А -> Я, повторный: Я -> А
+	SortItemNameInAscendingOrder = not SortItemNameInAscendingOrder
+	SetItemNameIcon(SortItemNameInAscendingOrder and txSortDown or txSortUp)
+
+	-- собираем строки в Lua-таблицу и сортируем там, а не в контейнере
+	local list = {}
+	for i = 0, count - 1 do
+		local widget = Container:At(i)
+		local line = widget and Lines[widget:GetName()]
+		if line then
+			if not line.sortName then
+				line.sortName = NameSortKey(userMods.FromWString(line.infoForBuy.name))
+			end
+			list[#list + 1] = line
+		end
+	end
+
+	local ascending = SortItemNameInAscendingOrder
+	table.sort(list, function(a, b)
+		if a.sortName ~= b.sortName then
+			if ascending then return a.sortName < b.sortName end
+			return a.sortName > b.sortName
+		end
+		-- одинаковые имена: дешёвые выше, затем по ключу (для стабильного порядка)
+		local pa, pb = a.infoForBuy.priceperunit or 0, b.infoForBuy.priceperunit or 0
+		if pa ~= pb then return pa < pb end
+		return tostring(a.infoForBuy.key) < tostring(b.infoForBuy.key)
+	end)
+
+	-- переставляем виджеты в контейнере в новом порядке
+	for i = 1, #list do
+		local widget = list[i].widget
+		Container:Remove(widget)
+		Container:Insert(i - 1, widget)
+	end
+	Container:ForceReposition()
+	Container:EnsureVisible(Container:At(0))
 end
 
 ListBuy.slot_over = function(params)
