@@ -45,6 +45,22 @@ local smartLinePool   = {}
 local doubleLinePool  = {}
 local separatorPool   = {}
 local descriptionPool = {}
+local moneyPool       = { destroy = true }  -- строки с монетами не переиспользуются, а уничтожаются
+
+-- Контейнер и панель с монетами берём у PriceInTooltip (те же виджеты, что и в
+-- родном тултипе). Дескрипторы снимаем при загрузке, пока PriceInTooltip
+-- ещё не переложил их детей в родной тултип.
+local DescMoneyContainer, DescMoneyPanel
+do
+    local ok = pcall(function()
+        local src = mainForm:GetChildChecked("PriceInTooltip", false)
+        DescMoneyContainer = src:GetChildChecked("ContainerPrice", false):GetWidgetDesc()
+        DescMoneyPanel = src:GetChildChecked("Prices", false):GetWidgetDesc()
+    end)
+    if not ok then
+        DescMoneyContainer, DescMoneyPanel = nil, nil
+    end
+end
 
 -- Активные виджеты: { widget = w, pool = pool }
 local activeWidgets = {}
@@ -97,8 +113,88 @@ local function AcquireDescriptionLine()
     return w
 end
 
-local function Track(w, pool)
-    activeWidgets[#activeWidgets + 1] = { widget = w, pool = pool }
+local function Track(w, pool, extra)
+    activeWidgets[#activeWidgets + 1] = { widget = w, pool = pool, extra = extra }
+end
+
+-- Есть ли хоть одно ненулевое сопротивление
+local function HasResistances(bonus)
+    local resistances = bonus and bonus.resistances
+    if not resistances then return false end
+    for _, r in pairs(resistances) do
+        if r and r.base and r.base > 0 then return true end
+    end
+    return false
+end
+
+-- Длительность в мс -> "1 ч. 2 м. 3 с."
+local function FormatDuration(ms)
+    local totalSec = math.floor((ms or 0) / 1000)
+    local h = math.floor(totalSec / 3600)
+    local m = math.floor((totalSec % 3600) / 60)
+    local s = totalSec % 60
+    local parts = {}
+    if h > 0 then parts[#parts + 1] = tostring(h) .. L("cdHour") end
+    if m > 0 then parts[#parts + 1] = tostring(m) .. L("cdMin") end
+    if s > 0 or #parts == 0 then parts[#parts + 1] = tostring(s) .. L("cdSec") end
+    return table.concat(parts, " ")
+end
+
+-- Медь -> "250 з. 12 с. 5 м."
+local function FormatCoins(copper)
+    local parts = Split(math.floor(copper))
+    local out = {}
+    if parts[1] > 0 then
+        out[#out + 1] = userMods.FromWString(common.FormatInt(parts[1], "%d", " ")) .. L("coinGold")
+    end
+    if parts[2] > 0 then
+        out[#out + 1] = tostring(parts[2]) .. L("coinSilver")
+    end
+    if parts[3] > 0 then
+        out[#out + 1] = tostring(parts[3]) .. L("coinCopper")
+    end
+    return table.concat(out, " ")
+end
+
+-- Строка с монетами и иконками (как в PriceInTooltip). false, если не удалось.
+local function PushCoinsLine(copper)
+    if not (DescMoneyContainer and DescMoneyPanel) then return false end
+    local container, panel
+    local ok = pcall(function()
+        local parts = Split(math.floor(copper))
+        local group = common.GetAddonRelatedTextureGroup("Group01")
+        container = mainForm:CreateWidgetByDesc(DescMoneyContainer)
+        mainForm:AddChild(container)
+        panel = mainForm:CreateWidgetByDesc(DescMoneyPanel)
+        mainForm:AddChild(panel)
+        -- ширину подгоняем под содержимое, а не под тултип с ценами
+        local place = container:GetPlacementPlain()
+        place.sizeX = 200
+        container:SetPlacementPlain(place)
+
+        local function addCoin(valueName, iconName, tag, amount, textureName, format)
+            local v = panel:GetChildChecked(valueName, false)
+            local icon = panel:GetChildChecked(iconName, false)
+            if format then
+                v:SetVal(tag, common.FormatInt(amount, "%d", format))
+            else
+                v:SetVal(tag, common.FormatInt(amount, "%d"))
+            end
+            icon:SetBackgroundTexture(group:GetTexture(textureName))
+            container:PushBack(v)
+            container:PushBack(icon)
+        end
+        if parts[1] > 0 then addCoin("ValueGold", "IconGold", "gold", parts[1], "CoinGold", " ") end
+        if parts[2] > 0 then addCoin("ValueSilver", "IconSilver", "silver", parts[2], "CoinSilver") end
+        if parts[3] > 0 then addCoin("ValueCopper", "IconCopper", "copper", parts[3], "CoinCopper") end
+        cTooltip:PushBack(container)
+        Track(container, moneyPool, panel)
+    end)
+    if not ok then
+        pcall(function() if container then container:DestroyWidget() end end)
+        pcall(function() if panel then panel:DestroyWidget() end end)
+    end
+    return ok
 end
 
 local function ResetWidget(w)
@@ -116,11 +212,11 @@ local function ResetWidget(w)
     end
 
     -- Для DoubleLine и других составных виджетов очищаем детей
-    local left = w:GetChildChecked("LineLeft", false)
+    local left = w:GetChildUnchecked("LineLeft", false)
     if left and left.ClearValues then
         pcall(function() left:ClearValues() end)
     end
-    local right = w:GetChildChecked("LineRight", false)
+    local right = w:GetChildUnchecked("LineRight", false)
     if right and right.ClearValues then
         pcall(function() right:ClearValues() end)
     end
@@ -131,8 +227,15 @@ local function RecycleAll()
         local item = activeWidgets[i]
         local w = item.widget
         pcall(function() cTooltip:Remove(w) end)
-        ResetWidget(w)
-        table.insert(item.pool, w)
+        if item.pool.destroy then
+            pcall(function() w:DestroyWidget() end)
+            if item.extra then
+                pcall(function() item.extra:DestroyWidget() end)
+            end
+        else
+            ResetWidget(w)
+            table.insert(item.pool, w)
+        end
         activeWidgets[i] = nil
     end
 end
@@ -253,7 +356,7 @@ local function fillTooltip(content)
     itemaname:SetMultiline(true)
     itemaname:SetWrapText(true)
     SafeSetVal(itemaname, "value", content.name)
-    itemaname:SetClassVal("class", ItemQualityClass[content.quality])
+    itemaname:SetClassVal("class", ItemQualityClass[content.quality] or "tip_base")
     itemaname:SetClassVal("size", "Size16")
     cTooltip:PushBack(itemaname)
     Track(itemaname, smartLinePool)
@@ -265,6 +368,41 @@ local function fillTooltip(content)
         Binding:SetClassVal("class", "tip_golden")
         cTooltip:PushBack(Binding)
         Track(Binding, smartLinePool)
+    end
+
+    -- Проклятый предмет, гильдейский, лимит владения, временный
+    if content.isCursed then
+        local cursed = AcquireSmartLine()
+        SafeSetVal(cursed, "value", L("Cursed"))
+        cursed:SetClassVal("class", "tip_red")
+        cTooltip:PushBack(cursed)
+        Track(cursed, smartLinePool)
+    end
+    if content.isGuildItem then
+        local guild = AcquireSmartLine()
+        SafeSetVal(guild, "value", L("GuildItem"))
+        guild:SetClassVal("class", "tip_golden")
+        cTooltip:PushBack(guild)
+        Track(guild, smartLinePool)
+    end
+    if content.ownershipLimit and content.ownershipLimit > 0 then
+        local limit = AcquireSmartLine()
+        SafeSetVal(limit, "value", L("OwnershipLimit") .. tostring(content.ownershipLimit))
+        limit:SetClassVal("class", "tip_base")
+        cTooltip:PushBack(limit)
+        Track(limit, smartLinePool)
+    end
+    if content.temporary then
+        local ms = content.temporary.remainingMs
+        if not ms or ms <= 0 then ms = content.temporary.durationMs or 0 end
+        local hours = math.floor(ms / 3600000)
+        local minutes = math.floor((ms % 3600000) / 60000)
+        local temp = AcquireSmartLine()
+        SafeSetVal(temp, "value", L("TemporaryItem") .. tostring(hours) .. L("hoursShort")
+            .. tostring(minutes) .. L("minutesShort"))
+        temp:SetClassVal("class", "tip_red")
+        cTooltip:PushBack(temp)
+        Track(temp, smartLinePool)
     end
 
     -- GearScore
@@ -333,7 +471,7 @@ local function fillTooltip(content)
     local misc  = bonus.miscStats or {}
 
     -- Damage (weapon)
-    if content.isWeapon
+    if content.isWeapon and not misc.hideDPS
        and misc.minDamage and misc.maxDamage and misc.weaponSpeed then
         local DamageMinMax = AcquireDoubleLine()
         local intMin = tostring(math.ceil(misc.minDamage.base))
@@ -380,6 +518,36 @@ local function fillTooltip(content)
         sp:SetClassVal("class", "tip_base")
         cTooltip:PushBack(sp)
         Track(sp, smartLinePool)
+    elseif misc.spellPower and misc.spellPower.base and misc.spellPower.base > 0 then
+        -- среднее значение силы заклинаний, если min/max не заданы
+        local sp = AcquireSmartLine()
+        SafeSetVal(sp, "value", L("SpellPower") .. tostring(math.ceil(misc.spellPower.base)))
+        sp:SetClassVal("class", "tip_base")
+        cTooltip:PushBack(sp)
+        Track(sp, smartLinePool)
+    end
+
+    -- Применение предмета (зелья и т.п.)
+    if content.useDescription then
+        local ok, useText = pcall(function()
+            return userMods.FromWString(content.useDescription:ToWString())
+        end)
+        if ok and useText and string.len(useText) > 0 then
+            local use = AcquireSmartLine()
+            use:SetMultiline(true)
+            use:SetWrapText(true)
+            SafeSetVal(use, "value", L("UseEffect") .. useText)
+            use:SetClassVal("class", "Common")
+            cTooltip:PushBack(use)
+            Track(use, smartLinePool)
+        end
+    end
+    if content.useCooldownMs and content.useCooldownMs > 0 then
+        local cd = AcquireSmartLine()
+        SafeSetVal(cd, "value", L("Cooldown") .. FormatDuration(content.useCooldownMs))
+        cd:SetClassVal("class", "tip_blue")
+        cTooltip:PushBack(cd)
+        Track(cd, smartLinePool)
     end
 
     -- Separator
@@ -392,58 +560,84 @@ local function fillTooltip(content)
     if content.isWeapon or IsWeaponLike(content.dressSlot) then
         local spec = bonus.specStats or {}
         local sumSpecStats = 0
-        local wtSpecStats = AcquireDoubleLine()
-        SafeSetVal(wtSpecStats:GetChildChecked("LineLeft", false), "value", L("specStats"))
-        wtSpecStats:GetChildChecked("LineLeft", false):SetClassVal("class", "tip_white")
-        wtSpecStats:GetChildChecked("LineRight", false):SetClassVal("class", "StatPrimaryColor")
-        wtSpecStats:GetChildChecked("LineRight", false):SetClassVal("size", "Size17")
-        cTooltip:PushBack(wtSpecStats)
-        Track(wtSpecStats, doubleLinePool)
-
+        local specToShow = {}
         for i = 1, #spec do
-            local SpecStat = AcquireDoubleLine()
-            local value = common.FormatFloat(spec[i].value or 0, "%.2f")
-            local tooltipName = spec[i].tooltipName
-                and userMods.FromWString(spec[i].tooltipName) or ""
-            SafeSetVal(SpecStat:GetChildChecked("LineLeft", false),
-                "value", "+" .. userMods.FromWString(value) .. " " .. tooltipName)
-            SpecStat:GetChildChecked("LineLeft", false):SetClassVal("class", "tip_base")
-            cTooltip:PushBack(SpecStat)
-            Track(SpecStat, doubleLinePool)
-            sumSpecStats = sumSpecStats + (spec[i].value or 0)
+            local v = spec[i].value or 0
+            if v ~= 0 then specToShow[#specToShow + 1] = spec[i] end
+            sumSpecStats = sumSpecStats + v
         end
-        SafeSetVal(wtSpecStats:GetChildChecked("LineRight", false),
-            "value", tostring(math.ceil(sumSpecStats)))
+
+        if #specToShow > 0 then
+            local wtSpecStats = AcquireDoubleLine()
+            SafeSetVal(wtSpecStats:GetChildChecked("LineLeft", false), "value", L("specStats"))
+            wtSpecStats:GetChildChecked("LineLeft", false):SetClassVal("class", "tip_white")
+            SafeSetVal(wtSpecStats:GetChildChecked("LineRight", false),
+                "value", tostring(math.ceil(sumSpecStats)))
+            wtSpecStats:GetChildChecked("LineRight", false):SetClassVal("class", "StatPrimaryColor")
+            wtSpecStats:GetChildChecked("LineRight", false):SetClassVal("size", "Size17")
+            cTooltip:PushBack(wtSpecStats)
+            Track(wtSpecStats, doubleLinePool)
+
+            for i = 1, #specToShow do
+                local SpecStat = AcquireDoubleLine()
+                local value = common.FormatFloat(specToShow[i].value or 0, "%.2f")
+                local tooltipName = specToShow[i].tooltipName
+                    and userMods.FromWString(specToShow[i].tooltipName) or ""
+                SafeSetVal(SpecStat:GetChildChecked("LineLeft", false),
+                    "value", "+" .. userMods.FromWString(value) .. " " .. tooltipName)
+                SpecStat:GetChildChecked("LineLeft", false):SetClassVal("class", "tip_base")
+                cTooltip:PushBack(SpecStat)
+                Track(SpecStat, doubleLinePool)
+            end
+        end
 
         -- miscStats
         local power   = misc.power   and misc.power.base   or 0
         local stamina = misc.stamina and misc.stamina.base or 0
+        local wisdom  = misc.wisdom  and misc.wisdom.base  or 0
 
-        local stats = AcquireDoubleLine()
-        SafeSetVal(stats:GetChildChecked("LineLeft", false), "value", L("Stats"))
-        stats:GetChildChecked("LineLeft", false):SetClassVal("class", "tip_white")
-        SafeSetVal(stats:GetChildChecked("LineRight", false),
-            "value", tostring(math.ceil(power + stamina)))
-        stats:GetChildChecked("LineRight", false):SetClassVal("class", "StatPrimaryColor")
-        stats:GetChildChecked("LineRight", false):SetClassVal("size", "Size17")
-        cTooltip:PushBack(stats)
-        Track(stats, doubleLinePool)
+        local sumStats = power + stamina + wisdom
+        if sumStats > 0 then
+            local stats = AcquireDoubleLine()
+            SafeSetVal(stats:GetChildChecked("LineLeft", false), "value", L("Stats"))
+            stats:GetChildChecked("LineLeft", false):SetClassVal("class", "tip_white")
+            SafeSetVal(stats:GetChildChecked("LineRight", false),
+                "value", tostring(math.ceil(sumStats)))
+            stats:GetChildChecked("LineRight", false):SetClassVal("class", "StatPrimaryColor")
+            stats:GetChildChecked("LineRight", false):SetClassVal("size", "Size17")
+            cTooltip:PushBack(stats)
+            Track(stats, doubleLinePool)
 
-        local statPower = AcquireDoubleLine()
-        SafeSetVal(statPower:GetChildChecked("LineLeft", false),
-            "value", "+" .. userMods.FromWString(common.FormatFloat(power, "%.1f"))
-                .. L("statPower"))
-        statPower:GetChildChecked("LineLeft", false):SetClassVal("class", "tip_base")
-        cTooltip:PushBack(statPower)
-        Track(statPower, doubleLinePool)
+            if power > 0 then
+                local statPower = AcquireDoubleLine()
+                SafeSetVal(statPower:GetChildChecked("LineLeft", false),
+                    "value", "+" .. userMods.FromWString(common.FormatFloat(power, "%.1f"))
+                        .. L("statPower"))
+                statPower:GetChildChecked("LineLeft", false):SetClassVal("class", "tip_base")
+                cTooltip:PushBack(statPower)
+                Track(statPower, doubleLinePool)
+            end
 
-        local statStamina = AcquireDoubleLine()
-        SafeSetVal(statStamina:GetChildChecked("LineLeft", false),
-            "value", "+" .. userMods.FromWString(common.FormatFloat(stamina, "%.1f"))
-                .. L("statStamina"))
-        statStamina:GetChildChecked("LineLeft", false):SetClassVal("class", "tip_base")
-        cTooltip:PushBack(statStamina)
-        Track(statStamina, doubleLinePool)
+            if stamina > 0 then
+                local statStamina = AcquireDoubleLine()
+                SafeSetVal(statStamina:GetChildChecked("LineLeft", false),
+                    "value", "+" .. userMods.FromWString(common.FormatFloat(stamina, "%.1f"))
+                        .. L("statStamina"))
+                statStamina:GetChildChecked("LineLeft", false):SetClassVal("class", "tip_base")
+                cTooltip:PushBack(statStamina)
+                Track(statStamina, doubleLinePool)
+            end
+
+            if wisdom > 0 then
+                local statWisdom = AcquireDoubleLine()
+                SafeSetVal(statWisdom:GetChildChecked("LineLeft", false),
+                    "value", "+" .. userMods.FromWString(common.FormatFloat(wisdom, "%.1f"))
+                        .. L("statWisdom"))
+                statWisdom:GetChildChecked("LineLeft", false):SetClassVal("class", "tip_base")
+                cTooltip:PushBack(statWisdom)
+                Track(statWisdom, doubleLinePool)
+            end
+        end
 
         -- innateStats
         local InnateStats = bonus.innateStats or {}
@@ -462,7 +656,7 @@ local function fillTooltip(content)
         end
 
         -- resistances
-        if IsResistanceSlot(content.dressSlot) then
+        if IsResistanceSlot(content.dressSlot) and HasResistances(bonus) then
             local wtResistance = AcquireSmartLine()
             SafeSetVal(wtResistance, "value", L("Resistance"))
             wtResistance:SetClassVal("class", "tip_white")
@@ -487,6 +681,64 @@ local function fillTooltip(content)
         widgets_after_separator_1 = true
     end
 
+    -- Сетовый бонус, мета-улучшение, руна
+    local extras = {}
+    local sb = content.setBonus
+    if sb and sb.hasSetBonus and sb.name then
+        extras[#extras + 1] = { text = L("SetBonus") .. userMods.FromWString(sb.name), class = "tip_golden" }
+        if sb.description then
+            extras[#extras + 1] = { value = sb.description, multiline = true }
+        end
+    end
+    local meta = content.meta
+    if meta then
+        if meta.isInactive then
+            extras[#extras + 1] = { text = L("MetaInactive"), class = "tip_red" }
+        elseif meta.hasMetaState and meta.improvement then
+            extras[#extras + 1] = { text = L("MetaImprovement")
+                .. userMods.FromWString(common.FormatFloat(meta.improvement, "%.1f")) .. "%", class = "tip_base" }
+        end
+    end
+    local rune = content.rune
+    if rune then
+        if rune.level then
+            extras[#extras + 1] = { text = L("RuneLevel") .. tostring(rune.level), class = "tip_base" }
+        end
+        if rune.offensiveBonus and rune.offensiveBonus > 0 then
+            extras[#extras + 1] = { text = L("RuneOffense")
+                .. userMods.FromWString(common.FormatFloat(rune.offensiveBonus, "%.1f")) .. "%", class = "tip_base" }
+        end
+        if rune.defensiveBonus and rune.defensiveBonus > 0 then
+            extras[#extras + 1] = { text = L("RuneDefense")
+                .. userMods.FromWString(common.FormatFloat(rune.defensiveBonus, "%.1f")) .. "%", class = "tip_base" }
+        end
+    end
+    if #extras > 0 then
+        if widgets_after_separator_1 then
+            local sepE = AcquireSeparator()
+            cTooltip:PushBack(sepE)
+            Track(sepE, separatorPool)
+        end
+        for i = 1, #extras do
+            local e = extras[i]
+            if e.multiline then
+                local w = AcquireDescriptionLine()
+                SafeSetVal(w, "value", e.value)
+                w:SetMultiline(true)
+                w:SetWrapText(true)
+                cTooltip:PushBack(w)
+                Track(w, descriptionPool)
+            else
+                local w = AcquireSmartLine()
+                SafeSetVal(w, "value", e.text)
+                w:SetClassVal("class", e.class)
+                cTooltip:PushBack(w)
+                Track(w, smartLinePool)
+            end
+        end
+        widgets_after_separator_1 = true
+    end
+
     -- Description
     local hasDescription = false
     if content.description then
@@ -507,6 +759,28 @@ local function fillTooltip(content)
         description:SetWrapText(true)
         cTooltip:PushBack(description)
         Track(description, descriptionPool)
+    end
+
+    -- Количество в стопке и цена продажи торговцу
+    local stackInfo = content.stackInfo
+    if stackInfo and stackInfo.limit and stackInfo.limit > 1 then
+        local st = AcquireSmartLine()
+        SafeSetVal(st, "value", L("StackCount") .. tostring(stackInfo.count or 1)
+            .. "/" .. tostring(stackInfo.limit))
+        st:SetClassVal("class", "tip_white")
+        cTooltip:PushBack(st)
+        Track(st, smartLinePool)
+    end
+    local vendorPrice = content.vendorPrice
+    if vendorPrice and vendorPrice.sellPrice and vendorPrice.sellPrice > 0 then
+        if not PushCoinsLine(vendorPrice.sellPrice) then
+            -- запасной вариант без иконок
+            local pr = AcquireSmartLine()
+            SafeSetVal(pr, "value", L("SellPrice") .. FormatCoins(vendorPrice.sellPrice))
+            pr:SetClassVal("class", "tip_base")
+            cTooltip:PushBack(pr)
+            Track(pr, smartLinePool)
+        end
     end
 
     return true

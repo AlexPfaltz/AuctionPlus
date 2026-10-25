@@ -159,11 +159,7 @@ end
 
 function CheckTabVariant()
 	if not AuctionMainPanel or not AuctionMainPanel:IsVisible() then return end
-	if TabAll:GetVariant() == 1 or TabBids:GetVariant() == 1 or TabOwner:GetVariant() == 1 then
-		if btTabBuy:GetVariant() == 1 or btTabSell:GetVariant() == 1 then
-			TabOverlayPressed()
-		end
-	end
+	SyncAddonTabs()
 end
 
 ScanAuction.AuctionIsVisible = function(params)

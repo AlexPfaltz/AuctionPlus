@@ -256,26 +256,59 @@ function GetLastScan(table)
 	return date, values
 end
 
+-- Безопасный вызов itemLib-функции: при ошибке или nil возвращает nil
+local function SafeItemCall(func, itemId)
+	local ok, result = pcall(func, itemId)
+	if ok then return result end
+	return nil
+end
+
+-- Проклятый ли предмет (всегда boolean)
+function IsItemCursed(itemId)
+	return SafeItemCall(itemLib.IsCursed, itemId) and true or false
+end
+
 function GetInfoForTooltip(itemInfo)
 	local infoForTooltip = itemInfo
+	local id = itemInfo.id
 
-	infoForTooltip.quality = itemLib.GetQuality(itemInfo.id).quality
+	local itemQuality = itemLib.GetQuality(id)
+	infoForTooltip.quality = itemQuality and itemQuality.quality
+	infoForTooltip.isCursed = IsItemCursed(id)
 
-	local itemBinding = itemLib.GetBindingInfo(itemInfo.id)
+	local itemBinding = itemLib.GetBindingInfo(id)
 	if itemBinding then
 		infoForTooltip.isBound = itemBinding.isBound
 		infoForTooltip.binding = itemBinding.binding
 	end
 
-	local itemClassId = itemLib.GetClass(itemInfo.id)
+	local itemClassId = itemLib.GetClass(id)
 	local itemClassInfo = itemClassId and itemLib.GetClassInfo(itemClassId)
 	local itemClassName = itemClassInfo and itemClassInfo.name
 	infoForTooltip.class = itemClassName
 
-	infoForTooltip.conditions = itemLib.GetDressConditions(itemInfo.id)
+	infoForTooltip.conditions = itemLib.GetDressConditions(id)
 
-	infoForTooltip.bonus = itemLib.GetBonus(itemInfo.id)
-	infoForTooltip.gearScore = itemLib.GetGearScore(itemInfo.id)
+	infoForTooltip.bonus = itemLib.GetBonus(id)
+	infoForTooltip.gearScore = itemLib.GetGearScore(id)
+
+	-- Дополнительные данные для тултипа
+	infoForTooltip.setBonus = SafeItemCall(itemLib.GetSetBonusInfo, id)
+	infoForTooltip.meta = SafeItemCall(itemLib.GetMetaInfo, id)
+	infoForTooltip.rune = SafeItemCall(itemLib.GetRuneInfo, id)
+	infoForTooltip.temporary = SafeItemCall(itemLib.GetTemporaryInfo, id)
+	infoForTooltip.ownershipLimit = SafeItemCall(itemLib.GetOwnershipLimit, id)
+	infoForTooltip.stackInfo = SafeItemCall(itemLib.GetStackInfo, id)
+	infoForTooltip.vendorPrice = SafeItemCall(itemLib.GetPriceInfo, id)
+
+	-- Применение предмета (зелья и т.п.): описание и перезарядка спелла
+	local spellId = SafeItemCall(itemLib.GetSpell, id)
+	if spellId then
+		local spellDesc = SafeItemCall(spellLib.GetDescription, spellId)
+		local spellCd = SafeItemCall(spellLib.GetCooldown, spellId)
+		infoForTooltip.useDescription = spellDesc and spellDesc.description
+		infoForTooltip.useCooldownMs = spellCd and spellCd.durationMs
+	end
 
 	return infoForTooltip
 end
@@ -297,7 +330,8 @@ function GetStatsFromID(id)
 	local misc = bonus.miscStats or {}
 	local power = misc.power and misc.power.base or 0
 	local stamina = misc.stamina and misc.stamina.base or 0
-	local SumStats = power + stamina
+	local wisdom = misc.wisdom and misc.wisdom.base or 0
+	local SumStats = power + stamina + wisdom
 	return GS, SumSpecStats, SumStats
 end
 
@@ -418,36 +452,69 @@ function DestroyWidgetsInContainer(container)
     end
 end
 
+-- Какая вкладка аддона открыта сейчас: false | "buy" | "sell".
+-- Состояние вкладок хранится здесь, а не выводится из variant кнопок.
+Global("AddonTab", false)
+
+-- Выбранная сейчас "родная" вкладка (Все аукционы / Участник / Владелец)
 local function GetActiveStockTab()
     for _, tab in ipairs({ TabAll, TabBids, TabOwner }) do
         if tab:GetVariant() == 1 then return tab end
     end
 end
 
+-- Открытие вкладки аддона: запоминаем выбранную "родную" вкладку,
+-- гасим её подсветку и кладём поверх оверлей (клик по нему возвращает назад).
 function ShowTabOverlay()
-    lastStockTab = GetActiveStockTab() or lastStockTab
+    local active = GetActiveStockTab()
+    if active then lastStockTab = active end
     if not lastStockTab then return end
     wtTabOverlay:SetPlacementPlain(lastStockTab:GetPlacementPlain())
     wtTabOverlay:Show(true)
-	lastStockTab:SetVariant(0)
+    lastStockTab:SetVariant(0)
 end
 
+-- Закрытие вкладки аддона: убираем оверлей и возвращаем подсветку "родной"
+-- вкладке, но только если движок не выбрал за это время другую
+-- (иначе подсвечены окажутся сразу две).
 function HideTabOverlay()
     wtTabOverlay:Show(false)
+    if lastStockTab and not GetActiveStockTab() then
+        lastStockTab:SetVariant(1)
+    end
+end
+
+function CloseAddonTabs()
+    if AddonTab == "buy" then
+        CloseTabBuy()
+    elseif AddonTab == "sell" then
+        CloseTabSell()
+    else
+        HideTabOverlay()
+    end
+end
+
+-- Пока открыта вкладка аддона, ни одна "родная" не должна быть выбрана.
+-- Если выбрана - игрок кликнул по другой родной вкладке, закрываем свою.
+function SyncAddonTabs()
+    if AddonTab and GetActiveStockTab() then
+        CloseAddonTabs()
+    end
 end
 
 function TabOverlayPressed()
-	HideTabOverlay()
-	lastStockTab:SetVariant(1)
-    if btTabBuy:GetVariant() == 1 then
-        CloseTabBuy()
-    elseif btTabSell:GetVariant() == 1 then
-        CloseTabSell()
+    CloseAddonTabs()
+end
+
+function OnSecondTimer()
+    if AddonTab and AuctionMainPanel:IsVisible() then
+        SyncAddonTabs()
     end
 end
 
 function Init()
 	common.RegisterReactionHandler(TabOverlayPressed, "TabOverlayPressed")
+	common.RegisterEventHandler(OnSecondTimer, "EVENT_SECOND_TIMER")
 	common.RegisterEventHandler(WIDGET_SHOW_CHANGED, "EVENT_WIDGET_SHOW_CHANGED")
 	common.RegisterEventHandler(SlashCMD, "EVENT_UNKNOWN_SLASH_COMMAND")
 	AuctionMainPanel:SetOnShowNotification(true)

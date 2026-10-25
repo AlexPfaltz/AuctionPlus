@@ -61,12 +61,30 @@ function GetMoneyFromSearchBar(self)
 	return c
 end
 
-local function MakeWoDKey(itemName, GS, SumSpecStats, SumStats, buyoutPrice)
-    return string.format("%s|%d|%d|%d|%d",
-        itemName, GS or 0, SumSpecStats or 0, SumStats or 0, buyoutPrice or 0)
+-- Экипировка или оружие (такие лоты группируются по характеристикам)
+local function IsGearItem(itemInfo)
+	local slot = itemInfo.dressSlot
+	if itemInfo.isWeapon then return true end
+	if not slot then return false end
+	return (slot >= 0 and slot <= 18) or slot == 29 or (slot >= 43 and slot <= 46)
 end
 
-ListBuy.CreateLine = function(auctionInfo, WoD)
+-- Ключ группировки лота. Тот же ключ используется при выкупе, поэтому
+-- в выкупаемую пачку попадают только лоты, идентичные выбранному.
+-- Проклятые и обычные предметы - разные группы.
+local function MakeLotKey(auctionInfo, itemInfo, itemCount)
+	local itemName = userMods.FromWString(itemInfo.name)
+	local cursed = IsItemCursed(auctionInfo.itemId) and 1 or 0
+	local buyout = math.floor(auctionInfo.buyoutPrice or 0)
+	if IsGearItem(itemInfo) then
+		local GS, SumSpecStats, SumStats = GetStatsFromID(auctionInfo.itemId)
+		return string.format("%s|G|%.2f|%.2f|%.2f|%d|%d",
+			itemName, GS or 0, SumSpecStats or 0, SumStats or 0, buyout, cursed)
+	end
+	return string.format("%s|S|%d|%d|%d", itemName, itemCount, buyout, cursed)
+end
+
+ListBuy.CreateLine = function(auctionInfo, key)
     local line = {}
 	if not wtDescLine then
 		line.widget = wtListBuy:GetChildChecked("ItemLine", false)
@@ -87,6 +105,7 @@ ListBuy.CreateLine = function(auctionInfo, WoD)
 	local SplitPricePerUnit = Split(PricePerUnit)
 	
 	line.infoForTooltip = GetInfoForTooltip(itemInfo) --Инфа для тултипа
+	local isCursed = line.infoForTooltip.isCursed
 
 	--Закинем всю инфу в таблицу для дальнейшего использования, что бы не искать заного
 	local infoForBuy = {}
@@ -96,6 +115,8 @@ ListBuy.CreateLine = function(auctionInfo, WoD)
 	infoForBuy.quality = quality
 	infoForBuy.count = itemCount
 	infoForBuy.buyoutprice = PriceBuyOut
+	infoForBuy.key = key
+	infoForBuy.isCursed = isCursed
 	infoForBuy.priceperunit = PricePerUnit
 	line.infoForBuy = infoForBuy
 
@@ -105,7 +126,7 @@ ListBuy.CreateLine = function(auctionInfo, WoD)
 	line.lotsValue = 1
 	line.lots:SetVal("value", common.FormatInt(line.lotsValue, "%d"))
 	local UniSlot = line.widget:GetChildChecked("ItemSlot", false)
-	FillUniSlot(UniSlot, itemInfo.icon, quality, false, itemCount, nil)
+	FillUniSlot(UniSlot, itemInfo.icon, quality, isCursed, itemCount, nil)
 
 	line.itemName = line.widget:GetChildChecked("ItemName", false)
 	line.itemName:SetClassVal( "class", ItemQualityClass[quality])
@@ -138,53 +159,29 @@ ListBuy.CreateLine = function(auctionInfo, WoD)
 	line.iconsilver2:SetBackgroundTexture(common.GetAddonRelatedTextureGroup("Group01"):GetTexture("CoinSilver"))
 	line.iconcopper2 = line.widget:GetChildChecked("PriceBuyOut", false):GetChildChecked("IconCopper", false)	
 	line.iconcopper2:SetBackgroundTexture(common.GetAddonRelatedTextureGroup("Group01"):GetTexture("CoinCopper"))
-	if not WoD then
-		local name = itemName .. itemCount .. PricePerUnit
-		line.button:SetName(name)
-		line.widget:SetName(name)
-		line.widget:GetChildChecked("ItemSlot", false):SetName(name)
-		Lines[name] = line
-		Container:PushBack(Lines[name].widget)
-		Lines[name].widget:Show(true)
-	else
-    	local GS, SumSpecStats, SumStats = GetStatsFromID(itemInfo.id)
-    	local name = MakeWoDKey(itemName, GS, SumSpecStats, SumStats, buyoutPrice)
-    	line.button:SetName(name)
-    	line.widget:SetName(name)
-    	line.widget:GetChildChecked("ItemSlot", false):SetName(name)
-   		Lines[name] = line
-    	Container:PushBack(Lines[name].widget)
-    	Lines[name].widget:Show(true)
-	end
+	line.button:SetName(key)
+	line.widget:SetName(key)
+	line.widget:GetChildChecked("ItemSlot", false):SetName(key)
+	Lines[key] = line
+	Container:PushBack(line.widget)
+	line.widget:Show(true)
 end
 
 ListBuy.AddLine = function(auctionInfo)
 	local BuyoutPrice = auctionInfo.buyoutPrice
-	if not BuyoutPrice or BuyoutPrice == nil or BuyoutPrice <= 0 then return end
+	if not BuyoutPrice or BuyoutPrice <= 0 then return end
 
 	local itemInfo = itemLib.GetItemInfo(auctionInfo.itemId)
-	local itemName = userMods.FromWString(itemInfo.name)
+	if not itemInfo then return end
 	local itemCount = itemLib.GetStackInfo(auctionInfo.itemId).count
-	local PricePerUnit = BuyoutPrice / itemCount
 
-	if itemInfo.isWeapon or (itemInfo.dressSlot >= 0 and itemInfo.dressSlot <= 18) 
-	or itemInfo.dressSlot == 29 or (itemInfo.dressSlot >= 43 and itemInfo.dressSlot <= 46) then
-		local GS, SumSpecStats, SumStats = GetStatsFromID(itemInfo.id)
-		local name = MakeWoDKey(itemName, GS, SumSpecStats, SumStats, BuyoutPrice)
-		if Lines[name] then
-			Lines[name].lotsValue = Lines[name].lotsValue + 1
-			Lines[name].lots:SetVal("value", common.FormatInt(Lines[name].lotsValue, "%d"))
-		else
-			ListBuy.CreateLine(auctionInfo, true)
-		end
+	local key = MakeLotKey(auctionInfo, itemInfo, itemCount)
+	local line = Lines[key]
+	if line then
+		line.lotsValue = line.lotsValue + 1
+		line.lots:SetVal("value", common.FormatInt(line.lotsValue, "%d"))
 	else
-		local name = itemName .. itemCount .. PricePerUnit
-		if Lines[name] then
-			Lines[name].lotsValue = Lines[name].lotsValue + 1
-			Lines[name].lots:SetVal("value", common.FormatInt(Lines[name].lotsValue, "%d"))
-		else
-			ListBuy.CreateLine(auctionInfo, false)
-		end
+		ListBuy.CreateLine(auctionInfo, key)
 	end
 end
 
@@ -259,7 +256,8 @@ ListBuy.AuctionSearch = function(params)
 						local seller = userMods.FromWString(auctionInfo.sellerName)
 						local count = (itemLib.GetStackInfo(auctionInfo.itemId)).count
 						if LotForBuy.countLots and LotForBuy.countLots > 0 then
-							if itemName == LotForBuy.name and buyoutPrice == LotForBuy.buyoutprice and count == LotForBuy.count then
+							if itemName == LotForBuy.name and buyoutPrice == LotForBuy.buyoutprice and count == LotForBuy.count
+							and MakeLotKey(auctionInfo, itemInfo, count) == LotForBuy.key then
 								auction.Buyout(auctionInfo.id)
 								LotForBuy.countLots = LotForBuy.countLots - 1
 							end
@@ -333,6 +331,7 @@ function TheLastStageBeforeBuying(item, countLots)
 	LotForBuy.name = userMods.FromWString(item.infoForBuy.name)
 	LotForBuy.buyoutprice = item.infoForBuy.buyoutprice
 	LotForBuy.count = item.infoForBuy.count
+	LotForBuy.key = item.infoForBuy.key
 	LotForBuy.countLots = countLots
 	wtListBuy:GetChildChecked("BuySelected", false):Enable(true)
 	wtListBuy:GetChildChecked("BuySelected", false):Show(true)
@@ -591,11 +590,17 @@ function OnAuctionBidResult(params)
 end
 
 function OpenTabBuy()
+	SyncAddonTabs()
+	if AddonTab == "buy" then
+		btTabBuy:SetVariant(1)
+		return
+	end
 	if StartFullScan or StartScanForList then
 		StopScan()
 	end
+	if AddonTab == "sell" then CloseTabSell() end
 	ShowTabOverlay()
-	if btTabSell:GetVariant() == 1 then CloseTabSell() end
+	AddonTab = "buy"
 	AuctionMainPanel:GetChildChecked("List", false):Show(false)
 	AuctionMainPanel:GetChildChecked("Selection", false):Show(false)
 	AuctionMainPanel:GetChildChecked("Search", true):GetChildChecked("ButtonSearch", false):Show(false)
@@ -608,6 +613,7 @@ function OpenTabBuy()
 end
 
 function CloseTabBuy()
+	if AddonTab == "buy" then AddonTab = false end
 	wtListBuy:Show(false)
 	btTabBuy:SetVariant(0)
 	ClearTabBuy()

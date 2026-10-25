@@ -605,11 +605,17 @@ function ClearTabSell()
 end
 
 function OpenTabSell()
+	SyncAddonTabs()
+	if AddonTab == "sell" then
+		btTabSell:SetVariant(1)
+		return
+	end
 	if StartFullScan or StartScanForList then
 		StopScan()
 	end
+	if AddonTab == "buy" then CloseTabBuy() end
 	ShowTabOverlay()
-	if btTabBuy:GetVariant() == 1 then CloseTabBuy() end
+	AddonTab = "sell"
 	AuctionMainPanel:GetChildChecked("List", false):Show(false)
 	AuctionMainPanel:GetChildChecked("Selection", false):Show(false)
 	AuctionMainPanel:GetChildChecked("Search", true):Show(false)
@@ -620,6 +626,7 @@ function OpenTabSell()
 end
 
 function CloseTabSell()
+	if AddonTab == "sell" then AddonTab = false end
 	ListSell.widget:Show(false)
 	btTabSell:SetVariant(0)
 	ClearTabSell()
