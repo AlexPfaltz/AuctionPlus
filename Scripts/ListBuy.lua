@@ -27,11 +27,8 @@ local txSortDown = common.GetAddonRelatedTextureGroup("Group01"):GetTexture("Auc
 --
 local wtDescLine = nil
 local CurrentSelectedLine = false
-local SortBuyOutInAscendingOrder = false
-local SortPricePerUnitInAscendingOrder = false
-local SortNumLotsInAscendingOrder = false
-local SortItemNameInAscendingOrder = false
 local Lines = {}
+
 local LotForBuy = {}
 local BuyoutSelected = false
 local CountAuctions = 0
@@ -41,6 +38,120 @@ local auctionsPageCount = 0
 btTabBuy:SetVal("button_label", userMods.ToWString(GetLocalizedText("btTabBuy")))
 AuctionMainPanel:AddChild(wtListBuy)
 AuctionMainPanel:AddChild(btTabBuy)
+
+------------------------------------------------------------------------------
+-- Сортировка: единая логика для всех колонок
+------------------------------------------------------------------------------
+-- Ключ для сортировки по имени: регистр не учитывается (cp1251: А-Я -> а-я, Ё -> е)
+local function NameSortKey(name)
+	name = string.lower(name or "")
+	return (string.gsub(name, "[\168\184\192-\223]", function(c)
+		local code = string.byte(c)
+		if code == 168 or code == 184 then return string.char(229) end
+		return string.char(code + 32)
+	end))
+end
+
+-- Колонки сортировки: value(line) возвращает значение, по которому сравниваются строки.
+-- icon у колонки имени может отсутствовать (если не установлен IconItemName.xdb).
+local SortColumns = {
+	lots   = { icon = iconNumLots,      value = function(line) return line.lotsValue end },
+	name   = { icon = iconItemName,     value = function(line) return line.sortName end },
+	unit   = { icon = iconPricePerUnit, value = function(line) return line.infoForBuy.priceperunit or 0 end },
+	buyout = { icon = iconBuyOut,       value = function(line) return line.infoForBuy.buyoutprice or 0 end },
+}
+local SortColumn = false  -- ключ из SortColumns или false (порядок поступления)
+local SortAscending = true
+
+-- true, если строка a должна стоять выше строки b.
+-- Порядок всегда полный: при равенстве значений выбранной колонки строки
+-- сравниваются по имени, цене за единицу, цене выкупа и ключу. Направление
+-- сортировки на эти критерии не влияет.
+local function LessThan(a, b)
+	if SortColumn then
+		local value = SortColumns[SortColumn].value
+		local va, vb = value(a), value(b)
+		if va ~= vb then
+			if SortAscending then return va < vb end
+			return va > vb
+		end
+	end
+	if a.sortName ~= b.sortName then return a.sortName < b.sortName end
+	local ua, ub = a.infoForBuy.priceperunit or 0, b.infoForBuy.priceperunit or 0
+	if ua ~= ub then return ua < ub end
+	local pa, pb = a.infoForBuy.buyoutprice or 0, b.infoForBuy.buyoutprice or 0
+	if pa ~= pb then return pa < pb end
+	return tostring(a.infoForBuy.key) < tostring(b.infoForBuy.key)
+end
+
+local function UpdateSortIcons()
+	for column, info in pairs(SortColumns) do
+		if info.icon then
+			local texture = txSortNone
+			if column == SortColumn then
+				texture = SortAscending and txSortDown or txSortUp
+			end
+			info.icon:SetBackgroundTexture(texture)
+		end
+	end
+end
+
+local function ResetSort()
+	SortColumn = false
+	SortAscending = true
+	UpdateSortIcons()
+end
+
+-- Полная пересортировка контейнера по текущему выбору
+local function ApplySort()
+	if not SortColumn then return end
+	local count = Container:GetElementCount()
+	if count <= 1 then return end
+	local list = {}
+	for i = 0, count - 1 do
+		local widget = Container:At(i)
+		local line = widget and Lines[widget:GetName()]
+		if line then list[#list + 1] = line end
+	end
+	table.sort(list, LessThan)
+	for i = 1, #list do
+		Container:Remove(list[i].widget)
+		Container:Insert(i - 1, list[i].widget)
+	end
+	Container:ForceReposition()
+end
+
+-- Вставка (или перестановка) одной строки в нужную позицию уже отсортированного
+-- контейнера: так порядок сохраняется, пока поиск подгружает новые страницы
+-- и когда у строки меняется число лотов.
+ListBuy.PlaceLine = function(line, inContainer)
+	if inContainer then Container:Remove(line.widget) end
+	local low, high = 0, Container:GetElementCount()
+	while low < high do
+		local mid = math.floor((low + high) / 2)
+		local widget = Container:At(mid)
+		local other = widget and Lines[widget:GetName()]
+		if other and LessThan(other, line) then low = mid + 1 else high = mid end
+	end
+	Container:Insert(low, line.widget)
+end
+
+-- Клик по заголовку колонки: новая колонка сортируется по возрастанию,
+-- повторный клик меняет направление
+ListBuy.SortBy = function(column)
+	if not SortColumns[column] then return end
+	if SortColumn == column then
+		SortAscending = not SortAscending
+	else
+		SortColumn = column
+		SortAscending = true
+	end
+	UpdateSortIcons()
+	ApplySort()
+	if Container:GetElementCount() > 0 then
+		Container:EnsureVisible(Container:At(0))
+	end
+end
 
 function GetMoneyFromSearchBar(self)
 	local count = {}
@@ -165,7 +276,12 @@ ListBuy.CreateLine = function(auctionInfo, key)
 	line.widget:SetName(key)
 	line.widget:GetChildChecked("ItemSlot", false):SetName(key)
 	Lines[key] = line
-	Container:PushBack(line.widget)
+	line.sortName = NameSortKey(userMods.FromWString(itemInfo.name))
+	if SortColumn then
+		ListBuy.PlaceLine(line, false)
+	else
+		Container:PushBack(line.widget)
+	end
 	line.widget:Show(true)
 end
 
@@ -182,6 +298,7 @@ ListBuy.AddLine = function(auctionInfo)
 	if line then
 		line.lotsValue = line.lotsValue + 1
 		line.lots:SetVal("value", common.FormatInt(line.lotsValue, "%d"))
+		if SortColumn == "lots" then ListBuy.PlaceLine(line, true) end
 	else
 		ListBuy.CreateLine(auctionInfo, key)
 	end
@@ -296,35 +413,12 @@ function UpdPriceOnNumLots(price, numLots)
 	wtInfoBarPrice:GetChildChecked("Copper", false):SetVal("value", common.FormatInt(SplitMoney[3], "%d"))
 end
 
--- Иконка может отсутствовать (если не установлен IconItemName.xdb)
-local function SetItemNameIcon(texture)
-	if iconItemName then iconItemName:SetBackgroundTexture(texture) end
-end
-
-local function ResetItemNameSort()
-	SortItemNameInAscendingOrder = false
-	SetItemNameIcon(txSortNone)
-end
-
--- Ключ для сортировки по имени: регистр не учитывается (cp1251: А-Я -> а-я, Ё -> е)
-local function NameSortKey(name)
-	name = string.lower(name or "")
-	return (string.gsub(name, "[\168\184\192-\223]", function(c)
-		local code = string.byte(c)
-		if code == 168 or code == 184 then return string.char(229) end
-		return string.char(code + 32)
-	end))
-end
-
 ListBuy.FillSortBar = function()
 	btSortNumLots:SetVal("button_label", userMods.ToWString(GetLocalizedText("NumLots")))
 	btSortItemName:SetVal("button_label", userMods.ToWString(GetLocalizedText("ItemName")))
 	btSortPricePerUnit:SetVal("button_label", userMods.ToWString(GetLocalizedText("PricePerUnit")))
 	btSortPriceBuyOut:SetVal("button_label", userMods.ToWString(GetLocalizedText("PriceBuyOut")))
-	iconNumLots:SetBackgroundTexture(txSortNone)
-	iconPricePerUnit:SetBackgroundTexture(txSortNone)
-	iconBuyOut:SetBackgroundTexture(txSortNone)
-	SetItemNameIcon(txSortNone)
+	ResetSort()
 end
 
 ListBuy.FillInfoBar = function(line)
@@ -382,13 +476,7 @@ ListBuy.LinePressed = function(reaction)
 end
 
 ListBuy.reloadSortIcon = function()
-	SortBuyOutInAscendingOrder = false
-	SortPricePerUnitInAscendingOrder = false
-	SortNumLotsInAscendingOrder = false
-	iconNumLots:SetBackgroundTexture(txSortNone)
-	iconBuyOut:SetBackgroundTexture(txSortNone)
-	iconPricePerUnit:SetBackgroundTexture(txSortNone)
-	ResetItemNameSort()
+	UpdateSortIcons()
 end
 
 function ClearTabBuy()
@@ -437,189 +525,10 @@ ListBuy.EditLineFocusChanged = function()
 	end
 end
 
-ListBuy.GetMinValue = function(start, finish, valueForSort)
-	local maxValue, Atfound, AtName, LineName
-	for i = start, finish do
-		LineName = Container:At(i):GetName()
-		local linevalue
-		if valueForSort == "priceperunit" then
-			linevalue = Lines[LineName].infoForBuy.priceperunit
-		elseif valueForSort == "buyoutprice" then
-			linevalue = Lines[LineName].infoForBuy.buyoutprice
-		elseif valueForSort == "lotsValue" then 
-			linevalue = Lines[LineName].lotsValue
-		end
-		if not maxValue or maxValue > linevalue then
-			maxValue = linevalue
-		end
-		if maxValue == linevalue then
-			Atfound = i
-			AtName = LineName
-		end
-	end
-	return Atfound, AtName
-end
-
-ListBuy.GetMaxValue = function(start, finish, valueForSort)
-	local maxValue, Atfound, AtName, LineName
-	for i = start, finish do
-		LineName = Container:At(i):GetName()
-		local linevalue
-		if valueForSort == "priceperunit" then
-			linevalue = Lines[LineName].infoForBuy.priceperunit
-		elseif valueForSort == "buyoutprice" then
-			linevalue = Lines[LineName].infoForBuy.buyoutprice
-		elseif valueForSort == "lotsValue" then 
-			linevalue = Lines[LineName].lotsValue
-		end
-		if not maxValue or maxValue < linevalue then
-			maxValue = linevalue
-		end
-		if maxValue == linevalue then
-			Atfound = i
-			AtName = LineName
-		end
-	end
-	return Atfound, AtName
-end
-
-ListBuy.SortNumLots = function()
-	if Container:GetElementCount() <=1 then return end
-	ResetItemNameSort()
-	SortBuyOutInAscendingOrder = false
-	SortPricePerUnitInAscendingOrder = false
-	iconBuyOut:SetBackgroundTexture(txSortNone)
-	iconPricePerUnit:SetBackgroundTexture(txSortNone)
-	if not SortNumLotsInAscendingOrder then
-		SortNumLotsInAscendingOrder = true
-		iconNumLots:SetBackgroundTexture(txSortDown)
-	else
-		SortNumLotsInAscendingOrder = false
-		iconNumLots:SetBackgroundTexture(txSortUp)
-	end
-	local ElementCount = Container:GetElementCount() - 1
-	for i = 0, ElementCount do
-		local atMax, nameLines
-		if SortNumLotsInAscendingOrder then
-			atMax, nameLines = ListBuy.GetMinValue(i, ElementCount, "lotsValue")
-		else
-			atMax, nameLines = ListBuy.GetMaxValue(i, ElementCount, "lotsValue")
-		end
-		Container:RemoveAt(atMax)
-		Container:Insert(i, Lines[nameLines].widget)
-		Container:ForceReposition()
-	end
-	Container:EnsureVisible(Container:At(0))
-end
-
-ListBuy.SortPriceBuyOut = function()
-	if Container:GetElementCount() <=1 then return end
-	ResetItemNameSort()
-	SortPricePerUnitInAscendingOrder = false
-	SortNumLotsInAscendingOrder = false
-	iconPricePerUnit:SetBackgroundTexture(txSortNone)
-	iconNumLots:SetBackgroundTexture(txSortNone)
-	if not SortBuyOutInAscendingOrder then
-		SortBuyOutInAscendingOrder = true
-		iconBuyOut:SetBackgroundTexture(txSortDown)
-	else
-		SortBuyOutInAscendingOrder = false
-		iconBuyOut:SetBackgroundTexture(txSortUp)
-	end
-	local ElementCount = Container:GetElementCount() - 1
-	for i = 0, ElementCount do
-		local atMax, nameLines
-		if SortBuyOutInAscendingOrder then
-			atMax, nameLines = ListBuy.GetMinValue(i, ElementCount, "buyoutprice")
-		else
-			atMax, nameLines = ListBuy.GetMaxValue(i, ElementCount, "buyoutprice")
-		end
-		Container:RemoveAt(atMax)
-		Container:Insert(i, Lines[nameLines].widget)
-		Container:ForceReposition()
-	end
-	Container:EnsureVisible(Container:At(0))
-end
-
-ListBuy.SortPricePerUnit = function()
-	if Container:GetElementCount() <=1 then return end
-	ResetItemNameSort()
-	SortBuyOutInAscendingOrder = false
-	SortNumLotsInAscendingOrder = false
-	iconBuyOut:SetBackgroundTexture(txSortNone)
-	iconNumLots:SetBackgroundTexture(txSortNone)
-	if not SortPricePerUnitInAscendingOrder then
-		SortPricePerUnitInAscendingOrder = true
-		iconPricePerUnit:SetBackgroundTexture(txSortDown)
-	else
-		SortPricePerUnitInAscendingOrder = false
-		iconPricePerUnit:SetBackgroundTexture(txSortUp)
-	end
-	local ElementCount = Container:GetElementCount() - 1
-	for i = 0, ElementCount do
-		local atMax, nameLines
-		if SortPricePerUnitInAscendingOrder then
-			atMax, nameLines = ListBuy.GetMinValue(i, ElementCount, "priceperunit")
-		else
-			atMax, nameLines = ListBuy.GetMaxValue(i, ElementCount, "priceperunit")
-		end
-		Container:RemoveAt(atMax)
-		Container:Insert(i, Lines[nameLines].widget)
-		Container:ForceReposition()
-	end
-	Container:EnsureVisible(Container:At(0))
-end
-
-ListBuy.SortItemName = function()
-	local count = Container:GetElementCount()
-	if count <= 1 then return end
-
-	-- сбрасываем сортировки по остальным колонкам
-	SortBuyOutInAscendingOrder = false
-	SortPricePerUnitInAscendingOrder = false
-	SortNumLotsInAscendingOrder = false
-	iconNumLots:SetBackgroundTexture(txSortNone)
-	iconPricePerUnit:SetBackgroundTexture(txSortNone)
-	iconBuyOut:SetBackgroundTexture(txSortNone)
-
-	-- первый клик: А -> Я, повторный: Я -> А
-	SortItemNameInAscendingOrder = not SortItemNameInAscendingOrder
-	SetItemNameIcon(SortItemNameInAscendingOrder and txSortDown or txSortUp)
-
-	-- собираем строки в Lua-таблицу и сортируем там, а не в контейнере
-	local list = {}
-	for i = 0, count - 1 do
-		local widget = Container:At(i)
-		local line = widget and Lines[widget:GetName()]
-		if line then
-			if not line.sortName then
-				line.sortName = NameSortKey(userMods.FromWString(line.infoForBuy.name))
-			end
-			list[#list + 1] = line
-		end
-	end
-
-	local ascending = SortItemNameInAscendingOrder
-	table.sort(list, function(a, b)
-		if a.sortName ~= b.sortName then
-			if ascending then return a.sortName < b.sortName end
-			return a.sortName > b.sortName
-		end
-		-- одинаковые имена: дешёвые выше, затем по ключу (для стабильного порядка)
-		local pa, pb = a.infoForBuy.priceperunit or 0, b.infoForBuy.priceperunit or 0
-		if pa ~= pb then return pa < pb end
-		return tostring(a.infoForBuy.key) < tostring(b.infoForBuy.key)
-	end)
-
-	-- переставляем виджеты в контейнере в новом порядке
-	for i = 1, #list do
-		local widget = list[i].widget
-		Container:Remove(widget)
-		Container:Insert(i - 1, widget)
-	end
-	Container:ForceReposition()
-	Container:EnsureVisible(Container:At(0))
-end
+ListBuy.SortNumLots = function() ListBuy.SortBy("lots") end
+ListBuy.SortItemName = function() ListBuy.SortBy("name") end
+ListBuy.SortPricePerUnit = function() ListBuy.SortBy("unit") end
+ListBuy.SortPriceBuyOut = function() ListBuy.SortBy("buyout") end
 
 ListBuy.slot_over = function(params)
     if btTabBuy:GetVariant() == 0 then return end
