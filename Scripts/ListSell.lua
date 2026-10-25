@@ -12,6 +12,14 @@ local txSortDown = common.GetAddonRelatedTextureGroup("Group01"):GetTexture("Auc
 
 local itemInfo = {}
 local ListSell = {}
+
+-- Очистка списка лотов. Выбранная строка уничтожается вместе со списком,
+-- поэтому ссылку на неё нужно сбросить: иначе следующий клик по строке
+-- вызывает SetVariant у уже уничтоженной кнопки и обработчик падает.
+ListSell.ClearList = function()
+	CurrentSelectedLine = nil
+	DestroyWidgetsInContainer(ListSell.container)
+end
 ListSell.widget = mainForm:GetChildChecked("ListSell", false)
 ListSell.container = ListSell.widget:GetChildChecked("Container", false)
 ListSell.slotId = nil
@@ -153,7 +161,7 @@ ListSell.ValidateSlot = function()
 		ListSell.slotId = nil
 		InfoBar.Clear()
 		InfoBar.DIsable()
-		DestroyWidgetsInContainer(ListSell.container)
+		ListSell.ClearList()
 		return false
 	else
 		return true
@@ -267,7 +275,7 @@ end
 
 ListSell.StartSearch = function()
 	SortBar.Reload()
-	DestroyWidgetsInContainer(ListSell.container)
+	ListSell.ClearList()
 	auctionsPage = 0
 	auctionsPageCount = 0
 	if ListSell.AssembleFilter() then GetPage(1) end
@@ -364,7 +372,10 @@ ListSell.button_pressed = function(params)
 	elseif params.sender == "Line" then
 		local Parent = params.widget:GetParent()
 		if CurrentSelectedLine ~= nil then
-			CurrentSelectedLine:SetVariant(0)
+			-- кнопка могла быть уничтожена вместе со списком
+			if not pcall(function() CurrentSelectedLine:SetVariant(0) end) then
+				CurrentSelectedLine = nil
+			end
 		end
 		if params.widget:GetVariant() == 1 then
 			params.widget:SetVariant(0)
@@ -599,7 +610,7 @@ function GetPercentDuration(variant)
 end
 
 function ClearTabSell()
-	DestroyWidgetsInContainer(ListSell.container)
+	ListSell.ClearList()
 	InfoBar.Clear()
 	SortBar.Reload()
 end
@@ -665,7 +676,7 @@ function DropInAuction(params)
 			InfoBar.Clear()
 			InfoBar.DIsable()
 			SortBar.Reload()
-			DestroyWidgetsInContainer(ListSell.container)
+			ListSell.ClearList()
 			StatusBar:SetVal("value", userMods.ToWString(GetLocalizedText("not CanCreateAuction")))
 		end
 		--mission.DNDConfirmDropAttempt()
