@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WidgetPanel>
+	<Name>ScanPanel</Name>
+	<Priority>900</Priority>
+	<Children>
+		<Item href="Texts/Title.(WidgetTextView).xdb" />
+		<Item href="Texts/Line1.(WidgetTextView).xdb" />
+		<Item href="Texts/Line2.(WidgetTextView).xdb" />
+		<Item href="Texts/Line3.(WidgetTextView).xdb" />
+		<Item href="Texts/Line4.(WidgetTextView).xdb" />
+		<Item href="Texts/Line5.(WidgetTextView).xdb" />
+		<Item href="BarBack.(WidgetPanel).xdb" />
+		<Item href="Selectors/ScanMode.(WidgetPanel).xdb" />
+		<Item href="Selectors/ScanCategory.(WidgetPanel).xdb" />
+		<Item href="Selectors/ScanSubcategory.(WidgetPanel).xdb" />
+		<Item href="Buttons/ModeAll.(WidgetButton).xdb" />
+		<Item href="Buttons/ModeBag.(WidgetButton).xdb" />
+		<Item href="Buttons/ModeList.(WidgetButton).xdb" />
+		<Item href="Buttons/Start.(WidgetButton).xdb" />
+		<Item href="Buttons/Resume.(WidgetButton).xdb" />
+		<Item href="Buttons/Stop.(WidgetButton).xdb" />
+		<Item href="Buttons/Close.(WidgetButton).xdb" />
+		<Item href="Dropdown/DropList.(WidgetPanel).xdb" />
+	</Children>
+	<BackLayer href="../Sell/Textures/AuctionListBackground.(WidgetLayerSimpleTexture).xdb" />
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_BOTH</Align>
+			<Pos>12</Pos>
+			<HighPos>12</HighPos>
+		</X>
+		<Y>
+			<Align>WIDGET_ALIGN_BOTH</Align>
+			<Pos>40</Pos>
+			<HighPos>52</HighPos>
+		</Y>
+	</Placement>
+	<Visible>false</Visible>
+	<TransparentInput>false</TransparentInput>
+	<PickChildrenOnly>false</PickChildrenOnly>
+</WidgetPanel>

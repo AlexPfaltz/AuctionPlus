@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WidgetPanel>
+	<Name>ScanCategory</Name>
+	<Children>
+		<Item href="ScanCategoryText.(WidgetTextView).xdb" />
+			<Item href="../Dropdown/ScanCategoryDrop.(WidgetButton).xdb" />
+		<Item href="../Dropdown/DropArrow.(WidgetPanel).xdb" />
+	</Children>
+	<BackLayer href="../../../Options/GroupFrames/Textures/OptionFrame.(WidgetLayerTiledTexture).xdb" />
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_CENTER</Align>
+			<Pos>0</Pos>
+			<Size>700</Size>
+		</X>
+		<Y>
+			<Pos>312</Pos>
+			<Size>30</Size>
+		</Y>
+	</Placement>
+	<Visible>true</Visible>
+</WidgetPanel>

@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WidgetButton>
+	<TextTag>button_label</TextTag>
+	<Variants>
+		<Item>
+			<LayerHighlight href="../../../Buttons/Tab/TabHighlight.(WidgetLayerTiledTexture).xdb" />
+			<PushedOffset x="2" y="-2" />
+			<StateNormal>
+				<LayerMain href="../../../Buttons/Tab/TabNormal.(WidgetLayerTiledTexture).xdb" />
+				<FormatFileRef href="../../../Buttons/Tab/ButtonFormatNormal.txt" />
+			</StateNormal>
+			<StatePushed>
+				<LayerMain href="../../../Buttons/Tab/TabSelected.(WidgetLayerTiledTexture).xdb" />
+				<FormatFileRef href="../../../Buttons/Tab/ButtonFormatSelected.txt" />
+			</StatePushed>
+			<StateHighlighted>
+				<FormatFileRef href="../../../Buttons/Tab/ButtonFormatSelected.txt" />
+			</StateHighlighted>
+			<Reaction>ScanModeBag</Reaction>
+			<ReactionOnUp>true</ReactionOnUp>
+		</Item>
+		<Item>
+			<LayerHighlight href="../../../Buttons/Tab/TabHighlight.(WidgetLayerTiledTexture).xdb" />
+			<StateNormal>
+				<LayerMain href="../../../Buttons/Tab/TabSelected.(WidgetLayerTiledTexture).xdb" />
+				<FormatFileRef href="../../../Buttons/Tab/ButtonFormatSelected.txt" />
+			</StateNormal>
+			<StatePushed>
+				<LayerMain href="../../../Buttons/Tab/TabNormal.(WidgetLayerTiledTexture).xdb" />
+				<FormatFileRef href="../../../Buttons/Tab/ButtonFormatSelected.txt" />
+			</StatePushed>
+			<StateHighlighted>
+				<FormatFileRef href="../../../Buttons/Tab/ButtonFormatSelected.txt" />
+			</StateHighlighted>
+			<Reaction>ScanModeBag</Reaction>
+			<ReactionOnUp>true</ReactionOnUp>
+		</Item>
+	</Variants>
+	<TextStyle>
+		<Align>ALIGNY_MIDDLE</Align>
+	</TextStyle>
+	<Name>ModeBag</Name>
+	<Priority>0</Priority>
+		<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_CENTER</Align>
+			<Pos>0</Pos>
+			<Size>160</Size>
+		</X>
+		<Y>
+			<Align>WIDGET_ALIGN_LOW</Align>
+			<Pos>90</Pos>
+			<Size>40</Size>
+		</Y>
+	</Placement>
+
+	<Visible>false</Visible>
+	<IgnoreDblClick>true</IgnoreDblClick>
+</WidgetButton>

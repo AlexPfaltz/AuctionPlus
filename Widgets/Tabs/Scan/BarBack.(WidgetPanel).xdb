@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WidgetPanel>
+	<Name>BarBack</Name>
+	<Children>
+		<Item href="BarFill.(WidgetPanel).xdb" />
+	</Children>
+	<BackLayer href="../Buy/InfoBar/Textures/AuctionPanelEditable.(WidgetLayerTiledTexture).xdb" />
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_BOTH</Align>
+			<Pos>80</Pos>
+			<HighPos>80</HighPos>
+		</X>
+		<Y>
+			<Align>WIDGET_ALIGN_LOW</Align>
+			<Pos>90</Pos>
+			<Size>40</Size>
+		</Y>
+	</Placement>
+	<Visible>true</Visible>
+	<TransparentInput>true</TransparentInput>
+</WidgetPanel>

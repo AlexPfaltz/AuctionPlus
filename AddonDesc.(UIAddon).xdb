@@ -6,8 +6,10 @@
 		<Item href="Scripts/LibDnD.lua"/>
 		<Item href="Scripts/Localization.lua"/>
 		<Item href="Scripts/Common.lua"/>
+		<Item href="Scripts/PriceDB.lua"/>
 		<Item href="Scripts/ListBuy.lua"/>
 		<Item href="Scripts/ListSell.lua"/>
+		<Item href="Scripts/TabScan.lua"/>
 		<Item href="Scripts/ScanAuction.lua"/>
 		<Item href="Scripts/PriceInTooltip.lua"/>
 		<Item href="Scripts/Options.lua"/>
@@ -38,7 +40,7 @@
 		<sourceLink href="link.txt"/>
 		<supportLink href="link.txt"/>
 		<author>AlexPfaltz</author>
-		<version>3</version>
+		<version>4</version>
 		<buildTime>1746187702</buildTime>
 	</userAddonInfo>
 </UIAddon>

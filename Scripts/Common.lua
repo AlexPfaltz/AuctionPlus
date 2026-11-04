@@ -73,12 +73,13 @@ Global("SearchBar", {
     ["buyoutMin"] = ContextAuction:GetChildChecked("BuyOutMin", true),
     ["buyoutMax"] = ContextAuction:GetChildChecked("BuyOutMax", true)
 })
+Global("AddonTab", false)
 
 local wtTabOverlay = mainForm:GetChildChecked("TabOverlay", false)
 local PlaceholderOrange = common.GetAddonRelatedTextureGroup("Group01"):GetTexture("PlaceholderOrange")
 local UAMContainer = common.GetAddonMainForm("UserAddonManager"):GetChildChecked("List", true)
 local btSettings = mainForm:GetChildChecked("Settings", false)
-local btSettingsFound = false
+local btSettingsDesc = btSettings:GetWidgetDesc()
 local lastStockTab = nil
 
 TabAll:SetSmartPlacementPlain({alignX = WIDGET_ALIGN_LOW, posX = 30})
@@ -121,6 +122,18 @@ function IsEmptyTable( tab )
 		return false
 	end
 	return true
+end
+
+-- Количество элементов в таблице, включая таблицы с индексами от 0.
+-- Не используем table.getsize: в официальной документации его нет.
+function TableSize( tab )
+	local count = 0
+	if tab then
+		for _ in pairs( tab ) do
+			count = count + 1
+		end
+	end
+	return count
 end
 
 function Round( number, limit )
@@ -210,14 +223,14 @@ function FindCategoryId()
 	RootCategoryID = {}
 	ChildCategoryID = {}
 	local roots = itemLib.GetRootCategories()
-	for i = 0, table.getsize(roots)-1 do
+	for i = 0, TableSize(roots)-1 do
   		local categoryInfo = itemLib.GetCategoryInfo(roots[i])
   		if categoryInfo then
     		local RootName = userMods.FromWString(categoryInfo.name)
 			RootCategoryID[RootName] = roots[i]
 			if categoryInfo.root == true then
   				local childs = itemLib.GetChildCategories(roots[i])
-  				for j = 0, table.getsize(childs)-1 do
+  				for j = 0, TableSize(childs)-1 do
     				local categoryInfo = itemLib.GetCategoryInfo( childs[j] )
     				if categoryInfo then
       					local ChildName = userMods.FromWString(categoryInfo.name)
@@ -229,10 +242,14 @@ function FindCategoryId()
 	end
 end
 
-function GetPage(CurPage)
+-- Запрос страницы результатов. Порядок сортировки необязателен
+-- (по умолчанию без сортировки). Возвращает true, если запрос отправлен.
+function GetPage(CurPage, orderField, ascending)
 	if not auction.IsSearchInProgress() then
-		auction.Search(SearchFilter, AUCTION_ORDERFIELD_NONE, true, CurPage)
+		auction.Search(SearchFilter, orderField or AUCTION_ORDERFIELD_NONE, ascending ~= false, CurPage)
+		return true
 	end
+	return false
 end
 
 function SlashCMD(params)
@@ -256,16 +273,12 @@ function GetLastScan(table)
 	return date, values
 end
 
--- Безопасный вызов itemLib-функции: при ошибке или nil возвращает nil
-local function SafeItemCall(func, itemId)
-	local ok, result = pcall(func, itemId)
-	if ok then return result end
-	return nil
-end
-
 -- Проклятый ли предмет (всегда boolean)
 function IsItemCursed(itemId)
-	return SafeItemCall(itemLib.IsCursed, itemId) and true or false
+	if not itemId then
+		return false
+	end
+	return itemLib.IsCursed(itemId) == true
 end
 
 function GetInfoForTooltip(itemInfo)
@@ -292,20 +305,21 @@ function GetInfoForTooltip(itemInfo)
 	infoForTooltip.bonus = itemLib.GetBonus(id)
 	infoForTooltip.gearScore = itemLib.GetGearScore(id)
 
-	-- Дополнительные данные для тултипа
-	infoForTooltip.setBonus = SafeItemCall(itemLib.GetSetBonusInfo, id)
-	infoForTooltip.meta = SafeItemCall(itemLib.GetMetaInfo, id)
-	infoForTooltip.rune = SafeItemCall(itemLib.GetRuneInfo, id)
-	infoForTooltip.temporary = SafeItemCall(itemLib.GetTemporaryInfo, id)
-	infoForTooltip.ownershipLimit = SafeItemCall(itemLib.GetOwnershipLimit, id)
-	infoForTooltip.stackInfo = SafeItemCall(itemLib.GetStackInfo, id)
-	infoForTooltip.vendorPrice = SafeItemCall(itemLib.GetPriceInfo, id)
+	-- Дополнительные данные для тултипа.
+	-- Все функции по документации возвращают table или nil, исключений не ожидается.
+	infoForTooltip.setBonus = itemLib.GetSetBonusInfo(id)
+	infoForTooltip.meta = itemLib.GetMetaInfo(id)
+	infoForTooltip.rune = itemLib.GetRuneInfo(id)
+	infoForTooltip.temporary = itemLib.GetTemporaryInfo(id)
+	infoForTooltip.ownershipLimit = itemLib.GetOwnershipLimit(id)
+	infoForTooltip.stackInfo = itemLib.GetStackInfo(id)
+	infoForTooltip.vendorPrice = itemLib.GetPriceInfo(id)
 
 	-- Применение предмета (зелья и т.п.): описание и перезарядка спелла
-	local spellId = SafeItemCall(itemLib.GetSpell, id)
+	local spellId = itemLib.GetSpell(id)
 	if spellId then
-		local spellDesc = SafeItemCall(spellLib.GetDescription, spellId)
-		local spellCd = SafeItemCall(spellLib.GetCooldown, spellId)
+		local spellDesc = spellLib.GetDescription(spellId)
+		local spellCd = spellLib.GetCooldown(spellId)
 		infoForTooltip.useDescription = spellDesc and spellDesc.description
 		infoForTooltip.useCooldownMs = spellCd and spellCd.durationMs
 	end
@@ -384,22 +398,40 @@ function FindFreeSlots()
 	return freeslots
 end
 
+local function EnsureSettingsButton()
+	if not btSettings or not btSettings:IsValid() then
+		btSettings = mainForm:CreateWidgetByDesc(btSettingsDesc)
+		mainForm:AddChild(btSettings)
+	end
+	return btSettings
+end
+
+local function RowName(row)
+	local LabelText = row:GetChildUnchecked("Label", false) or row:GetChildUnchecked("Label", true)
+	if not LabelText then return nil end
+	return userMods.FromWString(LabelText:GetWString())
+end
+
 function AddButtonSettings()
-	if btSettingsFound then return end
+	local localizedName = GetLocalizedText("AddonName")
 	for i = 0, UAMContainer:GetElementCount()-1 do
-		local LabelText =UAMContainer:At(i):GetChildChecked("Label", false)
-		local name = userMods.FromWString(LabelText:GetWString())
-		if string.find(name, GetLocalizedText("AddonName")) then
-			UAMContainer:At(i):AddChild(btSettings)
-			btSettings:Show(true)
-			btSettingsFound = true
-			break
+		local row = UAMContainer:At(i)
+		local name = row and RowName(row)
+		if name and (string.find(name, localizedName, 1, true)
+			or string.find(name, "AuctionPlus", 1, true)
+			or string.find(name, "Auction+", 1, true)) then
+			local button = EnsureSettingsButton()
+			if button:GetParent() ~= row then
+				row:AddChild(button)
+			end
+			button:Show(true)
+			return
 		end
 	end
 end
 
 function UamIsVisible(widget)
-	if widget:IsVisibleEx() and btSettingsFound == false then
+	if widget:IsVisibleEx() then
 		AddButtonSettings()
 	end
 end
@@ -418,49 +450,44 @@ end
 
 function SafeGetAuctions()
     if not AuctionMainPanel or not AuctionMainPanel:IsVisible() then
-        return nil
+        return {}
     end
-    local ok, auctions = pcall(auction.GetAuctions)
-    if not ok or not auctions then
-        return nil
-    end
-    return auctions
+    return auction.GetAuctions()
 end
 
 function DestroyWidgetsInContainer(container)
     if not container then return end
     local cached_widgets = {}
     local items_count = container:GetElementCount()
-    if items_count > 0 then
         for i = 0, items_count - 1 do
             local w = container:At(i)
-            if w then
-                -- IsValid может упасть на InvalidWidgetSafe — оборачиваем в pcall
-                local ok, valid = pcall(function() return w:IsValid() end)
-                if ok and valid then
+        -- IsValid — единственный метод, который можно вызывать у уничтоженного виджета.
+        if w and w:IsValid() then
                     cached_widgets[#cached_widgets + 1] = w
                 end
             end
-        end
-    end
 
     container:RemoveItems()
 
     for i = 1, #cached_widgets do
         local w = cached_widgets[i]
-        pcall(function() w:DestroyWidget() end)
+        -- Родитель мог уничтожить вложенные виджеты раньше; проверяем каждого.
+        if w:IsValid() then
+            w:DestroyWidget()
+        end
     end
 end
-
--- Какая вкладка аддона открыта сейчас: false | "buy" | "sell".
--- Состояние вкладок хранится здесь, а не выводится из variant кнопок.
-Global("AddonTab", false)
 
 -- Выбранная сейчас "родная" вкладка (Все аукционы / Участник / Владелец)
 local function GetActiveStockTab()
     for _, tab in ipairs({ TabAll, TabBids, TabOwner }) do
         if tab:GetVariant() == 1 then return tab end
     end
+end
+
+-- Выбранная сейчас "родная" вкладка (nil, если выбрана вкладка аддона)
+function GetCurrentStockTab()
+    return GetActiveStockTab()
 end
 
 -- Открытие вкладки аддона: запоминаем выбранную "родную" вкладку,
@@ -489,6 +516,8 @@ function CloseAddonTabs()
         CloseTabBuy()
     elseif AddonTab == "sell" then
         CloseTabSell()
+    elseif AddonTab == "scan" then
+        CloseTabScan()
     else
         HideTabOverlay()
     end

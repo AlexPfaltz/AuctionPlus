@@ -198,6 +198,17 @@ local function MakeLotKey(auctionInfo, itemInfo, itemCount)
 end
 
 ListBuy.CreateLine = function(auctionInfo, key)
+	local itemInfo = itemLib.GetItemInfo(auctionInfo.itemId)
+	if not itemInfo then return end
+	local stackInfo = itemLib.GetStackInfo(auctionInfo.itemId)
+	if not stackInfo then return end
+	local itemQuality = itemLib.GetQuality(auctionInfo.itemId)
+	local itemName = userMods.FromWString(itemInfo.name)
+	local quality = itemQuality and itemQuality.quality
+	local itemCount = stackInfo.count
+	local PriceBuyOut = auctionInfo.buyoutPrice
+	if not PriceBuyOut or PriceBuyOut <= 0 or itemCount <= 0 then return end
+
     local line = {}
 	if not wtDescLine then
 		line.widget = wtListBuy:GetChildChecked("ItemLine", false)
@@ -206,13 +217,6 @@ ListBuy.CreateLine = function(auctionInfo, key)
 		line.widget = mainForm:CreateWidgetByDesc(wtDescLine)
 		mainForm:AddChild(line.widget)
 	end
-	
-	local itemInfo = itemLib.GetItemInfo(auctionInfo.itemId)
-	local itemQuality = itemLib.GetQuality(auctionInfo.itemId)
-	local itemName = userMods.FromWString(itemInfo.name)
-	local quality = itemQuality and itemQuality.quality
-	local itemCount = itemLib.GetStackInfo(auctionInfo.itemId).count
-	local PriceBuyOut = auctionInfo.buyoutPrice
 	local PricePerUnit = PriceBuyOut / itemCount
 	local SplitPriceBuyOut = Split(PriceBuyOut)
 	local SplitPricePerUnit = Split(PricePerUnit)
@@ -242,7 +246,7 @@ ListBuy.CreateLine = function(auctionInfo, key)
 	FillUniSlot(UniSlot, itemInfo.icon, quality, isCursed, itemCount, nil)
 
 	line.itemName = line.widget:GetChildChecked("ItemName", false)
-	line.itemName:SetClassVal( "class", ItemQualityClass[quality])
+	line.itemName:SetClassVal( "class", ItemQualityClass[quality] or "tip_base")
 	line.itemName:SetVal("itemname", itemInfo.name)
 	
 	--Заполняем виджет цены за штуку
@@ -291,7 +295,9 @@ ListBuy.AddLine = function(auctionInfo)
 
 	local itemInfo = itemLib.GetItemInfo(auctionInfo.itemId)
 	if not itemInfo then return end
-	local itemCount = itemLib.GetStackInfo(auctionInfo.itemId).count
+	local stackInfo = itemLib.GetStackInfo(auctionInfo.itemId)
+	if not stackInfo then return end
+	local itemCount = stackInfo.count
 
 	local key = MakeLotKey(auctionInfo, itemInfo, itemCount)
 	local line = Lines[key]
@@ -306,7 +312,7 @@ end
 
 ListBuy.AssembleFilter = function()
 	SearchFilter = {}
-	if btTabBuy:GetVariant() == 1 then
+	if AddonTab == "buy" then
 		if BuyoutSelected then
 			SearchFilter.name = userMods.ToWString(LotForBuy.name)
 			SearchFilter.buyoutMin = tonumber(LotForBuy.buyoutprice)
@@ -337,72 +343,72 @@ ListBuy.AuctionSearch = function(params)
         return
     end
 
-	if btTabBuy:GetVariant() == 1 then
-		if BuyoutSelected == false then
-			auctionsPage = auction.GetAuctionsPage()
-            auctionsPageCount = params and params.totalPagesCount or auction.GetAuctionsPageCount()
-			local auctions = SafeGetAuctions()
-			if table.getsize(auctions) > 0 then
-				--ListBuyFilled = true
-				for _, auctionId in pairs(auctions) do
-					local auctionInfo = auction.GetAuctionInfo(auctionId)
-					if auctionInfo then
-						ListBuy.AddLine(auctionInfo)
-						CountAuctions = CountAuctions + 1
-					end
-				end
-				if auctionsPage < auctionsPageCount then
-					GetPage(auctionsPage+1)
-					StatusBar:SetVal("value", userMods.ToWString(GetLocalizedText("SearchInProgress")..tostring(auctionsPage)..GetLocalizedText("SeparatorSearchInProgress")..tostring(auctionsPageCount)))
-				end	
-				if auctionsPage == auctionsPageCount then
-					StatusBar:SetVal("value", userMods.ToWString(GetLocalizedText("SearchFinished")..tostring(CountAuctions)))
-					CountAuctions = 0
+	if AddonTab ~= "buy" then return end
+	if not BuyoutSelected then
+		auctionsPage = auction.GetAuctionsPage()
+        auctionsPageCount = params and params.totalPagesCount or auction.GetAuctionsPageCount()
+		local auctions = SafeGetAuctions()
+		if TableSize(auctions) > 0 then
+			for _, auctionId in pairs(auctions) do
+				local auctionInfo = auction.GetAuctionInfo(auctionId)
+				if auctionInfo then
+					ListBuy.AddLine(auctionInfo)
+					CountAuctions = CountAuctions + 1
 				end
 			end
+		end
+		if auctionsPage < auctionsPageCount then
+			GetPage(auctionsPage+1)
+			StatusBar:SetVal("value", userMods.ToWString(GetLocalizedText("SearchInProgress")..tostring(auctionsPage)..GetLocalizedText("SeparatorSearchInProgress")..tostring(auctionsPageCount)))
 		else
-			if LotForBuy.name and LotForBuy.buyoutprice and LotForBuy.count and LotForBuy.countLots and LotForBuy.countLots > 0 then
-				local auctionsCount = auction.GetAuctionsCount()
-				auctionsPage = auction.GetAuctionsPage()
-				auctionsPageCount = auction.GetAuctionsPageCount()
-				local auctions = SafeGetAuctions()
-				if table.getsize(auctions) > 0 then
-					for _, auctionId in pairs(auctions) do
-						local auctionInfo = auction.GetAuctionInfo(auctionId)
-						local buyoutPrice = auctionInfo.buyoutPrice
-						local itemInfo = itemLib.GetItemInfo(auctionInfo.itemId)
-						local itemName = userMods.FromWString(itemInfo.name)
-						local seller = userMods.FromWString(auctionInfo.sellerName)
-						local count = (itemLib.GetStackInfo(auctionInfo.itemId)).count
-						if LotForBuy.countLots and LotForBuy.countLots > 0 then
-							if itemName == LotForBuy.name and buyoutPrice == LotForBuy.buyoutprice and count == LotForBuy.count
-							and MakeLotKey(auctionInfo, itemInfo, count) == LotForBuy.key then
-								auction.Buyout(auctionInfo.id)
-								LotForBuy.countLots = LotForBuy.countLots - 1
-							end
-						else
-							BuyoutSelected = false
-							StatusBar:SetVal("value", userMods.ToWString(GetLocalizedText("BuyoutFinished")))
-							ListBuy.StartSearch()
-						end
-					end
-					if auctionsPage < auctionsPageCount then
-						GetPage(auctionsPage+1)
-						StatusBar:SetVal("value", userMods.ToWString(GetLocalizedText("SearchSelectedForBuyOutInProgress")..tostring(auctionsPage)..GetLocalizedText("SeparatorSearchInProgress")..tostring(auctionsPageCount)))
-					end
-					if auctionsPage == auctionsPageCount then
-						BuyoutSelected = false
-						StatusBar:SetVal("value", userMods.ToWString(GetLocalizedText("BuyoutFinished")))
-						ListBuy.StartSearch()
-					end
+			StatusBar:SetVal("value", userMods.ToWString(GetLocalizedText("SearchFinished")..tostring(CountAuctions)))
+			CountAuctions = 0
+		end
+		return
+	end
+
+	-- Выкуп выбранной группы лотов.
+	if not (LotForBuy.name and LotForBuy.buyoutprice and LotForBuy.count
+	        and LotForBuy.countLots and LotForBuy.countLots > 0) then
+		BuyoutSelected = false
+		StatusBar:SetVal("value", userMods.ToWString(GetLocalizedText("BuyoutFinished")))
+		ListBuy.StartSearch()
+		return
+	end
+
+	auctionsPage = auction.GetAuctionsPage()
+	auctionsPageCount = auction.GetAuctionsPageCount()
+	local auctions = SafeGetAuctions()
+
+	for _, auctionId in pairs(auctions) do
+		if LotForBuy.countLots <= 0 then break end
+		local auctionInfo = auction.GetAuctionInfo(auctionId)
+		if auctionInfo then
+			local itemInfo = itemLib.GetItemInfo(auctionInfo.itemId)
+			local stackInfo = itemLib.GetStackInfo(auctionInfo.itemId)
+			if itemInfo and stackInfo then
+				local buyoutPrice = auctionInfo.buyoutPrice
+				local itemName = userMods.FromWString(itemInfo.name)
+				local count = stackInfo.count
+				if itemName == LotForBuy.name and buyoutPrice == LotForBuy.buyoutprice
+					and count == LotForBuy.count
+					and MakeLotKey(auctionInfo, itemInfo, count) == LotForBuy.key then
+						auction.Buyout(auctionInfo.id)
+						LotForBuy.countLots = LotForBuy.countLots - 1
 				end
-			else
-				BuyoutSelected = false
-				StatusBar:SetVal("value", userMods.ToWString(GetLocalizedText("BuyoutFinished")))
-				ListBuy.StartSearch()
 			end
 		end
 	end
+
+	if LotForBuy.countLots and LotForBuy.countLots > 0 and auctionsPage < auctionsPageCount then
+		GetPage(auctionsPage+1)
+		StatusBar:SetVal("value", userMods.ToWString(GetLocalizedText("SearchSelectedForBuyOutInProgress")..tostring(auctionsPage)..GetLocalizedText("SeparatorSearchInProgress")..tostring(auctionsPageCount)))
+		return
+	end
+
+	BuyoutSelected = false
+	StatusBar:SetVal("value", userMods.ToWString(GetLocalizedText("BuyoutFinished")))
+	ListBuy.StartSearch()
 end
 
 function UpdPriceOnNumLots(price, numLots)
@@ -480,13 +486,17 @@ ListBuy.reloadSortIcon = function()
 end
 
 function ClearTabBuy()
-    -- Уничтожаем виджеты из Lines (с защитой)
+    -- Уничтожаем виджеты из Lines; IsValid — единственный безопасный метод
+    -- для уже уничтоженного виджета.
     for key, val in pairs(Lines) do
-        if val and val.widget then
-            pcall(function() val.widget:DestroyWidget() end)
+        if val and val.widget and val.widget:IsValid() then
+            val.widget:DestroyWidget()
         end
     end
     Lines = {}
+    CountAuctions = 0
+    auctionsPage = 0
+    auctionsPageCount = 0
     LotForBuy = {}
     CurrentSelectedLine = false
     -- Чистим контейнер (там могут быть виджеты, не попавшие в Lines)
@@ -496,7 +506,7 @@ function ClearTabBuy()
 end
 
 ListBuy.EditLineChanged = function()
-	if btTabBuy:GetVariant() == 0 then return end
+	if AddonTab ~= "buy" then return end
 	local number = wtInfoBarLots:GetChildChecked("EditLine", false):GetText():ToInt()
 	if number == nil or number == 0 then
 		wtListBuy:GetChildChecked("BuySelected", false):Enable(false)
@@ -514,7 +524,7 @@ ListBuy.EditLineChanged = function()
 	end
 end
 ListBuy.EditLineFocusChanged = function()
-	if btTabBuy:GetVariant() == 0 then return end
+	if AddonTab ~= "buy" then return end
 	local number = wtInfoBarLots:GetChildChecked("EditLine", false):GetText():ToInt()
 	if not CurrentSelectedLine then return end
 	if not number or number <= 1 then
@@ -531,7 +541,7 @@ ListBuy.SortPricePerUnit = function() ListBuy.SortBy("unit") end
 ListBuy.SortPriceBuyOut = function() ListBuy.SortBy("buyout") end
 
 ListBuy.slot_over = function(params)
-    if btTabBuy:GetVariant() == 0 then return end
+    if AddonTab ~= "buy" then return end
     local wtParent = params.widget:GetParent()
     local nameParent = wtParent:GetName()
     local line = Lines[nameParent]
@@ -547,12 +557,20 @@ end
 
 ListBuy.BuySelected = function()
 	BuyoutSelected = true
-	if ListBuy.AssembleFilter() then GetPage(1) end
+	if not ListBuy.AssembleFilter() then
+		BuyoutSelected = false
+		return
+	end
+	if not GetPage(1) then
+		BuyoutSelected = false
+		StatusBar:SetVal("value", userMods.ToWString(GetLocalizedText("SearchAlreadyInProgress")))
+	end
 end
 
 ListBuy.StartSearch = function()
 	auctionsPage = 0
 	auctionsPageCount = 0
+	CountAuctions = 0
 	ClearTabBuy()
 	if ListBuy.AssembleFilter() then GetPage(1) end
 end
@@ -578,9 +596,7 @@ function OpenTabBuy()
 		btTabBuy:SetVariant(1)
 		return
 	end
-	if StartFullScan or StartScanForList then
-		StopScan()
-	end
+	if AddonTab == "scan" then CloseTabScan() end
 	if AddonTab == "sell" then CloseTabSell() end
 	ShowTabOverlay()
 	AddonTab = "buy"
@@ -611,7 +627,7 @@ ListBuy.AuctionIsVisible = function(params)
 		if params.widget:IsVisible() then
 			btTabBuy:SetVariant(0)
 		else
-			if btTabBuy:GetVariant() == 1 then
+			if AddonTab == "buy" then
 				CloseTabBuy()
 			end
 		end

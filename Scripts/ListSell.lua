@@ -121,9 +121,14 @@ AuctionMainPanel:AddChild(btTabSell)
 --
 ListSell.GetInfo = function(itemId)
 	itemInfo = itemLib.GetItemInfo(itemId)
+	if not itemInfo then
+		return false
+	end
 	itemInfo = GetInfoForTooltip(itemInfo)
-	itemInfo.stackCount = itemLib.GetStackInfo(itemId).count
-	itemInfo.prices = itemLib.GetPriceInfo(itemId)
+	local stackInfo = itemLib.GetStackInfo(itemId)
+	itemInfo.stackCount = stackInfo and stackInfo.count or 0
+	itemInfo.prices = itemLib.GetPriceInfo(itemId) or {}
+	return true
 end
 
 ListSell.SplitItem = function(count)
@@ -201,9 +206,9 @@ end
 ListSell.FindLine = function(name)
 	local foundLine = nil
 	for i = 0, ListSell.container:GetElementCount() - 1 do
-		local nameAt = ListSell.container:At(i):GetName()
-		if nameAt == name then
-			foundLine = ListSell.container:At(i)
+		local widget = ListSell.container:At(i)
+		if widget and widget:GetName() == name then
+			foundLine = widget
 		end
 	end
 	return foundLine
@@ -213,7 +218,9 @@ ListSell.AddLine = function(auctionInfo)
 	local BuyoutPrice = auctionInfo.buyoutPrice
 	if not BuyoutPrice or BuyoutPrice == nil or BuyoutPrice <= 0 then return end
 
-	local itemCount = itemLib.GetStackInfo(auctionInfo.itemId).count
+	local stackInfo = itemLib.GetStackInfo(auctionInfo.itemId)
+	if not stackInfo then return end
+	local itemCount = stackInfo.count
 	local PricePerUnit = BuyoutPrice/itemCount
 	local nameLine = tostring(PricePerUnit)
 	local line = ListSell.FindLine(nameLine)
@@ -233,42 +240,35 @@ ListSell.AuctionSearch = function(params)
         return
     end
 	
-	if btTabSell:GetVariant() == 1 and InfoBar.UniSlot.widget:IsEnabled() then
-		auctionsPage = auction.GetAuctionsPage()
-		auctionsPageCount = auction.GetAuctionsPageCount()
-		local auctions = SafeGetAuctions()
-		if table.getsize(auctions) > 0 then
-			for _, auctionId in pairs(auctions) do
-				local auctionInfo = auction.GetAuctionInfo(auctionId)
-				if auctionInfo then
-					ListSell.AddLine(auctionInfo)
-					CountAuctions = CountAuctions + 1
-				end
-			end
-			if auctionsPage < auctionsPageCount then
-				GetPage(auctionsPage+1)
-				StatusBar:SetVal("value", userMods.ToWString(GetLocalizedText("SearchInProgress")..tostring(auctionsPage)..GetLocalizedText("SeparatorSearchInProgress")..tostring(auctionsPageCount)))
-			end	
-			if auctionsPage == auctionsPageCount then
-				StatusBar:SetVal("value", userMods.ToWString(GetLocalizedText("SearchFinished")..tostring(CountAuctions)))
-				CountAuctions = 0
+	if AddonTab ~= "sell" or not InfoBar.UniSlot.widget:IsEnabled() then
+		return
+	end
+
+	auctionsPage = auction.GetAuctionsPage()
+	auctionsPageCount = auction.GetAuctionsPageCount()
+	local auctions = SafeGetAuctions()
+	if TableSize(auctions) > 0 then
+		for _, auctionId in pairs(auctions) do
+			local auctionInfo = auction.GetAuctionInfo(auctionId)
+			if auctionInfo then
+				ListSell.AddLine(auctionInfo)
+				CountAuctions = CountAuctions + 1
 			end
 		end
+	end
+		if auctionsPage < auctionsPageCount then
+			GetPage(auctionsPage+1)
+			StatusBar:SetVal("value", userMods.ToWString(GetLocalizedText("SearchInProgress")..tostring(auctionsPage)..GetLocalizedText("SeparatorSearchInProgress")..tostring(auctionsPageCount)))
+		else
+			StatusBar:SetVal("value", userMods.ToWString(GetLocalizedText("SearchFinished")..tostring(CountAuctions)))
+			CountAuctions = 0
 	end
 end
 
 ListSell.AssembleFilter = function()
 	SearchFilter = {}
-	if btTabSell:GetVariant() == 1 then
+	if AddonTab == "sell" then
 		SearchFilter.name = itemInfo.name
-		--SearchFilter.rootCategory = itemLib.GetCategory(itemInfo.id)
-		--SearchFilter.childCategory = 
-		--SearchFilter.rarityMin = rarityList[GetLocalizedText(userMods.FromWString(SearchBar.rarityMin:GetWString()))] or nil
-		--SearchFilter.rarityMax = rarityList[GetLocalizedText(userMods.FromWString(SearchBar.rarityMax:GetWString()))] or nil
-		--SearchFilter.levelMin = SearchBar.levelMin:GetText():ToInt() or nil
-		--SearchFilter.levelMax = SearchBar.levelMin:GetText():ToInt() or nil
-		--SearchFilter.buyoutMin = GetMoneyFromSearchBar(SearchBar.buyoutMin)
-		--SearchFilter.buyoutMax = GetMoneyFromSearchBar(SearchBar.buyoutMax)
 	end
 	return true
 end
@@ -278,6 +278,7 @@ ListSell.StartSearch = function()
 	ListSell.ClearList()
 	auctionsPage = 0
 	auctionsPageCount = 0
+	CountAuctions = 0
 	if ListSell.AssembleFilter() then GetPage(1) end
 end
 
@@ -309,7 +310,9 @@ ListSell.SortDown = function(param)
 		ListSell.container:Insert(i, tempWt)
 		ListSell.container:ForceReposition()
 	end
-	ListSell.container:EnsureVisible(ListSell.container:At(0))
+	if ListSell.container:GetElementCount() > 0 then
+		ListSell.container:EnsureVisible(ListSell.container:At(0))
+	end
 end
 
 ListSell.SortUp = function(param)
@@ -340,15 +343,22 @@ ListSell.SortUp = function(param)
 		ListSell.container:Insert(i, tempWt)
 		ListSell.container:ForceReposition()
 	end
-	ListSell.container:EnsureVisible(ListSell.container:At(0))
+	if ListSell.container:GetElementCount() > 0 then
+		ListSell.container:EnsureVisible(ListSell.container:At(0))
+	end
 end
 
 ListSell.button_pressed = function(params)
-	if btTabSell:GetVariant() == 0 then return end
+	if AddonTab ~= "sell" then return end
 	--common.LogInfo("common", "params.sender = ", tostring(params.sender))
 	if params.sender == "Post" then
 		local count = InfoBar.Quantity.edit:GetText():ToInt()
-		itemInfo.stackCount = itemLib.GetStackInfo(itemInfo.id).count
+		if not count or count < 1 then
+			StatusBar:SetVal("value", userMods.ToWString(GetLocalizedText("values are not correctly")))
+			return
+		end
+		local stackInfo = itemLib.GetStackInfo(itemInfo.id)
+		itemInfo.stackCount = stackInfo and stackInfo.count or 0
 		local startprice = GetMoney(InfoBar.StartPrice.price)
 		local buyoutprice = GetMoney(InfoBar.BuyoutPrice.price)
 		if startprice > buyoutprice then
@@ -373,9 +383,10 @@ ListSell.button_pressed = function(params)
 		local Parent = params.widget:GetParent()
 		if CurrentSelectedLine ~= nil then
 			-- кнопка могла быть уничтожена вместе со списком
-			if not pcall(function() CurrentSelectedLine:SetVariant(0) end) then
-				CurrentSelectedLine = nil
+			if CurrentSelectedLine:IsValid() then
+				CurrentSelectedLine:SetVariant(0)
 			end
+			CurrentSelectedLine = nil
 		end
 		if params.widget:GetVariant() == 1 then
 			params.widget:SetVariant(0)
@@ -398,7 +409,7 @@ ListSell.AuctionIsVisible = function(params)
 		if params.widget:IsVisible() then
 			btTabSell:SetVariant(0)
 		else
-			if btTabSell:GetVariant() == 1 then
+			if AddonTab == "sell" then
 				CloseTabSell()
 			end
 			if WaitingForEndSpliItem then WaitingForEndSpliItem = false end
@@ -408,14 +419,22 @@ end
 
 InfoBar.Fill = function(itemId)
 	AuctionProperties = auction.GetProperties()
-	ListSell.GetInfo(itemId)
-	FillUniSlot(InfoBar.UniSlot.widget, itemInfo.icon, itemInfo.quality, false, nil, nil)
+	if not ListSell.GetInfo(itemId) then
+		return false
+	end
+	FillUniSlot(InfoBar.UniSlot.widget, itemInfo.icon, itemInfo.quality, itemInfo.isCursed, nil, nil)
 	InfoBar.Name.itemName:SetVal("value", itemInfo.name)
 	InfoBar.Name.itemName:SetClassVal("class", ItemQualityClass[itemInfo.quality])
 	InfoBar.Quantity.edit:SetText(common.FormatInt(itemInfo.stackCount, "%d"))
-	SetMoney(InfoBar.StartPrice.price, itemInfo.prices.auctionPrice)
+	local auctionPrice = itemInfo.prices.auctionPrice or 0
+	SetMoney(InfoBar.StartPrice.price, auctionPrice)
 	InfoBar.Duration["12h"].checkbox:SetVariant(1)
-	SetMoney(InfoBar.Deposit.price, GetPercentDuration(CheckDuration()) * itemInfo.prices.auctionPrice * (InfoBar.Quantity.edit:GetText():ToInt()) / 100)
+	if AuctionProperties then
+		SetMoney(InfoBar.Deposit.price, GetPercentDuration(CheckDuration()) * auctionPrice * (InfoBar.Quantity.edit:GetText():ToInt() or 0) / 100)
+	else
+		-- Параметры аукциона ещё не пришли: залог рассчитаем в OnAuctionProperties.
+		SetMoney(InfoBar.Deposit.price)
+	end
 	InfoBar.CheckValidateValues()
 	return true
 end
@@ -478,8 +497,10 @@ end
 
 InfoBar.CheckQuantity = function()
 	local Quantity = InfoBar.Quantity.edit:GetText():ToInt()
-	itemInfo.stackCount = itemLib.GetStackInfo(itemInfo.id).count
-	if Quantity > itemInfo.stackCount then
+	local stackInfo = itemLib.GetStackInfo(itemInfo.id)
+	if not stackInfo then return end
+	itemInfo.stackCount = stackInfo.count
+	if Quantity and Quantity > itemInfo.stackCount then
 		InfoBar.Quantity.edit:SetText(common.FormatInt(itemInfo.stackCount, "%d"))
 	end
 	--common.LogInfo("common", "CheckQuantity")
@@ -495,7 +516,7 @@ InfoBar.slot_over = function(params)
 end
 
 InfoBar.EditLineChanged = function(params)
-	if btTabSell:GetVariant() == 0 then return end
+	if AddonTab ~= "sell" then return end
 	local nameParent = params.widget:GetParent():GetName()
 	local nameParentParent = params.widget:GetParent():GetParent():GetName() --когда надоело придумывать названия переменным
 
@@ -536,7 +557,7 @@ InfoBar.EditLineChanged = function(params)
 end
 
 InfoBar.checkbox_pressed = function(params)
-	if btTabSell:GetVariant() == 0 then return end
+	if AddonTab ~= "sell" then return end
 	params.widget:SetVariant(1)
 	local nameParent = params.widget:GetParent():GetName()
 	for k, v in pairs(InfoBar.Duration) do
@@ -548,7 +569,7 @@ InfoBar.checkbox_pressed = function(params)
 end
 
 SortBar.sort_pressed = function(params)
-	if btTabSell:GetVariant() == 0 then return end 
+	if AddonTab ~= "sell" then return end 
 	if SortBar[params.sender].sorted == "none" or SortBar[params.sender].sorted == "up" then
 		SortBar[params.sender].sorted = "down"
 		SortBar[params.sender].icon:SetBackgroundTexture(txSortDown)
@@ -578,9 +599,10 @@ function OnAuctionProperties(params)
         AuctionProperties = auction.GetProperties()
         if AuctionProperties and InfoBar.UniSlot.widget:IsEnabled() then
             -- пересчитать залог
+            local auctionPrice = itemInfo.prices and itemInfo.prices.auctionPrice or 0
             SetMoney(InfoBar.Deposit.price,
-                GetPercentDuration(CheckDuration()) * itemInfo.prices.auctionPrice
-                * (InfoBar.Quantity.edit:GetText():ToInt()) / 100)
+                GetPercentDuration(CheckDuration()) * auctionPrice
+                * (InfoBar.Quantity.edit:GetText():ToInt() or 0) / 100)
         end
     end
 end
@@ -600,11 +622,13 @@ function CheckDuration()
 end
 
 function GetPercentDuration(variant)
+	-- 5% — значение по умолчанию, если параметры аукциона ещё не получены.
+	local base = AuctionProperties and AuctionProperties.pawnFactorPercent or 5
 	local percent = {
-		[0] = AuctionProperties.pawnFactorPercent / 2,
-		[1] = AuctionProperties.pawnFactorPercent,
-		[2] = AuctionProperties.pawnFactorPercent * 1.5,
-		[3] = AuctionProperties.pawnFactorPercent * 2
+		[0] = base / 2,
+		[1] = base,
+		[2] = base * 1.5,
+		[3] = base * 2
 	}
 	return percent[variant]
 end
@@ -621,9 +645,7 @@ function OpenTabSell()
 		btTabSell:SetVariant(1)
 		return
 	end
-	if StartFullScan or StartScanForList then
-		StopScan()
-	end
+	if AddonTab == "scan" then CloseTabScan() end
 	if AddonTab == "buy" then CloseTabBuy() end
 	ShowTabOverlay()
 	AddonTab = "sell"
@@ -651,10 +673,6 @@ function CloseTabSell()
 end
 
 function DropInAuction(params)
-	--for k, v in pairs(params) do
-	--	common.LogInfo("common", "k - ", tostring(k), ", v - ", tostring(v))
-	--end
-
 	local detected = false
 	for i = 1, #RegWIdgetsIDs do
 		if params.targetId == RegWIdgetsIDs[i].id then detected = true end
@@ -679,32 +697,21 @@ function DropInAuction(params)
 			ListSell.ClearList()
 			StatusBar:SetVal("value", userMods.ToWString(GetLocalizedText("not CanCreateAuction")))
 		end
-		--mission.DNDConfirmDropAttempt()
 	end
 end
 
 function PickItem(params)
-	--for k, v in pairs(params) do
-	--	common.LogInfo("common", "k - ", tostring(k), ", v - ", tostring(v))
-	--end
 	local namewt = params.srcWidget:GetName()
 	local wtParent = params.srcWidget:GetParent()
 	local nameParent = wtParent:GetName()
-	if AuctionMainPanel:IsVisible() and btTabSell:GetVariant() == 1 and namewt == "Button" and string.find(nameParent, "Item") then
+	if AuctionMainPanel:IsVisible() and AddonTab == "sell" and namewt == "Button" and string.find(nameParent, "Item") then
 		local slotId = math.modf(params.srcId / 1000)
 		ListSell.pickSlotId = slotId
 	end
-	--mission.DNDConfirmPickAttempt()
 end
 
 function EVENT_INVENTORY_SLOT_CHANGED(params)
-	--common.LogInfo("common", "EVENT_INVENTORY_SLOT_CHANGED")
-	--for k, v in pairs(params) do
-	--	common.LogInfo("common", tostring(k), ", ", tostring(v))
-	--end
-
 	if WaitingForEndSpliItem then
-		--common.LogInfo("common", "EVENT_2")
 		local info = itemLib.GetItemInfo(params.itemId)
 		info.stackCount = itemLib.GetStackInfo(params.itemId).count
 		local count = InfoBar.Quantity.edit:GetText():ToInt()
@@ -719,22 +726,19 @@ function EVENT_INVENTORY_SLOT_CHANGED(params)
 		end
 	end
 
-	if not WaitingForEndSpliItem and AuctionMainPanel:IsVisible() and btTabSell:GetVariant() == 1 and InfoBar.UniSlot.widget:IsEnabled() then
-		--common.LogInfo("common", "EVENT_1")
+	if not WaitingForEndSpliItem and AuctionMainPanel:IsVisible() and AddonTab == "sell" and InfoBar.UniSlot.widget:IsEnabled() then
 		if ListSell.ValidateSlot() then InfoBar.CheckQuantity() end
 	end
 end
 
 function EVENT_AUCTION_CREATION_RESULT(params)
-	if not WaitingForEndSpliItem and AuctionMainPanel:IsVisible() and btTabSell:GetVariant() == 1 and InfoBar.UniSlot.widget:IsEnabled() then
-		--common.LogInfo("common", "EVENT_0")
+	if not WaitingForEndSpliItem and AuctionMainPanel:IsVisible() and AddonTab == "sell" and InfoBar.UniSlot.widget:IsEnabled() then
 		if ListSell.ValidateSlot() then InfoBar.CheckQuantity() end
 	end
 end
 
 ListSell.RegWIdgetsIDs = function()
 	for i = 1, #RegWIdgetsIDs do
-		--common.LogInfo("common", "widget - ", tostring(RegWIdgetsIDs[i].widget), ", id - ", tostring(RegWIdgetsIDs[i].id))
 		RegWIdgetsIDs[i].widget:DNDRegister(RegWIdgetsIDs[i].id, true)
 	end
 end
@@ -753,7 +757,6 @@ ListSell.Init = function()
 	common.RegisterReactionHandler(ListSell.button_pressed, "button_pressed")
 	common.RegisterReactionHandler(SortBar.sort_pressed, "sort_pressed")
 	common.RegisterReactionHandler(OpenTabSell, "OpenTabSell")
-	--common.RegisterReactionHandler(CloseTabSell, "CloseTabSell")
 	ListSell.RegWIdgetsIDs()
 end
 

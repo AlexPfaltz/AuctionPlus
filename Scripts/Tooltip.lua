@@ -50,15 +50,17 @@ local moneyPool       = { destroy = true }  -- строки с монетами 
 -- Контейнер и панель с монетами берём у PriceInTooltip (те же виджеты, что и в
 -- родном тултипе). Дескрипторы снимаем при загрузке, пока PriceInTooltip
 -- ещё не переложил их детей в родной тултип.
-local DescMoneyContainer, DescMoneyPanel
+local DescMoneyContainer, DescMoneyPanel, MoneyHost
 do
-    local ok = pcall(function()
-        local src = mainForm:GetChildChecked("PriceInTooltip", false)
-        DescMoneyContainer = src:GetChildChecked("ContainerPrice", false):GetWidgetDesc()
-        DescMoneyPanel = src:GetChildChecked("Prices", false):GetWidgetDesc()
-    end)
-    if not ok then
-        DescMoneyContainer, DescMoneyPanel = nil, nil
+    local src = mainForm:GetChildUnchecked("PriceInTooltip", false)
+    if src then
+        local container = src:GetChildUnchecked("ContainerPrice", false)
+        local panel = src:GetChildUnchecked("Prices", false)
+        if container and panel then
+            DescMoneyContainer = container:GetWidgetDesc()
+            DescMoneyPanel = panel:GetWidgetDesc()
+            MoneyHost = src
+        end
     end
 end
 
@@ -158,67 +160,56 @@ end
 
 -- Строка с монетами и иконками (как в PriceInTooltip). false, если не удалось.
 local function PushCoinsLine(copper)
-    if not (DescMoneyContainer and DescMoneyPanel) then return false end
-    local container, panel
-    local ok = pcall(function()
-        local parts = Split(math.floor(copper))
-        local group = common.GetAddonRelatedTextureGroup("Group01")
-        container = mainForm:CreateWidgetByDesc(DescMoneyContainer)
-        mainForm:AddChild(container)
-        panel = mainForm:CreateWidgetByDesc(DescMoneyPanel)
-        mainForm:AddChild(panel)
-        -- ширину подгоняем под содержимое, а не под тултип с ценами
-        local place = container:GetPlacementPlain()
-        place.sizeX = 200
-        container:SetPlacementPlain(place)
+    if not (DescMoneyContainer and DescMoneyPanel and MoneyHost) then return false end
+    local parts = Split(math.floor(copper))
+    local group = common.GetAddonRelatedTextureGroup("Group01")
+    -- создаём внутри скрытой панели PriceInTooltip: неиспользованные монеты
+    -- панели не должны оставаться видимыми в углу экрана
+    local container = mainForm:CreateWidgetByDesc(DescMoneyContainer)
+    MoneyHost:AddChild(container)
+    local panel = mainForm:CreateWidgetByDesc(DescMoneyPanel)
+    MoneyHost:AddChild(panel)
+    -- ширину подгоняем под содержимое, а не под тултип с ценами
+    local place = container:GetPlacementPlain()
+    place.sizeX = 200
+    container:SetPlacementPlain(place)
 
-        local function addCoin(valueName, iconName, tag, amount, textureName, format)
-            local v = panel:GetChildChecked(valueName, false)
-            local icon = panel:GetChildChecked(iconName, false)
-            if format then
-                v:SetVal(tag, common.FormatInt(amount, "%d", format))
-            else
-                v:SetVal(tag, common.FormatInt(amount, "%d"))
-            end
-            icon:SetBackgroundTexture(group:GetTexture(textureName))
-            container:PushBack(v)
-            container:PushBack(icon)
+    local function addCoin(valueName, iconName, tag, amount, textureName, format)
+        local v = panel:GetChildChecked(valueName, false)
+        local icon = panel:GetChildChecked(iconName, false)
+        if format then
+            v:SetVal(tag, common.FormatInt(amount, "%d", format))
+        else
+            v:SetVal(tag, common.FormatInt(amount, "%d"))
         end
-        if parts[1] > 0 then addCoin("ValueGold", "IconGold", "gold", parts[1], "CoinGold", " ") end
-        if parts[2] > 0 then addCoin("ValueSilver", "IconSilver", "silver", parts[2], "CoinSilver") end
-        if parts[3] > 0 then addCoin("ValueCopper", "IconCopper", "copper", parts[3], "CoinCopper") end
-        cTooltip:PushBack(container)
-        Track(container, moneyPool, panel)
-    end)
-    if not ok then
-        pcall(function() if container then container:DestroyWidget() end end)
-        pcall(function() if panel then panel:DestroyWidget() end end)
+        icon:SetBackgroundTexture(group:GetTexture(textureName))
+        container:PushBack(v)
+        container:PushBack(icon)
     end
-    return ok
+    if parts[1] > 0 then addCoin("ValueGold", "IconGold", "gold", parts[1], "CoinGold", " ") end
+    if parts[2] > 0 then addCoin("ValueSilver", "IconSilver", "silver", parts[2], "CoinSilver") end
+    if parts[3] > 0 then addCoin("ValueCopper", "IconCopper", "copper", parts[3], "CoinCopper") end
+    cTooltip:PushBack(container)
+    Track(container, moneyPool, panel)
+    return true
 end
 
 local function ResetWidget(w)
     -- Очищаем все подстановочные значения (текст) у самого виджета
-    if w.ClearValues then
-        pcall(function() w:ClearValues() end)
-    end
+    if w.ClearValues then w:ClearValues() end
     
     -- Сбрасываем многострочность и перенос (чтобы тексты не раздувались)
-    if w.SetMultiline then
-        pcall(function() w:SetMultiline(false) end)
-    end
-    if w.SetWrapText then
-        pcall(function() w:SetWrapText(false) end)
-    end
+    if w.SetMultiline then w:SetMultiline(false) end
+    if w.SetWrapText then w:SetWrapText(false) end
 
     -- Для DoubleLine и других составных виджетов очищаем детей
     local left = w:GetChildUnchecked("LineLeft", false)
     if left and left.ClearValues then
-        pcall(function() left:ClearValues() end)
+        left:ClearValues()
     end
     local right = w:GetChildUnchecked("LineRight", false)
     if right and right.ClearValues then
-        pcall(function() right:ClearValues() end)
+        right:ClearValues()
     end
 end
 
@@ -226,15 +217,17 @@ local function RecycleAll()
     for i = #activeWidgets, 1, -1 do
         local item = activeWidgets[i]
         local w = item.widget
-        pcall(function() cTooltip:Remove(w) end)
-        if item.pool.destroy then
-            pcall(function() w:DestroyWidget() end)
-            if item.extra then
-                pcall(function() item.extra:DestroyWidget() end)
+        if w and w:IsValid() then
+            cTooltip:Remove(w)
+            if item.pool.destroy then
+                w:DestroyWidget()
+            else
+                ResetWidget(w)
+                table.insert(item.pool, w)
             end
-        else
-            ResetWidget(w)
-            table.insert(item.pool, w)
+        end
+        if item.extra and item.extra:IsValid() then
+            item.extra:DestroyWidget()
         end
         activeWidgets[i] = nil
     end
@@ -529,10 +522,15 @@ local function fillTooltip(content)
 
     -- Применение предмета (зелья и т.п.)
     if content.useDescription then
-        local ok, useText = pcall(function()
-            return userMods.FromWString(content.useDescription:ToWString())
-        end)
-        if ok and useText and string.len(useText) > 0 then
+        local useText
+        local valueType = apitype(content.useDescription)
+        if valueType == "ValuedText" then
+            useText = userMods.FromWString(content.useDescription:ToWString())
+        elseif valueType == "WString" then
+            useText = userMods.FromWString(content.useDescription)
+        elseif type(content.useDescription) == "string" then
+            useText = content.useDescription
+        end
             local use = AcquireSmartLine()
             use:SetMultiline(true)
             use:SetWrapText(true)
@@ -540,7 +538,6 @@ local function fillTooltip(content)
             use:SetClassVal("class", "Common")
             cTooltip:PushBack(use)
             Track(use, smartLinePool)
-        end
     end
     if content.useCooldownMs and content.useCooldownMs > 0 then
         local cd = AcquireSmartLine()
@@ -740,26 +737,17 @@ local function fillTooltip(content)
     end
 
     -- Description
-    local hasDescription = false
-    if content.description then
-        local ok, len = pcall(function()
-            return string.len(userMods.FromWString(content.description:ToWString()))
-        end)
-        hasDescription = ok and len and len > 0
+    if widgets_after_separator_1 then
+        local sep2 = AcquireSeparator()
+        cTooltip:PushBack(sep2)
+        Track(sep2, separatorPool)
     end
-    if hasDescription then
-        if widgets_after_separator_1 then
-            local sep2 = AcquireSeparator()
-            cTooltip:PushBack(sep2)
-            Track(sep2, separatorPool)
-        end
-        local description = AcquireDescriptionLine()
-        SafeSetVal(description, "value", content.description)
-        description:SetMultiline(true)
-        description:SetWrapText(true)
-        cTooltip:PushBack(description)
-        Track(description, descriptionPool)
-    end
+    local description = AcquireDescriptionLine()
+    SafeSetVal(description, "value", content.description)
+    description:SetMultiline(true)
+    description:SetWrapText(true)
+    cTooltip:PushBack(description)
+    Track(description, descriptionPool)
 
     -- Количество в стопке и цена продажи торговцу
     local stackInfo = content.stackInfo
@@ -828,6 +816,7 @@ function CallTooltipItem(content, icon)
     if not content or not icon then return end
     RecycleAll()
     if fillTooltip(content) then
+        cTooltip:ForceReposition()
         tooltipPlace(icon)
         wtTooltip:Show(true)
         cTooltip:Show(true)

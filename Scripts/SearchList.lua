@@ -80,7 +80,14 @@ function SaveSearchList()
 	userMods.SetGlobalConfigSection("SearchList", SearchList)
 end
 
+local function ValidPlainLine(i)
+	local line = PlainLines[i]
+	return line and line.widget and line.widget:IsValid()
+		and line.text and line.text:IsValid()
+end
+
 function StrikeOutLine(i)
+	if not ValidPlainLine(i) then return end
 	local placeText = PlainLines[i].text:GetPlacementPlain()
 	if placeText.sizeY < 30 then
 		PlainLines[i].text:SetBackgroundTexture(StrikeOut)
@@ -93,18 +100,22 @@ end
 
 function ClearStrikeOutLine()
 	for i = 1, table.getn(PlainLines) do
-		PlainLines[i].text:SetBackgroundTexture(ClearBlockFrame)
-		if Options.ScanBy == 3 or OpenSearchListFromOptions then
-			PlainLines[i].eraser:Show(true)
+		if ValidPlainLine(i) then
+			PlainLines[i].text:SetBackgroundTexture(ClearBlockFrame)
+			if Options.ScanBy == 3 or OpenSearchListFromOptions then
+				PlainLines[i].eraser:Show(true)
+			end
 		end
 	end
 end
 
 function EnsureVisibleLine(i)
-	if Options.ScanBy == 2 then
-		ContainerForBag:EnsureVisible(PlainLines[i].widget)
-	elseif Options.ScanBy == 3 then
-		ContainerYourList:EnsureVisible(PlainLines[i].widget)
+	if not ValidPlainLine(i) then return end
+	local widget = PlainLines[i].widget
+	if Options.ScanBy == 2 and ContainerForBag:IsValid() then
+		ContainerForBag:EnsureVisible(widget)
+	elseif Options.ScanBy == 3 and ContainerYourList:IsValid() then
+		ContainerYourList:EnsureVisible(widget)
 	end
 end
 
@@ -116,6 +127,7 @@ function ClearList()
 	elseif OpenSearchListFromOptions then
 		DestroyWidgetsInContainer(ContainerYourList)
 	end
+	PlainLines = {}
 end
 
 function ShowSearchListForBag()
@@ -159,7 +171,9 @@ end
 
 function HideErasers()
 	for i = 1, table.getn(PlainLines) do
-		PlainLines[i].eraser:Show(false)
+		if ValidPlainLine(i) and PlainLines[i].eraser:IsValid() then
+			PlainLines[i].eraser:Show(false)
+		end
 	end
 end
 

@@ -4,7 +4,10 @@
 	<Children>
 		<Item href="ShowHeader.(WidgetPanel).xdb" />
 		<Item href="ShowDate.(WidgetPanel).xdb" />
-		<Item href="ShowPrices.(WidgetPanel).xdb" />
+		<Item href="ShowMin.(WidgetPanel).xdb" />
+		<Item href="ShowMarket.(WidgetPanel).xdb" />
+		<Item href="ShowMedian.(WidgetPanel).xdb" />
+		<Item href="ShowLots.(WidgetPanel).xdb" />
 		<Item href="ShowCoins.(WidgetPanel).xdb" />
 		<Item href="HeaderStyle.(WidgetPanel).xdb" />
 		<Item href="DateStyle.(WidgetPanel).xdb" />
@@ -18,7 +21,7 @@
 		</X>
 		<Y>
 			<Pos>38</Pos>
-			<Size>205</Size>
+			<Size>295</Size>
 		</Y>
 	</Placement>
 	<Visible>true</Visible>
