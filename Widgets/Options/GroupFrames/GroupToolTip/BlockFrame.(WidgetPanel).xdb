@@ -11,6 +11,7 @@
 		<Item href="ShowCoins.(WidgetPanel).xdb" />
 		<Item href="HeaderStyle.(WidgetPanel).xdb" />
 		<Item href="DateStyle.(WidgetPanel).xdb" />
+		<Item href="HistoryCount.(WidgetPanel).xdb" />
 	</Children>
 	<BackLayer href="../Textures/BlockFrame.(WidgetLayerTiledTexture).xdb" />
 	<Placement>
@@ -21,7 +22,7 @@
 		</X>
 		<Y>
 			<Pos>38</Pos>
-			<Size>295</Size>
+			<Size>325</Size>
 		</Y>
 	</Placement>
 	<Visible>true</Visible>

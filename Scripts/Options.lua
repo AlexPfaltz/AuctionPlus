@@ -2,10 +2,6 @@ Global ("listCSS", common.GetCSSList())
 local wtOptions = mainForm:GetChildChecked("Options", false)
 local Container = wtOptions:GetChildChecked("Container", false)
 local GroupMain = wtOptions:GetChildChecked("GroupMain", false)
-local ScanBy = GroupMain:GetChildChecked("ScanBy", true)
-local ValueScanBy = ScanBy:GetChildChecked("Value", false)
-local wtShowSearchList = GroupMain:GetChildChecked("ShowSearchList", true)
-local CbShowSearchList = wtShowSearchList:GetChildChecked("CheckBox", false)
 local GroupToolTip = wtOptions:GetChildChecked("GroupToolTip", false)
 local wtShowHeader = GroupToolTip:GetChildChecked("ShowHeader", true)
 local CbShowHeader = wtShowHeader:GetChildChecked("CheckBox", false)
@@ -24,6 +20,8 @@ local CbShowLots = wtShowLots and wtShowLots:GetChildUnchecked("CheckBox", false
 local CbShowHistory = wtShowHistory and wtShowHistory:GetChildUnchecked("CheckBox", false)
 local wtShowCoins = GroupToolTip:GetChildChecked("ShowCoins", true)
 local ValueShowCoins = wtShowCoins:GetChildChecked("Value", false)
+local wtHistoryCount = GroupToolTip:GetChildChecked("HistoryCount", true)
+local ValueHistoryCount = wtHistoryCount:GetChildChecked("Value", false)
 local wtHeaderStyle = GroupToolTip:GetChildChecked("HeaderStyle", true)
 local ValueHeaderStyle = wtHeaderStyle:GetChildChecked("Value", false)
 local wtDateStyle = GroupToolTip:GetChildChecked("DateStyle", true)
@@ -36,13 +34,15 @@ local defaultOptions = {
     ["ShowMedian"] = true,
     ["ShowLots"] = false,
     ["ShowHistory"] = true,
+    ["HistoryCount"] = 7,
     ["ShowCoins"] = 3,
     ["styleHeader"] = 81,
     ["styleDate"] = 240,
+    -- режимы сканирования: 1 - весь аукцион, 2 - категория, 3 - сумка, 4 - свой список
     ["ScanBy"] = 1,
+    ["ScanModesVer"] = 1,
     ["ScanRootCategory"] = 0,
-    ["ScanChildCategory"] = 0,
-    ["ShowSearchList"] = true
+    ["ScanChildCategory"] = 0
 }
 
 local function CopyDefaults()
@@ -57,7 +57,7 @@ Global ("Options", userMods.GetGlobalConfigSection("Options") or CopyDefaults())
 
 function CheckSettings()
     local SavedOptions = userMods.GetGlobalConfigSection("Options") or {}
-    -- миграция: ShowPrices (1 - мин и макс, 2 - только мин, 3 - только макс)
+    -- миграция ShowPrices (1 - мин и макс, 2 - только мин, 3 - только макс)
     -- заменён отдельными чекбоксами; максимум заменяется медианой
     if SavedOptions.ShowPrices ~= nil then
         if SavedOptions.ShowMin == nil and SavedOptions.ShowMedian == nil then
@@ -66,6 +66,15 @@ function CheckSettings()
             SavedOptions.ShowMedian = (variant == 1 or variant == 3)
         end
         SavedOptions.ShowPrices = nil
+    end
+    -- миграция режимов сканирования: добавился отдельный режим "по категории",
+    -- старые значения сдвигаются (2 - сумка -> 3, 3 - список -> 4)
+    if SavedOptions.ScanModesVer == nil and SavedOptions.ScanBy ~= nil then
+        if SavedOptions.ScanBy == 2 then
+            SavedOptions.ScanBy = 3
+        elseif SavedOptions.ScanBy >= 3 then
+            SavedOptions.ScanBy = 4
+        end
     end
     -- значения по умолчанию подставляются только вместо отсутствующих (nil),
     -- иначе выключенные (false) флаги сбрасывались бы при каждой загрузке
@@ -95,10 +104,6 @@ function SetLocalizedText()
     wtOptions:GetChildChecked("DefaultOptions", false):SetVal("button_label", userMods.ToWString(GetLocalizedText("Default Options")))
     GroupMain:GetChildChecked("GroupLabel", false):SetVal("text", GetLocalizedText("Main"))
     GroupToolTip:GetChildChecked("GroupLabel", false):SetVal("text", GetLocalizedText("Tooltip"))
-    ScanBy:GetChildChecked("Text", false):SetVal("text", GetLocalizedText("Variant scan"))
-    wtShowSearchList:GetChildChecked("Text", false):SetVal("text", GetLocalizedText("Show the search list when scanning"))
-    GroupMain:GetChildChecked("ShowSearchListNow", true):GetChildChecked("Text", false):SetVal("text", GetLocalizedText("Show the search list now"))
-    GroupMain:GetChildChecked("ShowSearchListNow", true):GetChildChecked("Button", false):SetVal("button_label", userMods.ToWString(GetLocalizedText("Show")))
     GroupMain:GetChildChecked("ClearBase", true):GetChildChecked("Text", false):SetVal("text", GetLocalizedText("Clear base"))
     GroupMain:GetChildChecked("ClearBase", true):GetChildChecked("ClearButton", false):SetVal("button_label", userMods.ToWString(GetLocalizedText("Clear")))
     wtShowHeader:GetChildChecked("Text", false):SetVal("text", GetLocalizedText("Show title"))
@@ -109,6 +114,7 @@ function SetLocalizedText()
     SetRowText(wtShowLots, "Show number of lots")
     SetRowText(wtShowHistory, "Show price history")
     wtShowCoins:GetChildChecked("Text", false):SetVal("text", GetLocalizedText("Show coins"))
+    wtHistoryCount:GetChildChecked("Text", false):SetVal("text", GetLocalizedText("History items count"))
     wtHeaderStyle:GetChildChecked("Text", false):SetVal("text", GetLocalizedText("Style text - header"))
     wtDateStyle:GetChildChecked("Text", false):SetVal("text", GetLocalizedText("Style text - date"))
 end
@@ -142,8 +148,7 @@ function FillValues()
     VariantShowCoins(Options.ShowCoins)
     VariantShowHeader(Options.ShowHeader)
     VariantShowDate(Options.ShowDate)
-    VariantScanBy(Options.ScanBy)
-    VariantShowSearchList(Options.ShowSearchList)
+    VariantHistoryCount(Options.HistoryCount)
 end
 
 function VariantShowHeader(variant)
@@ -154,20 +159,31 @@ function VariantShowHeader(variant)
     end
 end
 
-function VariantShowSearchList(variant)
-    if variant then
-        CbShowSearchList:SetVariant(1)
-    else
-        CbShowSearchList:SetVariant(0)
-    end
-end
-
 function VariantShowDate(variant)
     if variant then
         CbShowDate:SetVariant(1)
     else
         CbShowDate:SetVariant(0)
     end
+end
+
+-- Сколько последних дневных точек показывать в истории цен (1..7)
+function VariantHistoryCount(count)
+    count = math.max(1, math.min(7, count or 7))
+    Options.HistoryCount = count
+    ValueHistoryCount:SetVal("value", userMods.ToWString(tostring(count)))
+    wtHistoryCount:GetChildChecked("BtnLeft", false):Enable(count > 1)
+    wtHistoryCount:GetChildChecked("BtnRight", false):Enable(count < 7)
+end
+
+function HistoryCountNext(reaction)
+    VariantHistoryCount((Options.HistoryCount or 7) + 1)
+    userMods.SetGlobalConfigSection("Options", Options)
+end
+
+function HistoryCountPrev(reaction)
+    VariantHistoryCount((Options.HistoryCount or 7) - 1)
+    userMods.SetGlobalConfigSection("Options", Options)
 end
 
 function VariantShowCoins(variant)
@@ -187,16 +203,16 @@ function VariantShowCoins(variant)
 end
 
 function CoinsNext(reaction)
-    local variant = Options.ShowCoins
-    variant = variant + 1
+    local variant = Options.ShowCoins + 1
+    if variant > 3 then variant = 1 end
     VariantShowCoins(variant)
     Options.ShowCoins = variant
     userMods.SetGlobalConfigSection("Options", Options)
 end
 
 function CoinsPrev(reaction)
-    local variant = Options.ShowCoins
-    variant = variant - 1
+    local variant = Options.ShowCoins - 1
+    if variant < 1 then variant = 3 end
     VariantShowCoins(variant)
     Options.ShowCoins = variant
     userMods.SetGlobalConfigSection("Options", Options)
@@ -266,86 +282,22 @@ function showHistory(reaction)
     ToggleOption("ShowHistory", CbShowHistory)
 end
 
-function VariantScanBy(variant)
-    if variant == 1 then
-        ValueScanBy:SetVal("value", GetLocalizedText("All auction"))
-        ScanBy:GetChildChecked("BtnLeft", false):Enable(false)
-        ScanBy:GetChildChecked("BtnRight", false):Enable(true)
-        CbShowSearchList:Enable(false)
-    elseif variant == 2 then
-        ValueScanBy:SetVal("value", GetLocalizedText("Only by bag"))
-        ScanBy:GetChildChecked("BtnLeft", false):Enable(true)
-        ScanBy:GetChildChecked("BtnRight", false):Enable(true)
-        CbShowSearchList:Enable(true)
-    elseif variant == 3 then
-        ValueScanBy:SetVal("value", GetLocalizedText("Your list"))
-        ScanBy:GetChildChecked("BtnLeft", false):Enable(true)
-        ScanBy:GetChildChecked("BtnRight", false):Enable(false)
-        CbShowSearchList:Enable(true)
-    end
-end
-
-local function RefreshScanMode()
-    if not AuctionMainPanel or not AuctionMainPanel:IsVisible() then return end
-    if Options.ScanBy == 2 then
-        CheckBag()
-        if Options.ShowSearchList then ShowSearchListForBag() end
-    elseif Options.ScanBy == 3 and Options.ShowSearchList then
-        ShowYourSearchList()
-    end
-end
-
-function ScanNext(reaction)
-    HideSearchList()
-    local variant = Options.ScanBy
-    variant = variant + 1
-    VariantScanBy(variant)
-    Options.ScanBy = variant
-    userMods.SetGlobalConfigSection("Options", Options)
-    RefreshScanMode()
-end
-
-function ScanPrev(reaction)
-    HideSearchList()
-    local variant = Options.ScanBy
-    variant = variant - 1
-    VariantScanBy(variant)
-    Options.ScanBy = variant
-    userMods.SetGlobalConfigSection("Options", Options)
-    RefreshScanMode()
-end
-
 function DefaultOptions(reaction)
     Options = CopyDefaults()
     userMods.SetGlobalConfigSection("Options", Options)
     FillValues()
 end
 
-function ShowSearchList(reaction)
-    if CbShowSearchList:GetVariant() == 0 then
-        CbShowSearchList:SetVariant(1)
-        Options.ShowSearchList = true
-    else
-        CbShowSearchList:SetVariant(0)
-        Options.ShowSearchList = false
-    end
-    userMods.SetGlobalConfigSection("Options", Options)
-end
-
-function ShowSearchListNow()
-    OpenSearchListFromOptions = not OpenSearchListFromOptions
-    if OpenSearchListFromOptions then
-        ClearList()
-        ShowYourSearchList()
-    else
-        HideSearchList()
-    end
-end
-
 function ShowOptionsPanel()
     wtOptions:Show(true)
-    Container:PushBack(GroupMain)
-    Container:PushBack(GroupToolTip)
+    -- PushBack виджета, уже находящегося в контейнере, бросает ошибку:
+    -- панель могла остаться в контейнере после прошлого показа
+    if not Container:IsContain(GroupMain) then
+        Container:PushBack(GroupMain)
+    end
+    if not Container:IsContain(GroupToolTip) then
+        Container:PushBack(GroupToolTip)
+    end
     SetLocalizedText()
     FillValues()
 end
@@ -353,14 +305,6 @@ end
 function ClosePanel(reaction)
     wtOptions:Show(false)
     Container:RemoveItems()
-end
-
-function DisableButtonShowList()
-    GroupMain:GetChildChecked("ShowSearchListNow", true):GetChildChecked("Button", false):Enable(false)
-end
-
-function EnableButtonShowList()
-    GroupMain:GetChildChecked("ShowSearchListNow", true):GetChildChecked("Button", false):Enable(true)
 end
 
 function OptionsInit()
@@ -371,6 +315,8 @@ function OptionsInit()
     common.RegisterReactionHandler(HeaderStylePrev, "HeaderStylePrev")
     common.RegisterReactionHandler(DateStyleNext, "DateStyleNext")
     common.RegisterReactionHandler(DateStylePrev, "DateStylePrev")
+    common.RegisterReactionHandler(HistoryCountNext, "HistoryCountNext")
+    common.RegisterReactionHandler(HistoryCountPrev, "HistoryCountPrev")
     common.RegisterReactionHandler(showHeader, "showHeader")
     common.RegisterReactionHandler(showDate, "showDate")
     common.RegisterReactionHandler(showMin, "showMin")
@@ -378,12 +324,8 @@ function OptionsInit()
     common.RegisterReactionHandler(showMedian, "showMedian")
     common.RegisterReactionHandler(showLots, "showLots")
     common.RegisterReactionHandler(showHistory, "showHistory")
-    common.RegisterReactionHandler(ScanNext, "ScanNext")
-    common.RegisterReactionHandler(ScanPrev, "ScanPrev")
     common.RegisterReactionHandler(ClearBase, "ClearBase")
     common.RegisterReactionHandler(DefaultOptions, "DefaultOptions")
-    common.RegisterReactionHandler(ShowSearchList, "ShowSearchList")
-    common.RegisterReactionHandler(ShowSearchListNow, "ShowSearchListNow")
     common.RegisterReactionHandler(ShowOptionsPanel, "ShowOptionsPanel")
     CheckSettings()
     --DnD.Init(wtOptions, wtOptions, true, true)

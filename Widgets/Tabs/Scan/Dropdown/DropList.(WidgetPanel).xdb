@@ -6,7 +6,7 @@
 		<Item href="DropItems.(WidgetScrollableContainer).xdb" />
 		<Item href="DropItem.(WidgetButton).xdb" />
 	</Children>
-	<BackLayer href="../../Sell/Textures/AuctionListBackground.(WidgetLayerSimpleTexture).xdb" />
+	<BackLayer href="../../Sell/InfoBar/Textures/AuctionPanelDropDown.(WidgetLayerTiledTexture).xdb" />
 	<Placement>
 		<X>
 			<Align>WIDGET_ALIGN_CENTER</Align>

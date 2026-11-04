@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WidgetPanel>
+	<Name>TaskList</Name>
+	<Children>
+		<Item href="TaskItems.(WidgetScrollableContainer).xdb" />
+		<Item href="../../SearchList/Line.xdb" />
+		<Item href="../../SearchList/EditLine/EditPanel.xdb" />
+	</Children>
+	<BackLayer href="../../SearchList/Textures/LeatherTile.(WidgetLayerTiledTexture).xdb" />
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_CENTER</Align>
+			<Pos>0</Pos>
+			<Size>580</Size>
+		</X>
+		<Y>
+			<Pos>210</Pos>
+			<Size>182</Size>
+		</Y>
+	</Placement>
+	<Visible>false</Visible>
+	<clipContent>true</clipContent>
+</WidgetPanel>

@@ -13,14 +13,12 @@
 		<Item href="Selectors/ScanMode.(WidgetPanel).xdb" />
 		<Item href="Selectors/ScanCategory.(WidgetPanel).xdb" />
 		<Item href="Selectors/ScanSubcategory.(WidgetPanel).xdb" />
-		<Item href="Buttons/ModeAll.(WidgetButton).xdb" />
-		<Item href="Buttons/ModeBag.(WidgetButton).xdb" />
-		<Item href="Buttons/ModeList.(WidgetButton).xdb" />
 		<Item href="Buttons/Start.(WidgetButton).xdb" />
 		<Item href="Buttons/Resume.(WidgetButton).xdb" />
 		<Item href="Buttons/Stop.(WidgetButton).xdb" />
 		<Item href="Buttons/Close.(WidgetButton).xdb" />
 		<Item href="Dropdown/DropList.(WidgetPanel).xdb" />
+		<Item href="TaskList.(WidgetPanel).xdb" />
 	</Children>
 	<BackLayer href="../Sell/Textures/AuctionListBackground.(WidgetLayerSimpleTexture).xdb" />
 	<Placement>

@@ -1,4 +1,9 @@
 local ContextAuction = common.GetAddonMainForm("ContextAuction")
+-- Если родное окно аукциона недоступно (аддон выгружен/не загружен), не
+-- инициализируем обход стокового UI, но не мешаем остальным скриптам
+-- (база цен, тултипы). ListBuy/ListSell/TabScan проверяют этот флаг.
+Global("AuctionPlusNoAuction", ContextAuction == nil or ContextAuction == false)
+if not AuctionPlusNoAuction then
 Global("AuctionSearchSuccess", "ENUM_AuctionSearchResultMsgResult_SUCCESS")
 Global("AuctionCreateSuccess", "ENUM_AuctionCreateResultMsgResult_SUCCESS")
 Global("AuctionBidSuccess",    "ENUM_AuctionBidResultMsgResult_SUCCESS")
@@ -113,10 +118,6 @@ function GetItemQualityCSSColor( itemId )
 	return class and CSSClassColor[ class ]
 end
 ------------------------------------------------------------------------------
-function GetColorByQuality( quality )
-	return CSSClassColor[ ItemQualityClass[ quality ] ]
-end
-
 function IsEmptyTable( tab )
 	for id, value in pairs(tab) do
 		return false
@@ -152,15 +153,16 @@ end
 function Split(count)
 	local info = {}
 	if count > 0 then
-		for coinId, ratio in pairs(conversion) do
+		for coinId = 1, 3 do
+			local ratio = conversion[coinId]
 			info[coinId] = math.floor(count / ratio)
 			count = count - info[coinId] * ratio
 		end
 	else
-		for coinId, ratio in pairs(conversion) do
+		for coinId = 1, 3 do
 			info[coinId] = 0
-			info.zero = true
 		end
+		info.zero = true
 	end
 	return info
 end
@@ -170,11 +172,10 @@ function Merge(info)
 	if not IsEmptyTable(info) then
 		count = 0
 		if not info.zero then
-			for coinId, ratio in pairs(conversion) do	
+			for coinId = 1, 3 do
 				local sysId = sysCoinId[coinId]
-				
 				if info[ sysId ] then
-					count = count + info[ sysId ] * ratio
+					count = count + info[ sysId ] * conversion[coinId]
 				end
 			end
 		end
@@ -183,8 +184,6 @@ function Merge(info)
 end
 
 function GetMoney(widget)
-	--common.LogInfo("common", "type wt - ", tostring(type(widget)), ", name wt - ", tostring(widget:GetName()))
-
 	local count = {}
 	for coinId, sysId in pairs(sysCoinId) do
 		if widget:GetName() == "Price" then
@@ -197,8 +196,6 @@ function GetMoney(widget)
 end
 
 function SetMoney(widget, money)
-	--common.LogInfo("common", "type wt - ", tostring(type(widget)), ", name wt - ", tostring(widget:GetName()))
-
 	if money and money >= 0 then
 		local SplitMoney = Split(money)
 		for coinId, sysId in pairs(sysCoinId) do
@@ -224,19 +221,26 @@ function FindCategoryId()
 	ChildCategoryID = {}
 	local roots = itemLib.GetRootCategories()
 	for i = 0, TableSize(roots)-1 do
-  		local categoryInfo = itemLib.GetCategoryInfo(roots[i])
-  		if categoryInfo then
-    		local RootName = userMods.FromWString(categoryInfo.name)
-			RootCategoryID[RootName] = roots[i]
-			if categoryInfo.root == true then
-  				local childs = itemLib.GetChildCategories(roots[i])
-  				for j = 0, TableSize(childs)-1 do
-    				local categoryInfo = itemLib.GetCategoryInfo( childs[j] )
-    				if categoryInfo then
-      					local ChildName = userMods.FromWString(categoryInfo.name)
-						ChildCategoryID[ChildName] = childs[j]
-    				end
-  				end
+		-- таблицы идентификаторов приходят с дырами: защищаемся от nil
+		local rootId = roots[i]
+		if rootId then
+			local categoryInfo = itemLib.GetCategoryInfo(rootId)
+			if categoryInfo then
+				local RootName = userMods.FromWString(categoryInfo.name)
+				RootCategoryID[RootName] = rootId
+				if categoryInfo.root == true then
+					local childs = itemLib.GetChildCategories(rootId)
+					for j = 0, TableSize(childs)-1 do
+						local childId = childs[j]
+						if childId then
+							local childInfo = itemLib.GetCategoryInfo(childId)
+							if childInfo then
+								local ChildName = userMods.FromWString(childInfo.name)
+								ChildCategoryID[ChildName] = childId
+							end
+						end
+					end
+				end
 			end
 		end
 	end
@@ -257,20 +261,6 @@ function SlashCMD(params)
 	if text == "/opl" then
 		ShowOptionsPanel()
 	end
-end
-
-function GetLastScan(table)
-	local maxMS, date, values
-	for k, v in pairs(table) do
-		if not maxMS or maxMS < v.timeMS then
-			maxMS = v.timeMS
-		end
-		if maxMS == v.timeMS then
-			date = k
-			values = v
-		end
-	end
-	return date, values
 end
 
 -- Проклятый ли предмет (всегда boolean)
@@ -358,10 +348,11 @@ function FillUniSlot(widget, icon, quality, isCursed, stack, charges)
 	end
 	--Quality
 	local wtQuality = widget:GetChildChecked("Quality", false)
-	local TRANSPARENT_BLACK = { a = 0, r = 0, g = 0, b = 0 }
 	local CURSED = { a = 1, r = 150/255, g = 0, b = 0 }
-	local color = quality and quality > 2 and GetItemQualityCSSColor{ quality = quality, isCursed = isCursed } or TRANSPARENT_BLACK
-	color.a = 0.5
+	-- копия цвета: правка alpha не должна затрагивать общую таблицу CSSClassColor
+	local srcColor = quality and quality > 2 and GetItemQualityCSSColor{ quality = quality, isCursed = isCursed }
+	local color = srcColor and { a = 0.5, r = srcColor.r, g = srcColor.g, b = srcColor.b }
+		or { a = 0.5, r = 0, g = 0, b = 0 }
 	wtQuality:SetForegroundColor( color )
 	wtQuality:SetBackgroundColor( isCursed and CURSED or color )
 	wtQuality:Show(true)
@@ -457,22 +448,14 @@ end
 
 function DestroyWidgetsInContainer(container)
     if not container then return end
-    local cached_widgets = {}
-    local items_count = container:GetElementCount()
-        for i = 0, items_count - 1 do
-            local w = container:At(i)
-        -- IsValid — единственный метод, который можно вызывать у уничтоженного виджета.
-        if w and w:IsValid() then
-                    cached_widgets[#cached_widgets + 1] = w
-                end
-            end
-
-    container:RemoveItems()
-
-    for i = 1, #cached_widgets do
-        local w = cached_widgets[i]
-        -- Родитель мог уничтожить вложенные виджеты раньше; проверяем каждого.
-        if w:IsValid() then
+    -- Виджет уничтожается только после отсоединения от контейнера:
+    -- DestroyWidget по виджету внутри контейнера оставляет в нём
+    -- InvalidWidgetSafe, и любое следующее обращение к элементам
+    -- контейнера (включая IsValid) падает.
+    while container:GetElementCount() > 0 do
+        local w = container:At(0)
+        container:RemoveAt(0)
+        if w then
             w:DestroyWidget()
         end
     end
@@ -552,3 +535,5 @@ function Init()
 end
 
 Init()
+
+end

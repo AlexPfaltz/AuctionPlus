@@ -23,13 +23,16 @@ local function NewWidget(desc)
 	return widget
 end
 
--- Уничтожаем все созданные виджеты. Родитель уничтожает детей, поэтому
--- проверяем IsValid у каждого: после DestroyWidget другие методы нельзя
--- вызывать, а IsValid — можно.
-local function DestroyDynamic()
+-- Уничтожаем все созданные виджеты. Виджет сначала отсоединяем от чужого
+-- контейнера (Remove возвращает его владельцу): DestroyWidget по виджету,
+-- всё ещё находящемуся в контейнере, оставляет в нём битую ссылку.
+local function DestroyDynamic(container)
 	for i = #DynamicWidgets, 1, -1 do
 		local widget = DynamicWidgets[i]
-		if widget and widget:IsValid() then
+		if widget then
+			if container and container.IsContain and container:IsContain(widget) then
+				container:Remove(widget)
+			end
 			widget:DestroyWidget()
 		end
 	end
@@ -92,7 +95,8 @@ local function StyleClass(key)
 	return listCSS[index]
 end
 
--- Строка тултипа: [дата] подпись [монеты]. Дата выводится в первой строке.
+-- Строка тултипа: [дата] подпись [монеты]. Подпись и дата необязательны:
+-- дата используется и как префикс истории, и как отдельная строка.
 local function BuildRow(label, price, dateText)
 	local container = NewWidget(DescContainer)
 
@@ -103,9 +107,11 @@ local function BuildRow(label, price, dateText)
 		container:PushBack(dateWidget)
 	end
 
-	local labelWidget = NewWidget(DescLabel)
-	labelWidget:SetVal("value", label)
-	container:PushBack(labelWidget)
+	if label then
+		local labelWidget = NewWidget(DescLabel)
+		labelWidget:SetVal("value", label)
+		container:PushBack(labelWidget)
+	end
 
 	if price then
 		local panel = NewWidget(DescPrices)
@@ -130,15 +136,18 @@ local function BuildHeader(text)
 	return header
 end
 
--- Строки истории: последние дни, по одной точке на день.
-local function BuildHistoryRows(Itemname, isCursed)
+-- Строки истории: последние дни, по одной точке на день. Разделитель
+-- добавляется только если перед историей уже есть блок цен: иначе линия
+-- сливается с разделителем самого тултипа и получаются две подряд.
+local function BuildHistoryRows(Itemname, isCursed, needSeparator)
 	if not Options.ShowHistory then return nil end
-	local history = PriceDB.GetHistory(Itemname, isCursed, 7)
+	local history = PriceDB.GetHistory(Itemname, isCursed, Options.HistoryCount or 7)
 	if not history or #history < 2 then return nil end
 
 	local rows = {}
-	local separator = NewWidget(DescSeparator)
-	rows[#rows + 1] = separator
+	if needSeparator then
+		rows[#rows + 1] = NewWidget(DescSeparator)
+	end
 	rows[#rows + 1] = BuildHeader(GetLocalizedText("PriceHistory"))
 	for i = 1, #history do
 		local point = history[i]
@@ -177,14 +186,18 @@ local function FillRows(Itemname, isCursed)
 			if Options.ShowHeader then
 				rows[#rows + 1] = BuildHeader(GetLocalizedText("Auction price"))
 			end
-	local dateText = Options.ShowDate and FormatDate(cur.t) or nil
-	for i = 1, #specs do
-		rows[#rows + 1] = BuildRow(specs[i].label, specs[i].price, i == 1 and dateText or nil)
-	end
+			for i = 1, #specs do
+				rows[#rows + 1] = BuildRow(specs[i].label, specs[i].price)
+			end
+			-- дата сканирования - отдельной строкой ниже цен, а не в первой
+			local dateText = Options.ShowDate and FormatDate(cur.t) or nil
+			if dateText then
+				rows[#rows + 1] = BuildRow(nil, nil, dateText)
+			end
 		end
 	end
 
-	local historyRows = BuildHistoryRows(Itemname, isCursed)
+	local historyRows = BuildHistoryRows(Itemname, isCursed, #rows > 0)
 	if historyRows then
 		for i = 1, #historyRows do
 			rows[#rows + 1] = historyRows[i]
@@ -215,6 +228,7 @@ function PushPriceInToolTip(container)
 	local Name = container:At(0)
 	if not Name or not Name.GetWString then return end
 	local Itemname = userMods.FromWString(Name:GetWString())
+	if Itemname == "" then return end
 	local isCursed = IsCursedTooltip(container)
 	local rows = FillRows(Itemname, isCursed)
 	if not rows then return end
@@ -247,12 +261,12 @@ end
 
 function SearchTooltip(params)
 	if params.addonName ~= "ContextTooltip" then return end
+	local container = params.widget:GetChildUnchecked("Container", false)
 	if not params.widget:IsVisibleEx() then
-		DestroyDynamic()
+		DestroyDynamic(container)
 		return
 	end
-	DestroyDynamic()
-	local container = params.widget:GetChildUnchecked("Container", false)
+	DestroyDynamic(container)
 	if container then
 		PushPriceInToolTip(container)
 	end

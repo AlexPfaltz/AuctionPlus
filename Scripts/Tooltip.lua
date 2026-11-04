@@ -217,7 +217,7 @@ local function RecycleAll()
     for i = #activeWidgets, 1, -1 do
         local item = activeWidgets[i]
         local w = item.widget
-        if w and w:IsValid() then
+        if w then
             cTooltip:Remove(w)
             if item.pool.destroy then
                 w:DestroyWidget()
@@ -226,7 +226,7 @@ local function RecycleAll()
                 table.insert(item.pool, w)
             end
         end
-        if item.extra and item.extra:IsValid() then
+        if item.extra then
             item.extra:DestroyWidget()
         end
         activeWidgets[i] = nil

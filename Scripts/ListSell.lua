@@ -1,6 +1,9 @@
+if AuctionPlusNoAuction then return end
+
 Global("btTabSell", mainForm:GetChildChecked("TabSell", false))
 local AuctionProperties = nil
 local WaitingForEndSpliItem = false
+local SplitRequestMs = 0
 local DescLine = nil
 local CountAuctions = 0
 local auctionsPage = 0
@@ -12,6 +15,12 @@ local txSortDown = common.GetAddonRelatedTextureGroup("Group01"):GetTexture("Auc
 
 local itemInfo = {}
 local ListSell = {}
+-- Мы запросили страницу и ждём результата: только тогда пришедшее событие
+-- поиска наше (иначе это чужой запрос - скан или другая вкладка).
+local SearchRequested = false
+-- Определена ниже (см. конец файла): используется обработчиками кнопки
+-- "Выставить" и EVENT_INVENTORY_SLOT_CHANGED, объявленными раньше неё
+local GetDurationEnum
 
 -- Очистка списка лотов. Выбранная строка уничтожается вместе со списком,
 -- поэтому ссылку на неё нужно сбросить: иначе следующий клик по строке
@@ -159,13 +168,13 @@ end
 ListSell.ValidateSlot = function()
 	--common.LogInfo("common", "ValidateSlot")
 	local itemId = nil
-	if ListSell.slotId or ListSell.slotId ~= nil then
+	if ListSell.slotId ~= nil then
 		itemId = containerLib.GetItem( ITEM_CONT_INVENTORY, ListSell.slotId )
 	end
 	if itemId == nil or itemId ~= itemInfo.id then
 		ListSell.slotId = nil
 		InfoBar.Clear()
-		InfoBar.DIsable()
+		InfoBar.Disable()
 		ListSell.ClearList()
 		return false
 	else
@@ -237,12 +246,17 @@ ListSell.AuctionSearch = function(params)
 
 	 if AuctionSearchSuccess ~= nil and params and params.sysResult ~= nil
        and params.sysResult ~= AuctionSearchSuccess then
+		SearchRequested = false
         return
     end
-	
+
 	if AddonTab ~= "sell" or not InfoBar.UniSlot.widget:IsEnabled() then
 		return
 	end
+
+	-- результат чужого запроса (например, страница скана, поставленного
+	-- на паузу при уходе с вкладки): не обрабатываем и не листаем дальше
+	if not SearchRequested then return end
 
 	auctionsPage = auction.GetAuctionsPage()
 	auctionsPageCount = auction.GetAuctionsPageCount()
@@ -257,9 +271,10 @@ ListSell.AuctionSearch = function(params)
 		end
 	end
 		if auctionsPage < auctionsPageCount then
-			GetPage(auctionsPage+1)
+			SearchRequested = GetPage(auctionsPage+1)
 			StatusBar:SetVal("value", userMods.ToWString(GetLocalizedText("SearchInProgress")..tostring(auctionsPage)..GetLocalizedText("SeparatorSearchInProgress")..tostring(auctionsPageCount)))
 		else
+			SearchRequested = false
 			StatusBar:SetVal("value", userMods.ToWString(GetLocalizedText("SearchFinished")..tostring(CountAuctions)))
 			CountAuctions = 0
 	end
@@ -279,73 +294,46 @@ ListSell.StartSearch = function()
 	auctionsPage = 0
 	auctionsPageCount = 0
 	CountAuctions = 0
-	if ListSell.AssembleFilter() then GetPage(1) end
+	if ListSell.AssembleFilter() then SearchRequested = GetPage(1) end
+end
+
+ListSell.SortLines = function(param, ascending)
+	local items = {}
+	for i = 0, ListSell.container:GetElementCount() - 1 do
+		local wt = ListSell.container:At(i)
+		local value = nil
+		if param == "Price" then
+			value = GetMoney(wt:GetChildChecked("Price", false))
+		elseif param == "Available" then
+			value = wt:GetChildChecked("Available", false):GetWString():ToInt()
+		end
+		items[#items + 1] = { wt = wt, value = value or 0 }
+	end
+	table.sort(items, function(a, b)
+		if ascending then
+			return a.value < b.value
+		else
+			return a.value > b.value
+		end
+	end)
+	for i = #items, 1, -1 do
+		ListSell.container:Remove(items[i].wt)
+	end
+	for i = 1, #items do
+		ListSell.container:PushBack(items[i].wt)
+	end
+	ListSell.container:ForceReposition()
+	if ListSell.container:GetElementCount() > 0 then
+		ListSell.container:EnsureVisible(ListSell.container:At(0))
+	end
 end
 
 ListSell.SortDown = function(param)
-	for i = 0, ListSell.container:GetElementCount() - 1 do
-		local value = nil
-		local desiredvalue = nil
-		local tempWt = nil
-		local tempAt = nil
-
-		for j = i, ListSell.container:GetElementCount() - 1 do
-			if param == "Price" then
-				desiredvalue = GetMoney(ListSell.container:At(j):GetChildChecked("Price", false))
-			elseif param == "Available" then
-				desiredvalue = ListSell.container:At(j):GetChildChecked("Available", false):GetWString():ToInt()
-			end
-
-			if value == nil or value > desiredvalue then
-				value = desiredvalue
-			end
-
-			if value == desiredvalue then
-				tempAt = j
-				tempWt = ListSell.container:At(j)
-			end
-		end
-
-		ListSell.container:RemoveAt(tempAt)
-		ListSell.container:Insert(i, tempWt)
-		ListSell.container:ForceReposition()
-	end
-	if ListSell.container:GetElementCount() > 0 then
-		ListSell.container:EnsureVisible(ListSell.container:At(0))
-	end
+	ListSell.SortLines(param, true)
 end
 
 ListSell.SortUp = function(param)
-	for i = 0, ListSell.container:GetElementCount() - 1 do
-		local value = nil
-		local desiredvalue = nil
-		local tempWt = nil
-		local tempAt = nil
-
-		for j = i, ListSell.container:GetElementCount() - 1 do
-			if param == "Price" then
-				desiredvalue = GetMoney(ListSell.container:At(j):GetChildChecked("Price", false))
-			elseif param == "Available" then
-				desiredvalue = ListSell.container:At(j):GetChildChecked("Available", false):GetWString():ToInt()
-			end
-
-			if value == nil or value < desiredvalue then
-				value = desiredvalue
-			end
-
-			if value == desiredvalue then
-				tempAt = j
-				tempWt = ListSell.container:At(j)
-			end
-		end
-
-		ListSell.container:RemoveAt(tempAt)
-		ListSell.container:Insert(i, tempWt)
-		ListSell.container:ForceReposition()
-	end
-	if ListSell.container:GetElementCount() > 0 then
-		ListSell.container:EnsureVisible(ListSell.container:At(0))
-	end
+	ListSell.SortLines(param, false)
 end
 
 ListSell.button_pressed = function(params)
@@ -367,12 +355,13 @@ ListSell.button_pressed = function(params)
 			if count < itemInfo.stackCount then
 				if ListSell.SplitItem(count) then
 					WaitingForEndSpliItem = true
+					SplitRequestMs = common.GetLocalDateTimeMs()
 				end
 			else
 				local itemId = itemInfo.id
 				startprice = startprice * count
 				buyoutprice = buyoutprice * count
-				local duration = CheckDuration()
+				local duration = GetDurationEnum()
 				if not auction.IsCreationInProgress() then
 					auction.CreateForItem(itemId, startprice, buyoutprice, duration)
 				end
@@ -382,10 +371,9 @@ ListSell.button_pressed = function(params)
 	elseif params.sender == "Line" then
 		local Parent = params.widget:GetParent()
 		if CurrentSelectedLine ~= nil then
-			-- кнопка могла быть уничтожена вместе со списком
-			if CurrentSelectedLine:IsValid() then
-				CurrentSelectedLine:SetVariant(0)
-			end
+			-- ссылка сбрасывается в ClearList до уничтожения строк,
+			-- так что здесь кнопка всегда живая
+			CurrentSelectedLine:SetVariant(0)
 			CurrentSelectedLine = nil
 		end
 		if params.widget:GetVariant() == 1 then
@@ -453,7 +441,7 @@ InfoBar.Enable = function()
 	InfoBar.TotalPrice.widget:Enable(true)
 end
 
-InfoBar.DIsable = function()
+InfoBar.Disable = function()
 	InfoBar.UniSlot.widget:Enable(false)
 	InfoBar.Quantity.widget:Enable(false)
 	InfoBar.Quantity.widget:SetTransparentInput(true)
@@ -501,7 +489,15 @@ InfoBar.CheckQuantity = function()
 	if not stackInfo then return end
 	itemInfo.stackCount = stackInfo.count
 	if Quantity and Quantity > itemInfo.stackCount then
-		InfoBar.Quantity.edit:SetText(common.FormatInt(itemInfo.stackCount, "%d"))
+		Quantity = itemInfo.stackCount
+		InfoBar.Quantity.edit:SetText(common.FormatInt(Quantity, "%d"))
+	end
+	-- количество могло уменьшиться (предметы ушли в выставленные лоты):
+	-- пересчитываем залог и итоговую цену под фактическое значение
+	if Quantity and Quantity > 0 then
+		local auctionPrice = itemInfo.prices and itemInfo.prices.auctionPrice or 0
+		SetMoney(InfoBar.Deposit.price, GetPercentDuration(CheckDuration()) * auctionPrice * Quantity / 100)
+		SetMoney(InfoBar.TotalPrice.price, (GetMoney(InfoBar.BuyoutPrice.price) or 0) * Quantity)
 	end
 	--common.LogInfo("common", "CheckQuantity")
 end
@@ -621,6 +617,20 @@ function CheckDuration()
 	return variant
 end
 
+-- enum времени выставления лота (см. auction.CreateForItem: AUCTION_CREATETIME_*)
+local DurationEnum = {
+	[0] = AUCTION_CREATETIME_HOURS12,
+	[1] = AUCTION_CREATETIME_HOURS24,
+	[2] = AUCTION_CREATETIME_HOURS36,
+	[3] = AUCTION_CREATETIME_HOURS48,
+}
+
+-- присваивание, а не "local function": функция объявлена выше как upvalue,
+-- чтобы обработчики из первой половины файла видели её
+function GetDurationEnum()
+	return DurationEnum[CheckDuration()] or AUCTION_CREATETIME_HOURS24
+end
+
 function GetPercentDuration(variant)
 	-- 5% — значение по умолчанию, если параметры аукциона ещё не получены.
 	local base = AuctionProperties and AuctionProperties.pawnFactorPercent or 5
@@ -637,6 +647,7 @@ function ClearTabSell()
 	ListSell.ClearList()
 	InfoBar.Clear()
 	SortBar.Reload()
+	SearchRequested = false
 end
 
 function OpenTabSell()
@@ -667,7 +678,7 @@ function CloseTabSell()
 	AuctionMainPanel:GetChildChecked("Selection", false):Show(true)
 	AuctionMainPanel:GetChildChecked("Search", true):Show(true)
 	AuctionMainPanel:GetChildChecked("Money", true):Show(true)
-	InfoBar.DIsable()
+	InfoBar.Disable()
 	StatusBar:SetVal("value", common.GetEmptyWString())
 	HideTabOverlay()
 end
@@ -692,7 +703,7 @@ function DropInAuction(params)
 			ListSell.StartSearch()
 		else
 			InfoBar.Clear()
-			InfoBar.DIsable()
+			InfoBar.Disable()
 			SortBar.Reload()
 			ListSell.ClearList()
 			StatusBar:SetVal("value", userMods.ToWString(GetLocalizedText("not CanCreateAuction")))
@@ -710,15 +721,24 @@ function PickItem(params)
 	end
 end
 
+local function SplitWatchdog()
+	if WaitingForEndSpliItem and common.GetLocalDateTimeMs() - SplitRequestMs > 5000 then
+		WaitingForEndSpliItem = false
+	end
+end
+
 function EVENT_INVENTORY_SLOT_CHANGED(params)
 	if WaitingForEndSpliItem then
+		if not params.itemId then return end
 		local info = itemLib.GetItemInfo(params.itemId)
-		info.stackCount = itemLib.GetStackInfo(params.itemId).count
+		local stackInfo = itemLib.GetStackInfo(params.itemId)
+		if not info or not stackInfo then return end
+		info.stackCount = stackInfo.count
 		local count = InfoBar.Quantity.edit:GetText():ToInt()
 		if info.name == itemInfo.name and info.stackCount == count and itemLib.CanCreateAuction(params.itemId) then
 			local startprice = GetMoney(InfoBar.StartPrice.price) * count
 			local buyoutprice = GetMoney(InfoBar.BuyoutPrice.price) * count
-			local duration = CheckDuration()
+			local duration = GetDurationEnum()
 			if not auction.IsCreationInProgress() then
 				auction.CreateForItem(params.itemId, startprice, buyoutprice, duration)
 			end
@@ -751,6 +771,7 @@ ListSell.Init = function()
 	common.RegisterEventHandler(EVENT_INVENTORY_SLOT_CHANGED,"EVENT_INVENTORY_SLOT_CHANGED") --изменилось содержимое слота
 	common.RegisterEventHandler(EVENT_AUCTION_CREATION_RESULT,"EVENT_AUCTION_CREATION_RESULT") --результат попытки создать аукцион
 	common.RegisterEventHandler(OnAuctionProperties, "EVENT_AUCTION_PROPERTIES")
+	common.RegisterEventHandler(SplitWatchdog, "EVENT_SECOND_TIMER") --сторож зависшего сплита
 	common.RegisterReactionHandler(InfoBar.EditLineChanged, "EditLineChanged")
 	common.RegisterReactionHandler(InfoBar.slot_over, "slot_over")
 	common.RegisterReactionHandler(InfoBar.checkbox_pressed, "checkbox_pressed")

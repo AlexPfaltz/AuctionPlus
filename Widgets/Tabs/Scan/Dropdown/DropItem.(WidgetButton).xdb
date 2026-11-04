@@ -1,17 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
 <WidgetButton>
+	<TextTag>button_label</TextTag>
 	<Variants>
 		<Item>
+			<LayerHighlight href="../../Buy/Line/Textures/AuctionLineHighlight.(WidgetLayerSimpleTexture).xdb" />
+			<StateNormal>
+				<LayerMain href="../../Buy/Line/Textures/AuctionLineNormal.(WidgetLayerSimpleTexture).xdb" />
+				<FormatFileRef href="DropItem.txt" />
+			</StateNormal>
+			<StatePushed>
+				<LayerMain href="../../Buy/Line/Textures/AuctionLinePressed.(WidgetLayerSimpleTexture).xdb" />
+			</StatePushed>
+			<StateHighlighted>
+				<LayerMain href="../../Buy/Line/Textures/AuctionLineHighlighted.(WidgetLayerSimpleTexture).xdb" />
+			</StateHighlighted>
 			<Reaction>ScanDropItem</Reaction>
 			<ReactionOnUp>true</ReactionOnUp>
 		</Item>
 	</Variants>
+	<TextStyle>
+		<Align>ALIGNY_MIDDLE</Align>
+	</TextStyle>
 	<Name>DropItem</Name>
 	<Placement>
 		<X>
 			<Align>WIDGET_ALIGN_BOTH</Align>
-			<Pos>2</Pos>
-			<HighPos>2</HighPos>
+			<Pos>4</Pos>
+			<HighPos>4</HighPos>
 		</X>
 		<Y>
 			<Pos>0</Pos>
@@ -20,7 +35,4 @@
 	</Placement>
 	<Visible>false</Visible>
 	<Enabled>true</Enabled>
-	<Header>
-		<Prototype href="../../Resources/AuctionButtonCommon/AuctionButtonCommon.Prototype.(WidgetButton).xdb" />
-	</Header>
 </WidgetButton>

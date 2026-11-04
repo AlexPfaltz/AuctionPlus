@@ -2,14 +2,20 @@
 -- TabScan.lua: вкладка "Скан".
 -- Три вида одной панели: setup (выбор режима и запуск), run (ход скана),
 -- done (итог). Данные хода скана берёт из глобальной ScanInfo (ScanAuction.lua).
+-- Режимы: 1 - весь аукцион, 2 - категория, 3 - из сумки, 4 - свой список.
+-- Для режимов 3/4 задачи показываются встроенным списком (SearchList.lua).
 --------------------------------------------------------------------------------
 Global("TabScan", {})
 Global("btTabScan", mainForm:GetChildChecked("TabScan", false))
 
 local wtPanel = mainForm:GetChildChecked("ScanPanel", false)
 btTabScan:SetVal("button_label", userMods.ToWString(GetLocalizedText("btTabScan")))
-AuctionMainPanel:AddChild(btTabScan)
-AuctionMainPanel:AddChild(wtPanel)
+-- без ContextAuction остальное всё равно должно выполниться:
+-- ScanAuction вызывает TabScan.OnStopped при остановке скана
+if AuctionMainPanel then
+	AuctionMainPanel:AddChild(btTabScan)
+	AuctionMainPanel:AddChild(wtPanel)
+end
 
 local wtTitle = wtPanel:GetChildChecked("Title", false)
 local wtLine = {}
@@ -18,12 +24,6 @@ for i = 1, 5 do
 end
 local wtBarBack = wtPanel:GetChildChecked("BarBack", false)
 local wtBarFill = wtBarBack:GetChildChecked("BarFill", false)
--- кнопки режимов: ключ - значение Options.ScanBy
-local btMode = {
-	[1] = wtPanel:GetChildChecked("ModeAll", false),
-	[2] = wtPanel:GetChildChecked("ModeBag", false),
-	[3] = wtPanel:GetChildChecked("ModeList", false),
-}
 local btStart = wtPanel:GetChildChecked("Start", false)
 local btResume = wtPanel:GetChildChecked("Resume", false)
 local btStop = wtPanel:GetChildChecked("Stop", false)
@@ -35,6 +35,8 @@ local categoryPanel = wtPanel:GetChildChecked("ScanCategory", false)
 local categoryBtn = categoryPanel:GetChildChecked("DropBtn", false)
 local subcategoryPanel = wtPanel:GetChildChecked("ScanSubcategory", false)
 local subcategoryBtn = subcategoryPanel:GetChildChecked("DropBtn", false)
+-- Встроенный список задач для режимов "из сумки" и "свой список"
+local wtTaskList = wtPanel:GetChildChecked("TaskList", false)
 -- Выпадающий список: одна панель на оба селектора, строки создаются по шаблону
 local wtDropList = wtPanel:GetChildChecked("DropList", false)
 local wtDropItems = wtDropList:GetChildChecked("DropItems", false)
@@ -78,6 +80,20 @@ end
 local RefreshSetup
 local SetMode
 
+-- Режимы со встроенным списком задач
+local function IsTaskMode(mode)
+	return mode == 3 or mode == 4
+end
+
+-- Заполнить и показать встроенный список задач для текущего режима
+local function RefreshTaskList()
+	if not IsTaskMode(Options.ScanBy) then
+		HideTaskList()
+		return
+	end
+	ShowTaskList(Options.ScanBy)
+end
+
 --------------------------------------------------------------------------------
 -- Категории аукциона для ограничения полного скана
 --------------------------------------------------------------------------------
@@ -87,19 +103,29 @@ local function EnsureCategories()
 	RootCategories = {}
 	local roots = itemLib.GetRootCategories()
 	for i = 0, TableSize(roots) - 1 do
-		local info = itemLib.GetCategoryInfo(roots[i])
-		if info then
-			local children = {}
-			local childs = itemLib.GetChildCategories(roots[i])
-			for j = 0, TableSize(childs) - 1 do
-				local childInfo = itemLib.GetCategoryInfo(childs[j])
-				if childInfo then
-					children[#children + 1] = { id = childs[j], name = childInfo.name }
+		-- таблицы идентификаторов приходят с дырами: плотный обход
+		-- 0..size-1 отдаёт nil, и GetChildCategories падает
+		local rootId = roots[i]
+		if rootId then
+			local info = itemLib.GetCategoryInfo(rootId)
+			-- GetRootCategories возвращает и дочерние категории, а
+			-- GetChildCategories принимает только корневые (info.root == true)
+			if info and info.root == true then
+				local children = {}
+				local childs = itemLib.GetChildCategories(rootId)
+				for j = 0, TableSize(childs) - 1 do
+					local childId = childs[j]
+					if childId then
+						local childInfo = itemLib.GetCategoryInfo(childId)
+						if childInfo then
+							children[#children + 1] = { id = childId, name = childInfo.name }
+						end
+					end
 				end
+				RootCategories[#RootCategories + 1] = {
+					id = rootId, name = info.name, children = children,
+				}
 			end
-			RootCategories[#RootCategories + 1] = {
-				id = roots[i], name = info.name, children = children,
-			}
 		end
 	end
 end
@@ -139,7 +165,7 @@ local function RefreshScanSelectors()
 	categoryPanel:GetChildChecked("Text", false):SetVal("text", L("ScanCategoryLabel"))
 	subcategoryPanel:GetChildChecked("Text", false):SetVal("text", L("ScanSubcategoryLabel"))
 
-	local modeKeys = { "ScanModeAll", "ScanModeBag", "ScanModeList" }
+	local modeKeys = { "ScanModeAll", "ScanModeCategory", "ScanModeBag", "ScanModeList" }
 	modeValue:SetVal("value", L(modeKeys[Options.ScanBy] or "ScanModeAll"))
 
 	local root = RootNode()
@@ -231,7 +257,7 @@ end
 
 local function CycleMode(delta)
 	local mode = Options.ScanBy + delta
-	if mode < 1 then mode = 3 elseif mode > 3 then mode = 1 end
+	if mode < 1 then mode = 4 elseif mode > 4 then mode = 1 end
 	SetMode(mode)
 end
 
@@ -336,6 +362,17 @@ local function RefreshRun()
 		taskText = L("ScanModeAll")
 	end
 
+	if ScanInfo.mode == "list" then
+		-- в режиме списка показан встроенный список задач: оставляем две
+		-- строки над ним, остальные закрыты списком
+		SetLines(
+			taskText,
+			L("ScanPage") .. tostring(ScanInfo.page or 0) .. L("ScanOf")
+				.. tostring(ScanInfo.pageCount or 0) .. L("ScanLots") .. tostring(ScanInfo.lots or 0)
+				.. "   " .. timeText)
+		return
+	end
+
 	SetLines(
 		L("ScanPage") .. tostring(ScanInfo.page or 0) .. L("ScanOf")
 			.. tostring(ScanInfo.pageCount or 0) .. L("ScanLots") .. tostring(ScanInfo.lots or 0),
@@ -357,21 +394,27 @@ local function ModeInfoText()
 		end
 		return L("ScanInfoAll") .. ": " .. L("ScanNoEstimate")
 	elseif Options.ScanBy == 2 then
-		return L("ScanInfoBag") .. tostring(GetScanTaskCount())
+		return L("ScanInfoCategory")
 	end
-	return L("ScanInfoList") .. tostring(GetScanTaskCount())
+	return L(Options.ScanBy == 3 and "ScanInfoBag" or "ScanInfoList") .. tostring(GetScanTaskCount())
 end
 
 RefreshSetup = function()
 	SetText(wtTitle, L("ScanPanelTitle"))
 	RefreshScanSelectors()
 	modePanel:Show(true)
-	categoryPanel:Show(Options.ScanBy == 1)
-	subcategoryPanel:Show(Options.ScanBy == 1)
-	if Options.ScanBy ~= 1 then CloseDrop() end
+	local category = Options.ScanBy == 2
+	categoryPanel:Show(category)
+	subcategoryPanel:Show(category)
+	if not category then CloseDrop() end
+
+	local taskMode = IsTaskMode(Options.ScanBy)
+	wtTaskList:Show(taskMode)
+	-- строки 3-5 закрыты списком задач
+	for i = 3, 5 do wtLine[i]:Show(not taskMode) end
 
 	local busy = auction.IsSearchInProgress()
-	local empty = Options.ScanBy ~= 1 and GetScanTaskCount() == 0
+	local empty = taskMode and GetScanTaskCount() == 0
 	btStart:Enable(not empty and not busy)
 
 	local resume = GetResumeInfo()
@@ -379,13 +422,13 @@ RefreshSetup = function()
 	if resume then
 		resumeText = L("ScanPaused") .. FormatDuration(resume.leftMs)
 	end
-	btResume:Show(view == "setup" and resume ~= nil)
+	btResume:Show(resume ~= nil)
 
 	local first
 	if busy then
 		first = L("ScanBusy")
 	elseif empty then
-		first = L(Options.ScanBy == 2 and "ScanBagEmpty" or "ScanListEmpty")
+		first = L(Options.ScanBy == 3 and "ScanBagEmpty" or "ScanListEmpty")
 	else
 		first = ModeInfoText()
 	end
@@ -405,10 +448,15 @@ local function ShowView(name)
 	CloseDrop()
 	view = name
 	local setup, run, done = name == "setup", name == "run", name == "done"
-	for _, button in pairs(btMode) do button:Show(false) end
 	modePanel:Show(setup)
-	categoryPanel:Show(setup and Options.ScanBy == 1)
-	subcategoryPanel:Show(setup and Options.ScanBy == 1)
+	local category = setup and Options.ScanBy == 2
+	categoryPanel:Show(category)
+	subcategoryPanel:Show(category)
+	-- список задач виден в настройке режимов 3/4 и во время скана по списку
+	local taskList = (setup and IsTaskMode(Options.ScanBy))
+		or (run and ScanInfo.mode == "list")
+	wtTaskList:Show(taskList)
+	for i = 3, 5 do wtLine[i]:Show(not taskList) end
 	btStart:Show(setup)
 	btResume:Show(false)
 	btStop:Show(run)
@@ -460,9 +508,16 @@ function OpenTabScan()
 	AddonTab = "scan"
 	btTabScan:SetVariant(1)
 	wtPanel:Show(true)
+	-- сумка могла измениться, пока вкладка была закрыта
+	if Options.ScanBy == 3 then
+		CheckBag()
+	end
 	if ScanInfo.active then
 		ShowView("run")
 	else
+		if IsTaskMode(Options.ScanBy) then
+			RefreshTaskList()
+		end
 		ShowView("setup")
 	end
 end
@@ -493,26 +548,19 @@ end
 --------------------------------------------------------------------------------
 SetMode = function(mode)
 	if Options.ScanBy == mode then
-		RefreshScanSelectors()
+		RefreshSetup()
 		return
 	end
-	-- окно со списком имён подстраивается под режим; очищать его нужно до
-	-- смены режима, пока оно ещё знает, какой список в нём показан
-	HideSearchList()
+	CloseDrop()
 	Options.ScanBy = mode
 	userMods.SetGlobalConfigSection("Options", Options)
-	if mode == 2 then
+	if mode == 3 then
 		CheckBag()
-		if Options.ShowSearchList then ShowSearchListForBag() end
-	elseif mode == 3 and Options.ShowSearchList then
-		ShowYourSearchList()
 	end
+	RefreshTaskList()
 	RefreshSetup()
 end
 
-function ScanModeAll() SetMode(1) end
-function ScanModeBag() SetMode(2) end
-function ScanModeList() SetMode(3) end
 function ScanModePrev() CycleMode(-1) end
 function ScanModeNext() CycleMode(1) end
 function ScanCategoryDrop() OpenDrop("category") end
@@ -557,9 +605,6 @@ local function OnSecondTimer()
 end
 
 common.RegisterReactionHandler(OpenTabScan, "OpenTabScan")
-common.RegisterReactionHandler(ScanModeAll, "ScanModeAll")
-common.RegisterReactionHandler(ScanModeBag, "ScanModeBag")
-common.RegisterReactionHandler(ScanModeList, "ScanModeList")
 common.RegisterReactionHandler(ScanModePrev, "ScanModePrev")
 common.RegisterReactionHandler(ScanModeNext, "ScanModeNext")
 common.RegisterReactionHandler(ScanCategoryDrop, "ScanCategoryDrop")
@@ -577,6 +622,3 @@ SetButtonLabel(btStart, "ScanStart")
 SetButtonLabel(btResume, "ScanResume")
 SetButtonLabel(btStop, "ScanStop")
 SetButtonLabel(btClose, "ScanClose")
-SetButtonLabel(btMode[1], "ScanModeAll")
-SetButtonLabel(btMode[2], "ScanModeBag")
-SetButtonLabel(btMode[3], "ScanModeList")

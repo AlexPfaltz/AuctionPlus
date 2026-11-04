@@ -1,8 +1,9 @@
 --------------------------------------------------------------------------------
 -- ScanAuction.lua: сканирование цен аукциона.
--- Режимы (Options.ScanBy): 1 - весь аукцион, 2 - предметы из сумки, 3 - свой список.
--- Скан запускается из вкладки "Скан" (TabScan.lua). Уход с вкладки ставит скан на
--- паузу: продолжить можно только в течение RESUME_TTL_MS, потом начинается заново.
+-- Режимы (Options.ScanBy): 1 - весь аукцион, 2 - категория, 3 - предметы из
+-- сумки, 4 - свой список. Скан запускается из вкладки "Скан" (TabScan.lua).
+-- Уход с вкладки ставит скан на паузу: продолжить можно только в течение
+-- RESUME_TTL_MS, потом начинается заново.
 --------------------------------------------------------------------------------
 Global("StartFullScan", false)
 Global("StartScanForList", false)
@@ -35,23 +36,23 @@ end
 
 function CheckBag()
 	local AllBagSlot = containerLib.GetItems( ITEM_CONT_INVENTORY )
-	BagSearchList = {}
-	local i = 1
+	local names = {}
 	for k, v in pairs(AllBagSlot) do
 		if itemLib.CanCreateAuction(v) then
-			BagSearchList[i] = itemLib.GetName(v)
-			AddPlainLines(i, BagSearchList[i])
-			i=i+1
+			names[#names + 1] = itemLib.GetName(v)
 		end
 	end
+	-- порядок итерации по хэш-таблице не гарантирован: сортируем явно
+	table.sort(names, function(a, b) return NameToString(a) < NameToString(b) end)
+	BagSearchList = names
 end
 
 -- Имена предметов для режимов "из сумки" (список строится при открытии окна)
--- и "свой список" (читается из настроек, окно со списком для этого не нужно)
+-- и "свой список" (читается из настроек)
 local function CollectNames()
 	local names = {}
 	local source
-	if Options.ScanBy == 3 then
+	if Options.ScanBy == 4 then
 		source = userMods.GetGlobalConfigSection("SearchList") or {}
 	else
 		source = BagSearchList
@@ -62,15 +63,15 @@ local function CollectNames()
 	return names
 end
 
--- Сколько задач (предметов) будет в скане по списку/сумке; для режима "весь аукцион" - 1
+-- Сколько задач (предметов) будет в скане по списку/сумке; для полных режимов - 1
 function GetScanTaskCount()
-	if Options.ScanBy == 1 then return 1 end
+	if Options.ScanBy == 1 or Options.ScanBy == 2 then return 1 end
 	return table.getn(CollectNames())
 end
 
 -- Подпись набора задач: пауза действительна, только если набор не менялся
 local function Signature()
-	if Options.ScanBy == 1 then
+	if Options.ScanBy == 1 or Options.ScanBy == 2 then
 		return "all|" .. tostring(Options.ScanRootCategory or 0)
 			.. "|" .. tostring(Options.ScanChildCategory or 0)
 	end
@@ -104,9 +105,9 @@ end
 -- openName - имя предмета, открытого в момент паузы (при продолжении).
 local function BeginRun(page, openName)
 	SearchFilter = {}
-	-- Фильтр по категориям имеет смысл только для полного скана: в режимах
-	-- "из сумки" и "свой список" поиск идёт по точному имени предмета.
-	if Options.ScanBy == 1 then
+	-- Фильтр по категориям имеет смысл только в режиме "категория":
+	-- в режимах "из сумки" и "свой список" поиск идёт по точному имени предмета.
+	if Options.ScanBy == 2 then
 		local rootId = Options.ScanRootCategory
 		if rootId and rootId ~= 0 and itemLib.GetCategoryInfo(rootId) then
 			SearchFilter.rootCategory = rootId
@@ -119,8 +120,10 @@ local function BeginRun(page, openName)
 	local requested = nil
 	if StartScanForList then
 		requested = TaskNames[CurItem]
-		SearchFilter.name = requested
-		SearchBar.name:SetText(requested)
+		-- строки из конфига (cp1251) переводим в WString, WString пропускаем как есть
+		local wsName = type(requested) == "string" and userMods.ToWString(requested) or requested
+		SearchFilter.name = wsName
+		SearchBar.name:SetText(wsName)
 		ScanInfo.item = CurItem
 		ScanInfo.items = table.getn(TaskNames)
 		ScanInfo.itemName = NameToString(requested)
@@ -166,7 +169,7 @@ local function Launch(resume)
 	ScanStockTab = GetCurrentStockTab()
 	TaskNames = CollectNames()
 
-	if Options.ScanBy ~= 1 and table.getn(TaskNames) == 0 then
+	if Options.ScanBy >= 3 and table.getn(TaskNames) == 0 then
 		return false
 	end
 
@@ -186,7 +189,7 @@ local function Launch(resume)
 	ScanInfo.startMs = ScanInfo.startMs or NowMs()
 	ScanInfo.segmentMs = NowMs()
 
-	if Options.ScanBy == 1 then
+	if Options.ScanBy == 1 or Options.ScanBy == 2 then
 		ScanInfo.mode = "full"
 		StartFullScan = true
 		BeginRun(resume and resume.page or 1, resume and resume.openName)
@@ -207,8 +210,8 @@ function StopScan()
 	if wasActive then
 		RememberMeta(ScanInfo.completed)
 		Finish(ScanInfo.completed)
+		TabScan.OnStopped(ScanInfo.completed)
 	end
-	TabScan.OnStopped(ScanInfo.completed)
 end
 
 -- Пауза (уход с вкладки, закрытие окна): продолжить можно ограниченное время
@@ -356,10 +359,6 @@ ScanAuction.OnSecondTimer = function()
 	RequestPage(LastRequest.page, true)
 end
 
-function StopManualScan()
-	PriceDB.Save()
-end
-
 function CheckTabVariant()
 	if not AuctionMainPanel or not AuctionMainPanel:IsVisible() then return end
 	SyncAddonTabs()
@@ -368,25 +367,14 @@ end
 ScanAuction.AuctionIsVisible = function(params)
 	if params.addonName == "ContextAuction" and params.widget:GetName() == "Main" then
 		if params.widget:IsVisible() then
-			if OpenSearchListFromOptions then
-				HideSearchList()
-				OpenSearchListFromOptions = false
-			end
-			if Options.ScanBy == 2 then
+			-- сумка могла измениться, пока окно было закрыто
+			if Options.ScanBy == 3 then
 				CheckBag()
-				if Options.ShowSearchList then
-					ShowSearchListForBag()
-				end
-			elseif Options.ScanBy == 3 and Options.ShowSearchList then
-				ShowYourSearchList()
 			end
-			DisableButtonShowList()
 		else
 			-- окно закрыто: скан ставится на паузу
 			PauseScan()
 			PriceDB.Save()
-			HideSearchList()
-			EnableButtonShowList()
 		end
 	end
 end

@@ -1,3 +1,5 @@
+if AuctionPlusNoAuction then return end
+
 Global("btTabBuy", mainForm:GetChildChecked("TabBuy", false))
 local ListBuy = {}
 local wtListBuy = mainForm:GetChildChecked("ListBuy", false)
@@ -34,10 +36,20 @@ local BuyoutSelected = false
 local CountAuctions = 0
 local auctionsPage = 0
 local auctionsPageCount = 0
+-- Поиск нажат повторно, пока шёл старый: новый фильтр собран в SearchFilter,
+-- но auction.Search не принял его (старый поиск ещё не закончен). Пропускаем
+-- одно пришедшее событие (это результат старого фильтра) и стартуем заново.
+local RestartPending = false
+-- Мы запросили страницу и ждём результата: только тогда пришедшее событие
+-- поиска наше. Иначе это чужой запрос (скан, стоковый поиск) - обработав
+-- его, мы продолжили бы чужой поиск с чужим фильтром.
+local SearchRequested = false
 
 btTabBuy:SetVal("button_label", userMods.ToWString(GetLocalizedText("btTabBuy")))
-AuctionMainPanel:AddChild(wtListBuy)
-AuctionMainPanel:AddChild(btTabBuy)
+if AuctionMainPanel then
+	AuctionMainPanel:AddChild(wtListBuy)
+	AuctionMainPanel:AddChild(btTabBuy)
+end
 
 ------------------------------------------------------------------------------
 -- Сортировка: единая логика для всех колонок
@@ -337,13 +349,28 @@ ListBuy.AssembleFilter = function()
 end
 
 ListBuy.AuctionSearch = function(params)
-	
+
+	if AddonTab ~= "buy" then return end
+
+	-- результат чужого запроса (например, страница скана, поставленного
+	-- на паузу при уходе с вкладки): не обрабатываем и не листаем дальше
+	if not SearchRequested then return end
+
+	if RestartPending then
+		-- это результат старого поиска; он уже закончил работу (иначе событие
+		-- бы не пришло), значит можно стартовать с новым фильтром
+		RestartPending = false
+		ClearTabBuy()
+		SearchRequested = GetPage(1)
+		return
+	end
+
 	if AuctionSearchSuccess ~= nil and params and params.sysResult ~= nil
        and params.sysResult ~= AuctionSearchSuccess then
+		SearchRequested = false
         return
     end
 
-	if AddonTab ~= "buy" then return end
 	if not BuyoutSelected then
 		auctionsPage = auction.GetAuctionsPage()
         auctionsPageCount = params and params.totalPagesCount or auction.GetAuctionsPageCount()
@@ -358,9 +385,10 @@ ListBuy.AuctionSearch = function(params)
 			end
 		end
 		if auctionsPage < auctionsPageCount then
-			GetPage(auctionsPage+1)
+			SearchRequested = GetPage(auctionsPage+1)
 			StatusBar:SetVal("value", userMods.ToWString(GetLocalizedText("SearchInProgress")..tostring(auctionsPage)..GetLocalizedText("SeparatorSearchInProgress")..tostring(auctionsPageCount)))
 		else
+			SearchRequested = false
 			StatusBar:SetVal("value", userMods.ToWString(GetLocalizedText("SearchFinished")..tostring(CountAuctions)))
 			CountAuctions = 0
 		end
@@ -393,7 +421,10 @@ ListBuy.AuctionSearch = function(params)
 				if itemName == LotForBuy.name and buyoutPrice == LotForBuy.buyoutprice
 					and count == LotForBuy.count
 					and MakeLotKey(auctionInfo, itemInfo, count) == LotForBuy.key then
-						auction.Buyout(auctionInfo.id)
+						local state = auction.GetAuctionState(auctionInfo.id)
+						if state and not state.bidInProgress then
+							auction.Buyout(auctionInfo.id)
+						end
 						LotForBuy.countLots = LotForBuy.countLots - 1
 				end
 			end
@@ -401,12 +432,13 @@ ListBuy.AuctionSearch = function(params)
 	end
 
 	if LotForBuy.countLots and LotForBuy.countLots > 0 and auctionsPage < auctionsPageCount then
-		GetPage(auctionsPage+1)
+		SearchRequested = GetPage(auctionsPage+1)
 		StatusBar:SetVal("value", userMods.ToWString(GetLocalizedText("SearchSelectedForBuyOutInProgress")..tostring(auctionsPage)..GetLocalizedText("SeparatorSearchInProgress")..tostring(auctionsPageCount)))
 		return
 	end
 
 	BuyoutSelected = false
+	SearchRequested = false
 	StatusBar:SetVal("value", userMods.ToWString(GetLocalizedText("BuyoutFinished")))
 	ListBuy.StartSearch()
 end
@@ -430,7 +462,7 @@ end
 ListBuy.FillInfoBar = function(line)
 	wtInfoBarLots:GetChildChecked("HeaderNumLots", false):SetVal("value", userMods.ToWString(GetLocalizedText("HeaderNumLots")))
 	wtInfoBarLots:GetChildChecked("EditLine", false):SetText(userMods.ToWString(tostring(line.lotsValue)))
-	FillUniSlot(wtInfoBarSlot, line.infoForBuy.icon, line.infoForBuy.quality, false, line.infoForBuy.count, nil)
+	FillUniSlot(wtInfoBarSlot, line.infoForBuy.icon, line.infoForBuy.quality, line.infoForBuy.isCursed, line.infoForBuy.count, nil)
 	wtInfoBarSlot:SetName(CurrentSelectedLine)
 	wtInfoBarName:SetVal("itemname", line.infoForBuy.name)
 	wtInfoBarName:SetClassVal( "class", ItemQualityClass[line.infoForBuy.quality])
@@ -486,21 +518,18 @@ ListBuy.reloadSortIcon = function()
 end
 
 function ClearTabBuy()
-    -- Уничтожаем виджеты из Lines; IsValid — единственный безопасный метод
-    -- для уже уничтоженного виджета.
-    for key, val in pairs(Lines) do
-        if val and val.widget and val.widget:IsValid() then
-            val.widget:DestroyWidget()
-        end
-    end
+    -- Все строки лежат в Container; DestroyWidgetsInContainer сначала
+    -- отсоединяет виджеты от контейнера, потом уничтожает — прямой
+    -- DestroyWidget по виджету в контейнере оставляет в нём InvalidWidgetSafe.
+    DestroyWidgetsInContainer(Container)
     Lines = {}
     CountAuctions = 0
     auctionsPage = 0
     auctionsPageCount = 0
     LotForBuy = {}
     CurrentSelectedLine = false
-    -- Чистим контейнер (там могут быть виджеты, не попавшие в Lines)
-    DestroyWidgetsInContainer(Container)
+    RestartPending = false
+    SearchRequested = false
     ListBuy.ClearInfoBar()
     ListBuy.reloadSortIcon()
 end
@@ -561,18 +590,30 @@ ListBuy.BuySelected = function()
 		BuyoutSelected = false
 		return
 	end
-	if not GetPage(1) then
+	SearchRequested = GetPage(1)
+	if not SearchRequested then
 		BuyoutSelected = false
 		StatusBar:SetVal("value", userMods.ToWString(GetLocalizedText("SearchAlreadyInProgress")))
 	end
 end
 
 ListBuy.StartSearch = function()
-	auctionsPage = 0
-	auctionsPageCount = 0
-	CountAuctions = 0
+	-- повторный поиск отменяет выкуп выбранных лотов
+	BuyoutSelected = false
+	if not ListBuy.AssembleFilter() then
+		return
+	end
 	ClearTabBuy()
-	if ListBuy.AssembleFilter() then GetPage(1) end
+	if auction.IsSearchInProgress() then
+		-- старый поиск ещё не ответил: API не примет новый запрос.
+		-- Результат старого поиска будет пропущен (RestartPending), и с ним
+		-- же стартует поиск по уже собранному новому фильтру.
+		RestartPending = true
+		StatusBar:SetVal("value", userMods.ToWString(GetLocalizedText("SearchRestarting")))
+		return
+	end
+	RestartPending = false
+	SearchRequested = GetPage(1)
 end
 
 function OnAuctionBidResult(params)

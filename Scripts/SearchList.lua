@@ -1,21 +1,26 @@
-Global("OpenSearchListFromOptions", false)
+-- Список задач сканирования (режимы "из сумки" и "свой список"),
+-- встроенный в панель вкладки "Скан". Строки создаются из шаблона Line;
+-- в режиме "свой список" у строк есть ластики удаления, под списком -
+-- строка ввода для добавления нового имени.
+if AuctionPlusNoAuction then return end
+-- Панель ScanPanel при загрузке TabScan перемещена в окно аукциона
+-- (AuctionMainPanel:AddChild), поэтому ищем TaskList оттуда, а не от mainForm
 Global("SearchList", {})
-local wtSearchList = mainForm:GetChildChecked("SearchList", false)
-local ContainerForBag = wtSearchList:GetChildChecked("ContainerForBag", false)
-local ContainerYourList = wtSearchList:GetChildChecked("ContainerYourList", false)
+local wtTaskList = AuctionMainPanel:GetChildChecked("ScanPanel", false):GetChildChecked("TaskList", false)
+local wtTaskItems = wtTaskList:GetChildChecked("TaskItems", false)
+local EditPanel = wtTaskList:GetChildChecked("EditPanel", false)
+local EditLine = EditPanel:GetChildChecked("EditLine", false)
 local StrikeOut = common.GetAddonRelatedTextureGroup("Group01"):GetTexture("StrikeOut")
 local DoubleStrikethrough = common.GetAddonRelatedTextureGroup("Group01"):GetTexture("DoubleStrikethrough")
 local TripleStrikeout = common.GetAddonRelatedTextureGroup("Group01"):GetTexture("TripleStrikeout")
 local ClearBlockFrame = common.GetAddonRelatedTextureGroup("Group01"):GetTexture("ClearBlockFrame")
-local EditPanel = wtSearchList:GetChildChecked("EditPanel", false)
-local EditLine = EditPanel:GetChildChecked("EditLine", false)
 local wtDescPlainLine = nil
 local PlainLines = {}
 
 function CreatePlainLine(i)
 	local plainline = {}
 	if not wtDescPlainLine then
-		plainline.widget = wtSearchList:GetChildChecked("Line", false)
+		plainline.widget = wtTaskList:GetChildChecked("Line", false)
 		wtDescPlainLine = plainline.widget:GetWidgetDesc()
 	else
 		plainline.widget = mainForm:CreateWidgetByDesc(wtDescPlainLine)
@@ -29,24 +34,17 @@ function CreatePlainLine(i)
 	PlainLines[i] = plainline
 end
 
-function AddPlainLines(i, name)
+-- isYourList: строка своего списка - с ластиком удаления
+function AddPlainLines(i, name, isYourList)
     CreatePlainLine(i)
-	if Options.ScanBy == 2 and not OpenSearchListFromOptions then
-    	PlainLines[i].text:SetVal("text", name)
-		PlainLines[i].text:SetClassVal("class", "OnPaper")
-		PlainLines[i].eraser:Show(false)
-		ContainerForBag:PushBack(PlainLines[i].widget)
-	elseif Options.ScanBy == 3 and not OpenSearchListFromOptions then
-		PlainLines[i].text:SetVal("text", name)
-		PlainLines[i].text:SetClassVal("class", "OnPaper")
-		PlainLines[i].eraser:Show(true)
-		ContainerYourList:PushBack(PlainLines[i].widget)
-	elseif OpenSearchListFromOptions then
-		PlainLines[i].text:SetVal("text", name)
-		PlainLines[i].text:SetClassVal("class", "OnPaper")
-		PlainLines[i].eraser:Show(true)
-		ContainerYourList:PushBack(PlainLines[i].widget)
-	end
+    PlainLines[i].text:SetVal("text", name)
+    PlainLines[i].text:SetClassVal("class", "OnPaper")
+    if isYourList then
+        PlainLines[i].eraser:Show(true)
+    else
+        PlainLines[i].eraser:Show(false)
+    end
+    wtTaskItems:PushBack(PlainLines[i].widget)
 end
 
 function FillYourSearchList()
@@ -54,7 +52,7 @@ function FillYourSearchList()
 	local countSearchList = table.getn(SearchList)
 	if countSearchList > 0 then
 		for i = 1, countSearchList do
-			AddPlainLines(i, SearchList[i])
+			AddPlainLines(i, SearchList[i], true)
 		end
 	end
 end
@@ -63,7 +61,7 @@ function EditLineEnter()
 	local i = table.getn(SearchList)+1
 	local text = EditLine:GetText()
 	if string.len(userMods.FromWString(text)) > 0 then
-		AddPlainLines(i, text)
+		AddPlainLines(i, text, true)
 		table.insert(SearchList, text)
 		userMods.SetGlobalConfigSection("SearchList", SearchList)
 		EditLine:SetText(userMods.ToWString(""))
@@ -81,19 +79,20 @@ function SaveSearchList()
 end
 
 local function ValidPlainLine(i)
+	-- строки уничтожаются только через ClearList/ClearBagList,
+	-- которые сбрасывают PlainLines: запись в таблице = живая строка
 	local line = PlainLines[i]
-	return line and line.widget and line.widget:IsValid()
-		and line.text and line.text:IsValid()
+	return line and line.widget ~= nil and line.text ~= nil
 end
 
 function StrikeOutLine(i)
 	if not ValidPlainLine(i) then return end
 	local placeText = PlainLines[i].text:GetPlacementPlain()
-	if placeText.sizeY < 30 then
+	if placeText.sizeY <= 30 then
 		PlainLines[i].text:SetBackgroundTexture(StrikeOut)
-	elseif placeText.sizeY > 30 and placeText.sizeY < 50 then
+	elseif placeText.sizeY <= 50 then
 		PlainLines[i].text:SetBackgroundTexture(DoubleStrikethrough)
-	elseif placeText.sizeY > 50 then
+	else
 		PlainLines[i].text:SetBackgroundTexture(TripleStrikeout)
 	end
 end
@@ -102,7 +101,7 @@ function ClearStrikeOutLine()
 	for i = 1, table.getn(PlainLines) do
 		if ValidPlainLine(i) then
 			PlainLines[i].text:SetBackgroundTexture(ClearBlockFrame)
-			if Options.ScanBy == 3 or OpenSearchListFromOptions then
+			if Options.ScanBy == 4 then
 				PlainLines[i].eraser:Show(true)
 			end
 		end
@@ -111,46 +110,42 @@ end
 
 function EnsureVisibleLine(i)
 	if not ValidPlainLine(i) then return end
-	local widget = PlainLines[i].widget
-	if Options.ScanBy == 2 and ContainerForBag:IsValid() then
-		ContainerForBag:EnsureVisible(widget)
-	elseif Options.ScanBy == 3 and ContainerYourList:IsValid() then
-		ContainerYourList:EnsureVisible(widget)
+	if wtTaskItems:IsValid() then
+		wtTaskItems:EnsureVisible(PlainLines[i].widget)
 	end
 end
 
 function ClearList()
-	if Options.ScanBy == 2 and not OpenSearchListFromOptions then
-		DestroyWidgetsInContainer(ContainerForBag)
-	elseif Options.ScanBy == 3 and not OpenSearchListFromOptions then
-		DestroyWidgetsInContainer(ContainerYourList)
-	elseif OpenSearchListFromOptions then
-		DestroyWidgetsInContainer(ContainerYourList)
-	end
-	PlainLines = {}
+    DestroyWidgetsInContainer(wtTaskItems)
+    PlainLines = {}
 end
 
-function ShowSearchListForBag()
-	wtSearchList:Show(true)
-	ContainerForBag:Show(true)
-end
-
-function ShowYourSearchList()
-	FillYourSearchList()
-	wtSearchList:Show(true)
-	ContainerYourList:Show(true)
-	EditPanel:Show(true)
-	EditLine:SetText(userMods.ToWString(GetLocalizedText("Add a name")))
-	EditLine:SetFocus(false)
-end
-
-function HideSearchList()
+function ClearBagList()
 	ClearList()
-    wtSearchList:Show(false)
-	ContainerForBag:Show(false)
-	ContainerYourList:Show(false)
+end
+
+-- Показ встроенного списка. mode: 3 - предметы из сумки, 4 - свой список.
+-- Содержимое пересоздаётся при каждом показе.
+function ShowTaskList(mode)
+	ClearList()
+	if mode == 4 then
+		FillYourSearchList()
+		EditPanel:Show(true)
+		EditLine:SetText(userMods.ToWString(GetLocalizedText("Add a name")))
+		EditLine:SetFocus(false)
+	else
+		for i = 1, table.getn(BagSearchList) do
+			AddPlainLines(i, BagSearchList[i], false)
+		end
+		EditPanel:Show(false)
+	end
+	wtTaskList:Show(true)
+end
+
+function HideTaskList()
+	ClearList()
+	wtTaskList:Show(false)
 	EditPanel:Show(false)
-	OpenSearchListFromOptions = false
 end
 
 function DeleteLine(reaction)
@@ -171,21 +166,19 @@ end
 
 function HideErasers()
 	for i = 1, table.getn(PlainLines) do
-		if ValidPlainLine(i) and PlainLines[i].eraser:IsValid() then
+		if ValidPlainLine(i) and PlainLines[i].eraser then
 			PlainLines[i].eraser:Show(false)
 		end
 	end
 end
 
 function SearchListInit()
-    common.RegisterReactionHandler(HideSearchList, "CloseList")
-	common.RegisterReactionHandler(EditLineEnter, "EditLineEnter")
+    common.RegisterReactionHandler(EditLineEnter, "EditLineEnter")
 	common.RegisterReactionHandler(DeleteLine, "DeleteLine")
 	common.RegisterReactionHandler(EditLineEsc, "EditLineEsc")
 	common.RegisterReactionHandler(EditLineFocusChanged, "EditLineFocusChanged")
-	common.RegisterReactionHandler(EditLineEnter, "AddLine")
+    common.RegisterReactionHandler(EditLineEnter, "AddLine")
 	common.RegisterReactionHandler(EditLineEsc, "ClearLine")
-    DnD.Init(wtSearchList, wtSearchList, true, true)
 end
 
 SearchListInit()
