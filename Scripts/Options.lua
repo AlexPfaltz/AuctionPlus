@@ -100,7 +100,7 @@ local function SetRowText(row, key)
 end
 
 function SetLocalizedText()
-    wtOptions:GetChildChecked("Header", false):GetChildChecked("Text", false):SetVal("text", GetLocalizedText("Auction+: Options"))
+    wtOptions:GetChildChecked("Header", false):GetChildChecked("Text", false):SetVal("text", GetLocalizedText("AuctionPlus: Options"))
     wtOptions:GetChildChecked("DefaultOptions", false):SetVal("button_label", userMods.ToWString(GetLocalizedText("Default Options")))
     GroupMain:GetChildChecked("GroupLabel", false):SetVal("text", GetLocalizedText("Main"))
     GroupToolTip:GetChildChecked("GroupLabel", false):SetVal("text", GetLocalizedText("Tooltip"))

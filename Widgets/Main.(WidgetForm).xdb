@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <WidgetForm>
-	<Name>Auction+</Name>
+	<Name>AuctionPlus</Name>
 	<Priority>99000</Priority>
 	<Children>
 		<Item href="Buttons/Settings.(WidgetButton).xdb" />
