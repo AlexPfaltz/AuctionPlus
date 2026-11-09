@@ -3,35 +3,36 @@
 	<TextTag>button_label</TextTag>
 	<Variants>
 		<Item>
-			<LayerHighlight href="../../../Buttons/Tab/TabHighlight.(WidgetLayerTiledTexture).xdb" />
-			<PushedOffset x="2" y="-2" />
+			<LayerHighlight href="../../Resources/AuctionButtonCommon/AuctionButtonCommonHighlight.(WidgetLayerTiledTexture).xdb" />
+			<PushedOffset x="-2" y="2" />
 			<StateNormal>
-				<LayerMain href="../../../Buttons/Tab/TabNormal.(WidgetLayerTiledTexture).xdb" />
-				<FormatFileRef href="../../../Buttons/Tab/ButtonFormatNormal.txt" />
+				<LayerMain href="../../Resources/AuctionButtonCommon/AuctionButtonCommonNormal.(WidgetLayerTiledTexture).xdb" />
+				<FormatFileRef href="../../Resources/AuctionButtonCommon/ButtonFormatNormal.txt" />
 			</StateNormal>
 			<StatePushed>
-				<LayerMain href="../../../Buttons/Tab/TabSelected.(WidgetLayerTiledTexture).xdb" />
-				<FormatFileRef href="../../../Buttons/Tab/ButtonFormatSelected.txt" />
+				<LayerMain href="../../Resources/AuctionButtonCommon/AuctionButtonCommonPressed.(WidgetLayerTiledTexture).xdb" />
 			</StatePushed>
-			<StateHighlighted>
-				<FormatFileRef href="../../../Buttons/Tab/ButtonFormatSelected.txt" />
-			</StateHighlighted>
+			<StateDisabled>
+				<LayerMain href="../../Resources/AuctionButtonCommon/AuctionButtonCommonDisabled.(WidgetLayerTiledTexture).xdb" />
+				<FormatFileRef href="../../Resources/AuctionButtonCommon/ButtonFormatDisabled.txt" />
+			</StateDisabled>
 			<Reaction>ScanModeList</Reaction>
 			<ReactionOnUp>true</ReactionOnUp>
 		</Item>
 		<Item>
-			<LayerHighlight href="../../../Buttons/Tab/TabHighlight.(WidgetLayerTiledTexture).xdb" />
+			<LayerHighlight href="../../Resources/AuctionButtonCommon/AuctionButtonCommonHighlight.(WidgetLayerTiledTexture).xdb" />
 			<StateNormal>
-				<LayerMain href="../../../Buttons/Tab/TabSelected.(WidgetLayerTiledTexture).xdb" />
-				<FormatFileRef href="../../../Buttons/Tab/ButtonFormatSelected.txt" />
+				<LayerMain href="../../Resources/AuctionButtonCommon/AuctionButtonCommonPressed.(WidgetLayerTiledTexture).xdb" />
+				<FormatFileRef href="../../Resources/AuctionButtonCommon/ButtonFormatNormal.txt" />
 			</StateNormal>
 			<StatePushed>
-				<LayerMain href="../../../Buttons/Tab/TabNormal.(WidgetLayerTiledTexture).xdb" />
-				<FormatFileRef href="../../../Buttons/Tab/ButtonFormatSelected.txt" />
+				<LayerMain href="../../Resources/AuctionButtonCommon/AuctionButtonCommonPressed.(WidgetLayerTiledTexture).xdb" />
+				<FormatFileRef href="../../Resources/AuctionButtonCommon/ButtonFormatNormal.txt" />
 			</StatePushed>
-			<StateHighlighted>
-				<FormatFileRef href="../../../Buttons/Tab/ButtonFormatSelected.txt" />
-			</StateHighlighted>
+			<StateDisabled>
+				<LayerMain href="../../Resources/AuctionButtonCommon/AuctionButtonCommonPressed.(WidgetLayerTiledTexture).xdb" />
+				<FormatFileRef href="../../Resources/AuctionButtonCommon/ButtonFormatDisabled.txt" />
+			</StateDisabled>
 			<Reaction>ScanModeList</Reaction>
 			<ReactionOnUp>true</ReactionOnUp>
 		</Item>
@@ -40,20 +41,19 @@
 		<Align>ALIGNY_MIDDLE</Align>
 	</TextStyle>
 	<Name>ModeList</Name>
-	<Priority>0</Priority>
-		<Placement>
+	<Placement>
 		<X>
 			<Align>WIDGET_ALIGN_CENTER</Align>
-			<Pos>170</Pos>
-			<Size>160</Size>
+			<Pos>260</Pos>
+			<Size>164</Size>
 		</X>
 		<Y>
 			<Align>WIDGET_ALIGN_LOW</Align>
-			<Pos>90</Pos>
-			<Size>40</Size>
+			<Pos>86</Pos>
+			<Size>32</Size>
 		</Y>
 	</Placement>
-
-	<Visible>false</Visible>
+	<Visible>true</Visible>
+	<Enabled>true</Enabled>
 	<IgnoreDblClick>true</IgnoreDblClick>
 </WidgetButton>

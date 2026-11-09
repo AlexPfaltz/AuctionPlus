@@ -10,12 +10,12 @@
 		<X>
 			<Align>WIDGET_ALIGN_CENTER</Align>
 			<Pos>0</Pos>
-			<Size>160</Size>
+			<Size>200</Size>
 		</X>
 		<Y>
-			<Align>WIDGET_ALIGN_LOW</Align>
-			<Pos>397</Pos>
-			<Size>38</Size>
+			<Align>WIDGET_ALIGN_HIGH</Align>
+			<HighPos>12</HighPos>
+			<Size>44</Size>
 		</Y>
 	</Placement>
 	<Visible>true</Visible>

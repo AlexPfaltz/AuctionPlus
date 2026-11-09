@@ -13,8 +13,8 @@
 			<Size>240</Size>
 		</X>
 		<Y>
-			<Align>WIDGET_ALIGN_LOW</Align>
-			<Pos>397</Pos>
+			<Align>WIDGET_ALIGN_HIGH</Align>
+			<HighPos>12</HighPos>
 			<Size>44</Size>
 		</Y>
 	</Placement>

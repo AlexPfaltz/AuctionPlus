@@ -3,18 +3,19 @@
 	<Name>BarBack</Name>
 	<Children>
 		<Item href="BarFill.(WidgetPanel).xdb" />
+		<Item href="BarText.(WidgetTextView).xdb" />
 	</Children>
 	<BackLayer href="../Buy/InfoBar/Textures/AuctionPanelEditable.(WidgetLayerTiledTexture).xdb" />
 	<Placement>
 		<X>
 			<Align>WIDGET_ALIGN_BOTH</Align>
-			<Pos>80</Pos>
-			<HighPos>80</HighPos>
+			<Pos>24</Pos>
+			<HighPos>24</HighPos>
 		</X>
 		<Y>
 			<Align>WIDGET_ALIGN_LOW</Align>
-			<Pos>90</Pos>
-			<Size>40</Size>
+			<Pos>28</Pos>
+			<Size>22</Size>
 		</Y>
 	</Placement>
 	<Visible>true</Visible>

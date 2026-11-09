@@ -4,19 +4,19 @@
 	<Priority>900</Priority>
 	<Children>
 		<Item href="Texts/Title.(WidgetTextView).xdb" />
+		<Item href="Frames/FrameMode.(WidgetPanel).xdb" />
+		<Item href="Frames/FrameParams.(WidgetPanel).xdb" />
+		<Item href="Texts/ParamsInfo.(WidgetTextView).xdb" />
 		<Item href="Texts/Line1.(WidgetTextView).xdb" />
 		<Item href="Texts/Line2.(WidgetTextView).xdb" />
-		<Item href="Texts/Line3.(WidgetTextView).xdb" />
-		<Item href="Texts/Line4.(WidgetTextView).xdb" />
-		<Item href="Texts/Line5.(WidgetTextView).xdb" />
-		<Item href="BarBack.(WidgetPanel).xdb" />
-		<Item href="Selectors/ScanMode.(WidgetPanel).xdb" />
+		<Item href="Buttons/ModeAll.(WidgetButton).xdb" />
+		<Item href="Buttons/ModeCategory.(WidgetButton).xdb" />
+		<Item href="Buttons/ModeBag.(WidgetButton).xdb" />
+		<Item href="Buttons/ModeList.(WidgetButton).xdb" />
 		<Item href="Selectors/ScanCategory.(WidgetPanel).xdb" />
 		<Item href="Selectors/ScanSubcategory.(WidgetPanel).xdb" />
 		<Item href="Buttons/Start.(WidgetButton).xdb" />
 		<Item href="Buttons/Resume.(WidgetButton).xdb" />
-		<Item href="Buttons/Stop.(WidgetButton).xdb" />
-		<Item href="Buttons/Close.(WidgetButton).xdb" />
 		<Item href="Dropdown/DropList.(WidgetPanel).xdb" />
 		<Item href="TaskList.(WidgetPanel).xdb" />
 	</Children>

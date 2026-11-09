@@ -4,14 +4,14 @@
 	<Name>Line5</Name>
 	<Placement>
 		<X>
-			<Align>WIDGET_ALIGN_BOTH</Align>
-			<Pos>60</Pos>
-			<HighPos>60</HighPos>
+			<Align>WIDGET_ALIGN_CENTER</Align>
+			<Pos>0</Pos>
+			<Size>500</Size>
 		</X>
 		<Y>
 			<Align>WIDGET_ALIGN_LOW</Align>
-			<Pos>278</Pos>
-			<Size>26</Size>
+			<Pos>172</Pos>
+			<Size>22</Size>
 		</Y>
 	</Placement>
 	<Visible>true</Visible>

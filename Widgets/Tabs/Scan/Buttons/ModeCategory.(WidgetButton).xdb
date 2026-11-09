@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WidgetButton>
+	<TextTag>button_label</TextTag>
+	<Variants>
+		<Item>
+			<LayerHighlight href="../../Resources/AuctionButtonCommon/AuctionButtonCommonHighlight.(WidgetLayerTiledTexture).xdb" />
+			<PushedOffset x="-2" y="2" />
+			<StateNormal>
+				<LayerMain href="../../Resources/AuctionButtonCommon/AuctionButtonCommonNormal.(WidgetLayerTiledTexture).xdb" />
+				<FormatFileRef href="../../Resources/AuctionButtonCommon/ButtonFormatNormal.txt" />
+			</StateNormal>
+			<StatePushed>
+				<LayerMain href="../../Resources/AuctionButtonCommon/AuctionButtonCommonPressed.(WidgetLayerTiledTexture).xdb" />
+			</StatePushed>
+			<StateDisabled>
+				<LayerMain href="../../Resources/AuctionButtonCommon/AuctionButtonCommonDisabled.(WidgetLayerTiledTexture).xdb" />
+				<FormatFileRef href="../../Resources/AuctionButtonCommon/ButtonFormatDisabled.txt" />
+			</StateDisabled>
+			<Reaction>ScanModeCategory</Reaction>
+			<ReactionOnUp>true</ReactionOnUp>
+		</Item>
+		<Item>
+			<LayerHighlight href="../../Resources/AuctionButtonCommon/AuctionButtonCommonHighlight.(WidgetLayerTiledTexture).xdb" />
+			<StateNormal>
+				<LayerMain href="../../Resources/AuctionButtonCommon/AuctionButtonCommonPressed.(WidgetLayerTiledTexture).xdb" />
+				<FormatFileRef href="../../Resources/AuctionButtonCommon/ButtonFormatNormal.txt" />
+			</StateNormal>
+			<StatePushed>
+				<LayerMain href="../../Resources/AuctionButtonCommon/AuctionButtonCommonPressed.(WidgetLayerTiledTexture).xdb" />
+				<FormatFileRef href="../../Resources/AuctionButtonCommon/ButtonFormatNormal.txt" />
+			</StatePushed>
+			<StateDisabled>
+				<LayerMain href="../../Resources/AuctionButtonCommon/AuctionButtonCommonPressed.(WidgetLayerTiledTexture).xdb" />
+				<FormatFileRef href="../../Resources/AuctionButtonCommon/ButtonFormatDisabled.txt" />
+			</StateDisabled>
+			<Reaction>ScanModeCategory</Reaction>
+			<ReactionOnUp>true</ReactionOnUp>
+		</Item>
+	</Variants>
+	<TextStyle>
+		<Align>ALIGNY_MIDDLE</Align>
+	</TextStyle>
+	<Name>ModeCategory</Name>
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_CENTER</Align>
+			<Pos>-86</Pos>
+			<Size>164</Size>
+		</X>
+		<Y>
+			<Align>WIDGET_ALIGN_LOW</Align>
+			<Pos>86</Pos>
+			<Size>32</Size>
+		</Y>
+	</Placement>
+	<Visible>true</Visible>
+	<Enabled>true</Enabled>
+	<IgnoreDblClick>true</IgnoreDblClick>
+</WidgetButton>

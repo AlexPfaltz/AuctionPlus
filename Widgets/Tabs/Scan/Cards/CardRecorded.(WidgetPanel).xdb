@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WidgetPanel>
+	<Name>CardRecorded</Name>
+	<Children>
+		<Item href="CardCaption.(WidgetTextView).xdb" />
+		<Item href="CardValue.(WidgetTextView).xdb" />
+	</Children>
+	<BackLayer href="../../../Options/GroupFrames/Textures/ContentFrame.(WidgetLayerTiledTexture).xdb" />
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_CENTER</Align>
+			<Pos>224</Pos>
+			<Size>216</Size>
+		</X>
+		<Y>
+			<Align>WIDGET_ALIGN_LOW</Align>
+			<Pos>138</Pos>
+			<Size>52</Size>
+		</Y>
+	</Placement>
+	<Visible>false</Visible>
+	<TransparentInput>true</TransparentInput>
+</WidgetPanel>

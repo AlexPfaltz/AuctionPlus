@@ -16,6 +16,8 @@ local TripleStrikeout = common.GetAddonRelatedTextureGroup("Group01"):GetTexture
 local ClearBlockFrame = common.GetAddonRelatedTextureGroup("Group01"):GetTexture("ClearBlockFrame")
 local wtDescPlainLine = nil
 local PlainLines = {}
+-- флаг отложенной подгонки ширины кнопок удаления (см. ApplyEraserWidths)
+local needEraserWidths = false
 
 function CreatePlainLine(i)
 	local plainline = {}
@@ -38,13 +40,13 @@ end
 function AddPlainLines(i, name, isYourList)
     CreatePlainLine(i)
     PlainLines[i].text:SetVal("text", name)
-    PlainLines[i].text:SetClassVal("class", "OnPaper")
     if isYourList then
         PlainLines[i].eraser:Show(true)
     else
         PlainLines[i].eraser:Show(false)
     end
     wtTaskItems:PushBack(PlainLines[i].widget)
+	needEraserWidths = true
 end
 
 function FillYourSearchList()
@@ -128,17 +130,21 @@ end
 -- Содержимое пересоздаётся при каждом показе.
 function ShowTaskList(mode)
 	ClearList()
+	local place = wtTaskItems:GetPlacementPlain()
 	if mode == 4 then
+		place.highPosY = 46
 		FillYourSearchList()
 		EditPanel:Show(true)
 		EditLine:SetText(userMods.ToWString(GetLocalizedText("Add a name")))
 		EditLine:SetFocus(false)
 	else
+		place.highPosY = 14
 		for i = 1, table.getn(BagSearchList) do
 			AddPlainLines(i, BagSearchList[i], false)
 		end
 		EditPanel:Show(false)
 	end
+	wtTaskItems:SetPlacementPlain(place)
 	wtTaskList:Show(true)
 end
 
@@ -172,9 +178,34 @@ function HideErasers()
 	end
 end
 
+-- Кнопка удаления подгоняется под ширину названия: зачёркивание и зона
+-- клика совпадают с текстом с небольшим выступом по краям. Реальная ширина
+-- текста известна только после отрисовки, поэтому замер откладывается
+local function ApplyEraserWidths()
+	local screen = common.GetPosConverterParams()
+	for i = 1, table.getn(PlainLines) do
+		if ValidPlainLine(i) then
+			local rect = PlainLines[i].text:GetRealRect()
+			local width = (rect.x2 - rect.x1) * screen.fullVirtualSizeX / screen.realSizeX
+			if width > 0 then
+				local place = PlainLines[i].eraser:GetPlacementPlain()
+				place.sizeX = math.floor(width + 12)
+				PlainLines[i].eraser:SetPlacementPlain(place)
+			end
+		end
+	end
+end
+
+local function OnSecondTimer()
+	if not needEraserWidths then return end
+	needEraserWidths = false
+	ApplyEraserWidths()
+end
+
 function SearchListInit()
     common.RegisterReactionHandler(EditLineEnter, "EditLineEnter")
 	common.RegisterReactionHandler(DeleteLine, "DeleteLine")
+	common.RegisterEventHandler(OnSecondTimer, "EVENT_SECOND_TIMER")
 	common.RegisterReactionHandler(EditLineEsc, "EditLineEsc")
 	common.RegisterReactionHandler(EditLineFocusChanged, "EditLineFocusChanged")
     common.RegisterReactionHandler(EditLineEnter, "AddLine")

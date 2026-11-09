@@ -13,6 +13,7 @@
 		<Item href="Tabs/Buy/ListBuy.(WidgetPanel).xdb" />
 		<Item href="Tabs/Sell/ListSell.(WidgetPanel).xdb" />
 		<Item href="Tabs/Scan/ScanPanel.(WidgetPanel).xdb" />
+		<Item href="Tabs/Scan/ScanRun.(WidgetPanel).xdb" />
 		<Item href="Tooltip/Tooltip.(WidgetPanel).xdb" />
 	</Children>
 	<Placement>

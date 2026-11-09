@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WidgetPanel>
+	<Name>FrameProgress</Name>
+	<Children>
+		<Item href="Label.(WidgetTextView).xdb" />
+		<Item href="../BarBack.(WidgetPanel).xdb" />
+		<Item href="ItemLine.(WidgetTextView).xdb" />
+		<Item href="../Cards/CardPage.(WidgetPanel).xdb" />
+		<Item href="../Cards/CardLots.(WidgetPanel).xdb" />
+		<Item href="../Cards/CardElapsed.(WidgetPanel).xdb" />
+		<Item href="../Cards/CardRemaining.(WidgetPanel).xdb" />
+		<Item href="../Cards/CardSpeed.(WidgetPanel).xdb" />
+		<Item href="../Cards/CardRecorded.(WidgetPanel).xdb" />
+	</Children>
+	<BackLayer href="../../../Options/GroupFrames/Textures/GroupFrame.(WidgetLayerTiledTexture).xdb" />
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_CENTER</Align>
+			<Pos>0</Pos>
+			<Size>720</Size>
+		</X>
+		<Y>
+			<Align>WIDGET_ALIGN_LOW</Align>
+			<Pos>56</Pos>
+			<Size>208</Size>
+		</Y>
+	</Placement>
+	<Visible>true</Visible>
+	<TransparentInput>true</TransparentInput>
+</WidgetPanel>

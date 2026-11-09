@@ -1,7 +1,8 @@
 --------------------------------------------------------------------------------
 -- TabScan.lua: вкладка "Скан".
--- Три вида одной панели: setup (выбор режима и запуск), run (ход скана),
--- done (итог). Данные хода скана берёт из глобальной ScanInfo (ScanAuction.lua).
+-- Два окна: ScanPanel - настройка и запуск (setup), ScanRun - отдельное окно
+-- поверх неё с ходом скана (run) и отчётом по завершении (done).
+-- Данные хода скана берёт из глобальной ScanInfo (ScanAuction.lua).
 -- Режимы: 1 - весь аукцион, 2 - категория, 3 - из сумки, 4 - свой список.
 -- Для режимов 3/4 задачи показываются встроенным списком (SearchList.lua).
 --------------------------------------------------------------------------------
@@ -9,28 +10,55 @@ Global("TabScan", {})
 Global("btTabScan", mainForm:GetChildChecked("TabScan", false))
 
 local wtPanel = mainForm:GetChildChecked("ScanPanel", false)
+local wtRunPanel = mainForm:GetChildChecked("ScanRun", false)
 btTabScan:SetVal("button_label", userMods.ToWString(GetLocalizedText("btTabScan")))
 -- без ContextAuction остальное всё равно должно выполниться:
 -- ScanAuction вызывает TabScan.OnStopped при остановке скана
 if AuctionMainPanel then
 	AuctionMainPanel:AddChild(btTabScan)
 	AuctionMainPanel:AddChild(wtPanel)
+	AuctionMainPanel:AddChild(wtRunPanel)
 end
 
 local wtTitle = wtPanel:GetChildChecked("Title", false)
-local wtLine = {}
-for i = 1, 5 do
-	wtLine[i] = wtPanel:GetChildChecked("Line" .. i, false)
-end
-local wtBarBack = wtPanel:GetChildChecked("BarBack", false)
+-- строки подсказки в окне настройки
+local wtLine = {
+	wtPanel:GetChildChecked("Line1", false),
+	wtPanel:GetChildChecked("Line2", false),
+}
+local wtParamsInfo = wtPanel:GetChildChecked("ParamsInfo", false)
+local wtFrameMode = wtPanel:GetChildChecked("FrameMode", false)
+local wtFrameParams = wtPanel:GetChildChecked("FrameParams", false)
+-- отдельное окно хода скана и отчёта
+local wtRunTitle = wtRunPanel:GetChildChecked("Title", false)
+-- строки отчёта по завершении
+local wtRunLine = {
+	wtRunPanel:GetChildChecked("Line3", false),
+	wtRunPanel:GetChildChecked("Line4", false),
+	wtRunPanel:GetChildChecked("Line5", false),
+}
+local wtFrameProgress = wtRunPanel:GetChildChecked("FrameProgress", false)
+local wtProgressLabel = wtFrameProgress:GetChildChecked("Label", false)
+local wtBarBack = wtFrameProgress:GetChildChecked("BarBack", false)
 local wtBarFill = wtBarBack:GetChildChecked("BarFill", false)
+local wtBarText = wtBarBack:GetChildChecked("BarText", false)
+local wtItemLine = wtFrameProgress:GetChildChecked("ItemLine", false)
 local btStart = wtPanel:GetChildChecked("Start", false)
 local btResume = wtPanel:GetChildChecked("Resume", false)
-local btStop = wtPanel:GetChildChecked("Stop", false)
-local btClose = wtPanel:GetChildChecked("Close", false)
--- Селекторы способа сканирования и фильтра по категориям.
-local modePanel = wtPanel:GetChildChecked("ScanMode", false)
-local modeValue = modePanel:GetChildChecked("Value", false)
+local btStop = wtRunPanel:GetChildChecked("Stop", false)
+local btClose = wtRunPanel:GetChildChecked("Close", false)
+-- Кнопки способа сканирования: 1 - весь аукцион, 2 - категория, 3 - из сумки, 4 - свой список
+local btMode = {}
+for i, name in ipairs({ "ModeAll", "ModeCategory", "ModeBag", "ModeList" }) do
+	btMode[i] = wtPanel:GetChildChecked(name, false)
+end
+-- Карточки статистики хода скана (в рамке прогресса)
+local CARD_NAMES = { "CardPage", "CardLots", "CardElapsed", "CardRemaining", "CardSpeed", "CardRecorded" }
+local wtCard = {}
+for _, name in ipairs(CARD_NAMES) do
+	wtCard[name] = wtFrameProgress:GetChildChecked(name, false)
+end
+-- Селекторы фильтра по категориям
 local categoryPanel = wtPanel:GetChildChecked("ScanCategory", false)
 local categoryBtn = categoryPanel:GetChildChecked("DropBtn", false)
 local subcategoryPanel = wtPanel:GetChildChecked("ScanSubcategory", false)
@@ -65,10 +93,10 @@ local function SetText(widget, text)
 	widget:SetVal("value", text)
 end
 
-local function SetLines(...)
+local function SetLines(lines, ...)
 	local texts = { ... }
-	for i = 1, 5 do
-		SetText(wtLine[i], texts[i] or "")
+	for i = 1, table.getn(lines) do
+		SetText(lines[i], texts[i] or "")
 	end
 end
 
@@ -161,12 +189,12 @@ end
 
 local function RefreshScanSelectors()
 	EnsureCategories()
-	modePanel:GetChildChecked("Text", false):SetVal("text", L("ScanModeLabel"))
 	categoryPanel:GetChildChecked("Text", false):SetVal("text", L("ScanCategoryLabel"))
 	subcategoryPanel:GetChildChecked("Text", false):SetVal("text", L("ScanSubcategoryLabel"))
 
-	local modeKeys = { "ScanModeAll", "ScanModeCategory", "ScanModeBag", "ScanModeList" }
-	modeValue:SetVal("value", L(modeKeys[Options.ScanBy] or "ScanModeAll"))
+	for i = 1, 4 do
+		btMode[i]:SetVariant(Options.ScanBy == i and 1 or 0)
+	end
 
 	local root = RootNode()
 	categoryBtn:SetVal("button_label", root and root.name or userMods.ToWString(L("AllCategories")))
@@ -182,7 +210,7 @@ end
 --------------------------------------------------------------------------------
 local DROP_ROW_HEIGHT = 28                              -- высота строки списка с промежутком
 local DROP_MAX_ROWS = 10                                -- сколько строк видно без прокрутки
-local DROP_TOP = { category = 342, subcategory = 377 }  -- верхний край списка (под строкой селектора)
+local DROP_TOP = { category = 226, subcategory = 262 }  -- верхний край списка (под строкой селектора)
 local dropKind = nil                                    -- "category" | "subcategory" | nil
 local dropEntries = {}                                  -- { text = WString, id = число }
 
@@ -255,12 +283,6 @@ local function SelectDrop(index)
 	RefreshSetup()
 end
 
-local function CycleMode(delta)
-	local mode = Options.ScanBy + delta
-	if mode < 1 then mode = 4 elseif mode > 4 then mode = 1 end
-	SetMode(mode)
-end
-
 -- 1:05 для длительностей в мс
 local function FormatClock(ms)
 	local total = math.floor(ms / 1000)
@@ -326,6 +348,7 @@ end
 
 local function SetBar(fraction)
 	local width = math.floor(BarInnerWidth() * fraction)
+	SetText(wtBarText, tostring(math.floor(fraction * 100 + 0.5)) .. "%")
 	if width < 1 then
 		wtBarFill:Show(false)
 		return
@@ -336,50 +359,29 @@ local function SetBar(fraction)
 	wtBarFill:Show(true)
 end
 
+local function SetCard(name, value)
+	SetText(wtCard[name]:GetChildChecked("Value", false), value)
+end
+
 local function RefreshRun()
 	local fraction = Fraction()
 	SetBar(fraction)
 
 	local remaining = Remaining(fraction)
-	local timeText = L("ScanElapsed") .. FormatClock(ScanElapsedMs()) .. "   "
-	if remaining then
-		timeText = timeText .. L("ScanRemaining") .. FormatDuration(remaining)
-	else
-		timeText = timeText .. L("ScanCalculating")
-	end
-
 	local speed = PagesPerMinute()
-	local speedText = ""
-	if speed then
-		speedText = L("ScanSpeed") .. string.format("%.1f", speed) .. L("ScanPagesPerMin")
-	end
 
-	local taskText
-	if ScanInfo.mode == "list" then
-		taskText = L("ScanItem") .. tostring(ScanInfo.item or 0) .. L("ScanOf")
-			.. tostring(ScanInfo.items or 0) .. ": " .. tostring(ScanInfo.itemName or "")
-	else
-		taskText = L("ScanModeAll")
-	end
+	SetCard("CardPage", tostring(ScanInfo.page or 0) .. L("ScanOf") .. tostring(ScanInfo.pageCount or 0))
+	SetCard("CardLots", tostring(ScanInfo.lots or 0))
+	SetCard("CardElapsed", FormatClock(ScanElapsedMs()))
+	SetCard("CardRemaining", remaining and ("~" .. FormatDuration(remaining)) or "...")
+	SetCard("CardSpeed", speed and (string.format("%.1f", speed) .. L("ScanPagesPerMin")) or "-")
+	SetCard("CardRecorded", tostring(PriceDB.stats.committed or 0))
 
 	if ScanInfo.mode == "list" then
-		-- в режиме списка показан встроенный список задач: оставляем две
-		-- строки над ним, остальные закрыты списком
-		SetLines(
-			taskText,
-			L("ScanPage") .. tostring(ScanInfo.page or 0) .. L("ScanOf")
-				.. tostring(ScanInfo.pageCount or 0) .. L("ScanLots") .. tostring(ScanInfo.lots or 0)
-				.. "   " .. timeText)
-		return
+		-- в режиме списка над карточками показан текущий предмет
+		SetText(wtItemLine, L("ScanItem") .. tostring(ScanInfo.item or 0) .. L("ScanOf")
+			.. tostring(ScanInfo.items or 0) .. ": " .. tostring(ScanInfo.itemName or ""))
 	end
-
-	SetLines(
-		L("ScanPage") .. tostring(ScanInfo.page or 0) .. L("ScanOf")
-			.. tostring(ScanInfo.pageCount or 0) .. L("ScanLots") .. tostring(ScanInfo.lots or 0),
-		timeText,
-		speedText,
-		L("ScanRecorded") .. tostring(PriceDB.stats.committed or 0),
-		taskText)
 end
 
 --------------------------------------------------------------------------------
@@ -399,10 +401,65 @@ local function ModeInfoText()
 	return L(Options.ScanBy == 3 and "ScanInfoBag" or "ScanInfoList") .. tostring(GetScanTaskCount())
 end
 
+-- Раскладка окна настройки зависит от режима: рамка параметров подгоняется
+-- под содержимое, а в режимах со списком список растягивается до кнопок.
+local layoutMode = nil
+local function ApplyLayout(mode)
+	if layoutMode == mode then return end
+	layoutMode = mode
+	local taskMode = IsTaskMode(mode)
+
+	local place = wtFrameParams:GetPlacementPlain()
+	place.posY = 142
+	if taskMode then
+		place.alignY = WIDGET_ALIGN_BOTH
+		place.sizeY = 0
+		place.highPosY = 140
+	else
+		place.alignY = WIDGET_ALIGN_LOW
+		place.sizeY = mode == 2 and 140 or 64
+		place.highPosY = 0
+	end
+	wtFrameParams:SetPlacementPlain(place)
+
+	place = wtTaskList:GetPlacementPlain()
+	place.posY = 194
+	if taskMode then
+		place.alignY = WIDGET_ALIGN_BOTH
+		place.sizeY = 0
+		place.highPosY = 152
+	else
+		place.alignY = WIDGET_ALIGN_LOW
+		place.sizeY = 150
+		place.highPosY = 0
+	end
+	wtTaskList:SetPlacementPlain(place)
+
+	-- подсказки: в компактных режимах - сразу под рамкой, в режимах со
+	-- списком - внизу окна над кнопками запуска
+	local topY = nil
+	if not taskMode then
+		topY = mode == 2 and 296 or 220
+	end
+	for i = 1, 2 do
+		place = wtLine[i]:GetPlacementPlain()
+		if topY then
+			place.alignY = WIDGET_ALIGN_LOW
+			place.posY = topY + (i - 1) * 26
+			place.highPosY = 0
+		else
+			place.alignY = WIDGET_ALIGN_HIGH
+			place.posY = 0
+			place.highPosY = 96 - (i - 1) * 24
+		end
+		wtLine[i]:SetPlacementPlain(place)
+	end
+end
+
 RefreshSetup = function()
 	SetText(wtTitle, L("ScanPanelTitle"))
+	ApplyLayout(Options.ScanBy)
 	RefreshScanSelectors()
-	modePanel:Show(true)
 	local category = Options.ScanBy == 2
 	categoryPanel:Show(category)
 	subcategoryPanel:Show(category)
@@ -410,8 +467,6 @@ RefreshSetup = function()
 
 	local taskMode = IsTaskMode(Options.ScanBy)
 	wtTaskList:Show(taskMode)
-	-- строки 3-5 закрыты списком задач
-	for i = 3, 5 do wtLine[i]:Show(not taskMode) end
 
 	local busy = auction.IsSearchInProgress()
 	local empty = taskMode and GetScanTaskCount() == 0
@@ -430,15 +485,16 @@ RefreshSetup = function()
 	elseif empty then
 		first = L(Options.ScanBy == 3 and "ScanBagEmpty" or "ScanListEmpty")
 	else
-		first = ModeInfoText()
+		first = L("ScanHintStart")
 	end
-	SetLines(first, resumeText)
+	SetText(wtParamsInfo, ModeInfoText())
+	SetLines(wtLine, first, resumeText)
 end
 
-local function RefreshDone()
-	SetText(wtTitle, L("ScanTitleDone"))
-	SetBar(1)
-	SetLines(
+local function RefreshDone(completed)
+	SetText(wtRunTitle, L(completed and "ScanTitleDone" or "ScanTitleStopped"))
+	SetBar(completed and 1 or Fraction())
+	SetLines(wtRunLine,
 		L("ScanUpdated") .. tostring(ScanInfo.committed or 0),
 		L("ScanTime") .. FormatClock(ScanInfo.accMs or 0),
 		L("ScanLotsRead") .. tostring(ScanInfo.lots or 0))
@@ -448,28 +504,38 @@ local function ShowView(name)
 	CloseDrop()
 	view = name
 	local setup, run, done = name == "setup", name == "run", name == "done"
-	modePanel:Show(setup)
-	local category = setup and Options.ScanBy == 2
-	categoryPanel:Show(category)
-	subcategoryPanel:Show(category)
-	-- список задач виден в настройке режимов 3/4 и во время скана по списку
-	local taskList = (setup and IsTaskMode(Options.ScanBy))
-		or (run and ScanInfo.mode == "list")
-	wtTaskList:Show(taskList)
-	for i = 3, 5 do wtLine[i]:Show(not taskList) end
-	btStart:Show(setup)
-	btResume:Show(false)
+	-- настройка и ход скана - два отдельных окна
+	wtPanel:Show(setup)
+	wtRunPanel:Show(run or done)
+	if setup then
+		for i = 1, 4 do
+			btMode[i]:Enable(true)
+		end
+		wtParamsInfo:Show(true)
+		local category = Options.ScanBy == 2
+		categoryPanel:Show(category)
+		subcategoryPanel:Show(category)
+		wtTaskList:Show(IsTaskMode(Options.ScanBy))
+		RefreshSetup()
+		return
+	end
+	-- окно прогресса: во время скана - карточки, по завершении - строки отчёта
+	for _, cardName in ipairs(CARD_NAMES) do
+		wtCard[cardName]:Show(run)
+	end
+	for i = 1, 3 do
+		wtRunLine[i]:Show(done)
+	end
+	wtItemLine:Show(run and ScanInfo.mode == "list")
 	btStop:Show(run)
 	btClose:Show(done)
-	wtBarBack:Show(run or done)
-	if name == "setup" then
-		RefreshSetup()
-	elseif name == "run" then
-		SetText(wtTitle, L(ScanInfo.mode == "list" and "ScanTitleList" or "ScanTitleFull"))
+	wtProgressLabel:SetVal("text", userMods.ToWString(L(run and "ScanProgressLabel" or "ScanDoneLabel")))
+	if run then
+		SetText(wtRunTitle, L(ScanInfo.mode == "list" and "ScanTitleList" or "ScanTitleFull"))
 		wtBarFill:Show(false)
 		RefreshRun()
 	else
-		RefreshDone()
+		RefreshDone(ScanInfo.completed)
 	end
 end
 
@@ -490,7 +556,13 @@ function TabScan.OnStopped(completed)
 		view = "setup"
 		return
 	end
-	ShowView(completed and "done" or "setup")
+	-- пауза (уход со вкладки) возвращает к настройке, а завершение и
+	-- ручная остановка показывают отчёт
+	if completed or not ScanInfo.paused then
+		ShowView("done")
+	else
+		ShowView("setup")
+	end
 end
 
 --------------------------------------------------------------------------------
@@ -528,6 +600,7 @@ function CloseTabScan()
 	if AddonTab == "scan" then AddonTab = false end
 	CloseDrop()
 	wtPanel:Show(false)
+	wtRunPanel:Show(false)
 	btTabScan:SetVariant(0)
 	view = "setup"
 	HideTabOverlay()
@@ -561,8 +634,10 @@ SetMode = function(mode)
 	RefreshSetup()
 end
 
-function ScanModePrev() CycleMode(-1) end
-function ScanModeNext() CycleMode(1) end
+function ScanModeAll() SetMode(1) end
+function ScanModeCategory() SetMode(2) end
+function ScanModeBag() SetMode(3) end
+function ScanModeList() SetMode(4) end
 function ScanCategoryDrop() OpenDrop("category") end
 function ScanSubcategoryDrop() OpenDrop("subcategory") end
 function ScanDropItem(reaction)
@@ -605,8 +680,10 @@ local function OnSecondTimer()
 end
 
 common.RegisterReactionHandler(OpenTabScan, "OpenTabScan")
-common.RegisterReactionHandler(ScanModePrev, "ScanModePrev")
-common.RegisterReactionHandler(ScanModeNext, "ScanModeNext")
+common.RegisterReactionHandler(ScanModeAll, "ScanModeAll")
+common.RegisterReactionHandler(ScanModeCategory, "ScanModeCategory")
+common.RegisterReactionHandler(ScanModeBag, "ScanModeBag")
+common.RegisterReactionHandler(ScanModeList, "ScanModeList")
 common.RegisterReactionHandler(ScanCategoryDrop, "ScanCategoryDrop")
 common.RegisterReactionHandler(ScanSubcategoryDrop, "ScanSubcategoryDrop")
 common.RegisterReactionHandler(ScanDropItem, "ScanDropItem")
@@ -617,6 +694,24 @@ common.RegisterReactionHandler(ScanClosePressed, "ScanClosePressed")
 common.RegisterEventHandler(OnAuctionVisible, "EVENT_WIDGET_SHOW_CHANGED")
 common.RegisterEventHandler(OnSecondTimer, "EVENT_SECOND_TIMER")
 
+-- подписи рамок блоков
+wtFrameMode:GetChildChecked("Label", false):SetVal("text", userMods.ToWString(GetLocalizedText("ScanModeLabel")))
+wtFrameParams:GetChildChecked("Label", false):SetVal("text", userMods.ToWString(GetLocalizedText("ScanParamsLabel")))
+wtFrameProgress:GetChildChecked("Label", false):SetVal("text", userMods.ToWString(GetLocalizedText("ScanProgressLabel")))
+-- подписи карточек статистики
+local cardCaptionKeys = {
+	CardPage = "ScanCardPage", CardLots = "ScanCardLots", CardElapsed = "ScanCardElapsed",
+	CardRemaining = "ScanCardRemaining", CardSpeed = "ScanCardSpeed", CardRecorded = "ScanCardRecorded",
+}
+for _, name in ipairs(CARD_NAMES) do
+	wtCard[name]:GetChildChecked("Caption", false):SetVal("text",
+		userMods.ToWString(GetLocalizedText(cardCaptionKeys[name])))
+end
+-- подписи кнопок режимов
+local modeKeys = { "ScanModeAll", "ScanModeCategory", "ScanModeBag", "ScanModeList" }
+for i = 1, 4 do
+	btMode[i]:SetVal("button_label", userMods.ToWString(GetLocalizedText(modeKeys[i])))
+end
 -- подписи кнопок
 SetButtonLabel(btStart, "ScanStart")
 SetButtonLabel(btResume, "ScanResume")

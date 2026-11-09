@@ -1,10 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <WidgetButton>
+	<TextTag>button_label</TextTag>
 	<Variants>
 		<Item>
+			<LayerHighlight href="../../Buy/Line/Textures/AuctionLineHighlight.(WidgetLayerSimpleTexture).xdb" />
+			<StateNormal>
+				<LayerMain href="../../Sell/InfoBar/Textures/AuctionPanelDropDown.(WidgetLayerTiledTexture).xdb" />
+				<FormatFileRef href="DropBtn.txt" />
+			</StateNormal>
+			<StatePushed>
+				<LayerMain href="../../Sell/InfoBar/Textures/AuctionPanelDropDown.(WidgetLayerTiledTexture).xdb" />
+				<FormatFileRef href="DropBtn.txt" />
+			</StatePushed>
+			<StateDisabled>
+				<LayerMain href="../../Sell/InfoBar/Textures/AuctionPanelDropDown.(WidgetLayerTiledTexture).xdb" />
+				<FormatFileRef href="DropBtnDisabled.txt" />
+			</StateDisabled>
 			<Reaction>ScanSubcategoryDrop</Reaction>
+			<ReactionOnUp>true</ReactionOnUp>
 		</Item>
 	</Variants>
+	<TextStyle>
+		<Align>ALIGNY_MIDDLE</Align>
+	</TextStyle>
 	<Name>DropBtn</Name>
 	<Placement>
 		<X>
@@ -15,12 +33,9 @@
 		<Y>
 			<Align>WIDGET_ALIGN_CENTER</Align>
 			<Pos>0</Pos>
-			<Size>26</Size>
+			<Size>28</Size>
 		</Y>
 	</Placement>
 	<Visible>true</Visible>
 	<Enabled>true</Enabled>
-	<Header>
-		<Prototype href="../../Resources/AuctionButtonCommon/AuctionButtonCommon.Prototype.(WidgetButton).xdb" />
-	</Header>
 </WidgetButton>

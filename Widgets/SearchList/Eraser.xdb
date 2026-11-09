@@ -2,25 +2,27 @@
 <WidgetButton>
 	<Variants>
 		<Item>
-			<LayerHighlight href="Textures/ButtonHighlight.(WidgetLayerSimpleTexture).xdb" />
+			<StateHighlighted>
+				<LayerMain href="Textures/StrikeOutLine.(WidgetLayerSimpleTexture).xdb" />
+			</StateHighlighted>
 			<Reaction>DeleteLine</Reaction>
 			<ReactionOnUp>true</ReactionOnUp>
 		</Item>
 	</Variants>
 	<Name>Eraser</Name>
-	<BackLayer href="Textures/Eraser.(WidgetLayerSimpleTexture).xdb" />
 	<Placement>
 		<X>
-			<Align>WIDGET_ALIGN_HIGH</Align>
-			<HighPos>0</HighPos>
-			<Size>16</Size>
+			<Align>WIDGET_ALIGN_LOW</Align>
+			<Pos>-6</Pos>
+			<Size>40</Size>
 		</X>
 		<Y>
 			<Align>WIDGET_ALIGN_CENTER</Align>
-			<Pos>0</Pos>
-			<Size>16</Size>
+			<Pos>2</Pos>
+			<Size>20</Size>
 		</Y>
 	</Placement>
 	<Visible>true</Visible>
+	<TransparentInput>false</TransparentInput>
 	<IgnoreDblClick>true</IgnoreDblClick>
 </WidgetButton>

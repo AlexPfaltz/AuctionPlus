@@ -5,15 +5,8 @@
 		<Item>
 			<LayerHighlight href="../../Buy/Line/Textures/AuctionLineHighlight.(WidgetLayerSimpleTexture).xdb" />
 			<StateNormal>
-				<LayerMain href="../../Buy/Line/Textures/AuctionLineNormal.(WidgetLayerSimpleTexture).xdb" />
 				<FormatFileRef href="DropItem.txt" />
 			</StateNormal>
-			<StatePushed>
-				<LayerMain href="../../Buy/Line/Textures/AuctionLinePressed.(WidgetLayerSimpleTexture).xdb" />
-			</StatePushed>
-			<StateHighlighted>
-				<LayerMain href="../../Buy/Line/Textures/AuctionLineHighlighted.(WidgetLayerSimpleTexture).xdb" />
-			</StateHighlighted>
 			<Reaction>ScanDropItem</Reaction>
 			<ReactionOnUp>true</ReactionOnUp>
 		</Item>
