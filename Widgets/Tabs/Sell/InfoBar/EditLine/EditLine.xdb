@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <WidgetEditLine>
 	<isPassword>false</isPassword>
-	<Cursor1Layer href="Cursor.xdb" />
-	<Cursor2Layer href="Cursor2.xdb" />
+	<Cursor1Layer href="../../../../Common/EditLine/Cursor.xdb" />
+	<Cursor2Layer href="../../../../Common/EditLine/Cursor2.xdb" />
 	<CursorWidth>2</CursorWidth>
 	<CursorChangeTimeMs>500</CursorChangeTimeMs>
 	<maxSymbolsCount>6</maxSymbolsCount>
@@ -17,7 +17,7 @@
 		<Align>ALIGNY_MIDDLE</Align>
 	</TextStyle>
 	<globalClassName>EditLineMoneyAuctionCount</globalClassName>
-	<selectionLayer href="Selection.xdb" />
+	<selectionLayer href="../../../../Common/EditLine/Selection.xdb" />
 	<filterAlias>NUMBERS</filterAlias>
 	<ReactionEnter>EditLineEnter</ReactionEnter>
 	<ReactionEsc>EditLineEsc</ReactionEsc>

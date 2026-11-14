@@ -2,7 +2,7 @@
 <WidgetTextView>
 	<FormatFileRef href="Value.txt" />
 	<Name>Value</Name>
-	<BackLayer href="../../Textures/ContentFrame.(WidgetLayerTiledTexture).xdb" />
+	<BackLayer href="../../../../Common/Textures/ContentFrame.(WidgetLayerTiledTexture).xdb" />
 	<Placement>
 		<X>
 			<Align>WIDGET_ALIGN_HIGH</Align>

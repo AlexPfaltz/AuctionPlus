@@ -7,7 +7,7 @@
 		<Item href="36h.(WidgetPanel).xdb" />
 		<Item href="48h.(WidgetPanel).xdb" />
 	</Children>
-	<BackLayer href="../Textures/AuctionPanelDropDown.(WidgetLayerTiledTexture).xdb" />
+	<BackLayer href="../../../../Common/Textures/AuctionPanelDropDown.(WidgetLayerTiledTexture).xdb" />
 	<Placement>
 		<X>
 			<Align>WIDGET_ALIGN_LOW</Align>

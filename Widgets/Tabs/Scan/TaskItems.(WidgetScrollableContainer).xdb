@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <WidgetScrollableContainer>
-	<scrollBar href="../../SearchList/ScrollBar/GlideScrollBar.xdb" />
+	<scrollBar href="ScrollBar/GlideScrollBar.xdb" />
 	<widgetsArrangement>WIDGETS_ARRANGEMENT_T2B</widgetsArrangement>
 	<Name>TaskItems</Name>
-	<BackLayer href="../../SearchList/Textures/PaperTile.(WidgetLayerTiledTexture).xdb" />
+	<BackLayer href="../../Common/Textures/PaperTile.(WidgetLayerTiledTexture).xdb" />
 	<Placement>
 		<X>
 			<Align>WIDGET_ALIGN_BOTH</Align>

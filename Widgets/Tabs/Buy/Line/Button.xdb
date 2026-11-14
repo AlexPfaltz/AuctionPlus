@@ -2,7 +2,7 @@
 <WidgetButton>
 	<Variants>
 		<Item>
-			<LayerHighlight href="Textures/AuctionLineHighlight.(WidgetLayerSimpleTexture).xdb" />
+			<LayerHighlight href="../../../Common/Textures/AuctionLineHighlight.(WidgetLayerSimpleTexture).xdb" />
 			<StateNormal>
 				<LayerMain href="Textures/AuctionLineNormal.(WidgetLayerSimpleTexture).xdb" />
 			</StateNormal>
@@ -16,7 +16,7 @@
 			<ReactionOnUp>true</ReactionOnUp>
 		</Item>
 		<Item>
-			<LayerHighlight href="Textures/AuctionLineHighlight.(WidgetLayerSimpleTexture).xdb" />
+			<LayerHighlight href="../../../Common/Textures/AuctionLineHighlight.(WidgetLayerSimpleTexture).xdb" />
 			<StateNormal>
 				<LayerMain href="Textures/AuctionLineSelected.(WidgetLayerSimpleTexture).xdb" />
 			</StateNormal>

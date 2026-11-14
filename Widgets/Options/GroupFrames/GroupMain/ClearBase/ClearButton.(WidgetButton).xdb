@@ -17,6 +17,6 @@
 		</Y>
 	</Placement>
 	<Header>
-		<Prototype href="../../../Buttons/OptionButton/OptionButton.Prototype.(WidgetButton).xdb" />
+		<Prototype href="../../../../Common/Buttons/OptionButton/OptionButton.Prototype.(WidgetButton).xdb" />
 	</Header>
 </WidgetButton>

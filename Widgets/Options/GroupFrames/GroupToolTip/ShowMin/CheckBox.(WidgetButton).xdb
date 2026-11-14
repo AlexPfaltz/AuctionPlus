@@ -20,6 +20,6 @@
 		</Y>
 	</Placement>
 	<Header>
-		<Prototype href="../../../Buttons/CheckBox/CheckBoxStone.Prototype.(WidgetButton).xdb" />
+		<Prototype href="../../../../Common/Buttons/CheckBox/CheckBoxStone.Prototype.(WidgetButton).xdb" />
 	</Header>
 </WidgetButton>

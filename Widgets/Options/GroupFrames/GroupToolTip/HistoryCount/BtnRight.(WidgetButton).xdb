@@ -17,6 +17,6 @@
 		</Y>
 	</Placement>
 	<Header>
-		<Prototype href="../../../Buttons/CommonPinBtn/PinBtnRight.Prototype.(WidgetButton).xdb" />
+		<Prototype href="../../../../Common/Buttons/CommonPinBtn/PinBtnRight.Prototype.(WidgetButton).xdb" />
 	</Header>
 </WidgetButton>

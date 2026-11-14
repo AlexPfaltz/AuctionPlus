@@ -5,7 +5,7 @@
 		<Item href="GroupMain/BlockFrame.(WidgetPanel).xdb" />
 		<Item href="GroupMain/GroupLabel.(WidgetTextView).xdb" />
 	</Children>
-	<BackLayer href="Textures/GroupFrame.(WidgetLayerTiledTexture).xdb" />
+	<BackLayer href="../../Common/Textures/GroupFrame.(WidgetLayerTiledTexture).xdb" />
 	<Placement>
 		<X>
 			<Align>WIDGET_ALIGN_LOW</Align>

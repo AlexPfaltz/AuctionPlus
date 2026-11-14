@@ -15,19 +15,19 @@
 		</Item>
 		<Item>
 			<name>StrikeOut</name>
-			<textureItem href="../Widgets/SearchList/Textures/strikeout.(UISingleTexture).xdb" />
+			<textureItem href="../Widgets/Tabs/Scan/Textures/strikeout.(UISingleTexture).xdb" />
 		</Item>
 		<Item>
 			<name>DoubleStrikethrough</name>
-			<textureItem href="../Widgets/SearchList/Textures/DoubleStrikethrough.(UISingleTexture).xdb" />
+			<textureItem href="../Widgets/Tabs/Scan/Textures/DoubleStrikethrough.(UISingleTexture).xdb" />
 		</Item>
 		<Item>
 			<name>TripleStrikeout</name>
-			<textureItem href="../Widgets/SearchList/Textures/TripleStrikeout.(UISingleTexture).xdb" />
+			<textureItem href="../Widgets/Tabs/Scan/Textures/TripleStrikeout.(UISingleTexture).xdb" />
 		</Item>
 		<Item>
 			<name>ClearBlockFrame</name>
-			<textureItem href="../Widgets/SearchList/Textures/ClearBlockFrame.(UISingleTexture).xdb" />
+			<textureItem href="../Widgets/Tabs/Scan/Textures/ClearBlockFrame.(UISingleTexture).xdb" />
 		</Item>
 		<Item>
 			<name>AuctionButtonSortNone</name>

@@ -4,8 +4,8 @@
 	<Priority>1</Priority>
 	<Children>
 		<Item href="Header/Header.(WidgetPanel).xdb" />
-		<Item href="Buttons/ButtonCornerCross.(WidgetButton).xdb" />
-		<Item href="Buttons/DefaultOptions.(WidgetButton).xdb" />
+		<Item href="../Common/Buttons/ButtonCornerCross.(WidgetButton).xdb" />
+		<Item href="../Common/Buttons/DefaultOptions.(WidgetButton).xdb" />
 		<Item href="Container.(WidgetScrollableContainer).xdb" />
 		<Item href="GroupFrames/GroupMain.(WidgetPanel).xdb" />
 		<Item href="GroupFrames/GroupToolTip.(WidgetPanel).xdb" />

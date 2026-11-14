@@ -4,7 +4,7 @@
 	<Children>
 		<Item href="Label.(WidgetTextView).xdb" />
 	</Children>
-	<BackLayer href="../../../Options/GroupFrames/Textures/GroupFrame.(WidgetLayerTiledTexture).xdb" />
+	<BackLayer href="../../../Common/Textures/GroupFrame.(WidgetLayerTiledTexture).xdb" />
 	<Placement>
 		<X>
 			<Align>WIDGET_ALIGN_CENTER</Align>

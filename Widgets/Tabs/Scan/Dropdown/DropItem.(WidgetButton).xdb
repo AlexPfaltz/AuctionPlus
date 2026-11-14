@@ -3,7 +3,7 @@
 	<TextTag>button_label</TextTag>
 	<Variants>
 		<Item>
-			<LayerHighlight href="../../Buy/Line/Textures/AuctionLineHighlight.(WidgetLayerSimpleTexture).xdb" />
+			<LayerHighlight href="../../../Common/Textures/AuctionLineHighlight.(WidgetLayerSimpleTexture).xdb" />
 			<StateNormal>
 				<FormatFileRef href="DropItem.txt" />
 			</StateNormal>

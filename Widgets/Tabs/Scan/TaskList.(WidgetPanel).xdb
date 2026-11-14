@@ -6,7 +6,7 @@
 		<Item href="Tasks/TaskRow.(WidgetPanel).xdb" />
 		<Item href="Tasks/TaskEditPanel.(WidgetPanel).xdb" />
 	</Children>
-	<BackLayer href="../../SearchList/Textures/LeatherTile.(WidgetLayerTiledTexture).xdb" />
+	<BackLayer href="../../Common/Textures/LeatherTile.(WidgetLayerTiledTexture).xdb" />
 	<Placement>
 		<X>
 			<Align>WIDGET_ALIGN_CENTER</Align>

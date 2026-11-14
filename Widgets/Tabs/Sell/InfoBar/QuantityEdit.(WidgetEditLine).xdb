@@ -4,7 +4,7 @@
 	<Header>
 		<Prototype href="EditLine/EditLine.xdb" />
 	</Header>
-	<BackLayer href="Textures/AuctionPanelEditable.(WidgetLayerTiledTexture).xdb" />
+	<BackLayer href="../../../Common/Textures/AuctionPanelEditable.(WidgetLayerTiledTexture).xdb" />
 	<Placement>
 		<X>
 			<Align>WIDGET_ALIGN_HIGH</Align>

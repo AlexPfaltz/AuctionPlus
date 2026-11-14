@@ -2,7 +2,7 @@
 <WidgetPanel>
 	<Name>DropArrow</Name>
 	<Priority>400</Priority>
-	<BackLayer href="../../Buy/SortBar/SortIcon.(WidgetLayerSimpleTexture).xdb" />
+	<BackLayer href="../../Resources/SortIcon.(WidgetLayerSimpleTexture).xdb" />
 	<Placement>
 		<X>
 			<Align>WIDGET_ALIGN_HIGH</Align>

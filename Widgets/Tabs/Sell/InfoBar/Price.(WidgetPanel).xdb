@@ -6,7 +6,7 @@
 		<Item href="Price/Silver.(WidgetTextView).xdb" />
 		<Item href="Price/Copper.(WidgetTextView).xdb" />
 	</Children>
-	<BackLayer href="Textures/AuctionPanelMoneyCount.(WidgetLayerTiledTexture).xdb" />
+	<BackLayer href="../Textures/AuctionPanelMoneyCount.(WidgetLayerTiledTexture).xdb" />
 	<Placement>
 		<X>
 			<Align>WIDGET_ALIGN_HIGH</Align>

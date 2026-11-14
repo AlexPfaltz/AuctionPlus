@@ -5,7 +5,7 @@
 		<Item href="BarFill.(WidgetPanel).xdb" />
 		<Item href="BarText.(WidgetTextView).xdb" />
 	</Children>
-	<BackLayer href="../Buy/InfoBar/Textures/AuctionPanelEditable.(WidgetLayerTiledTexture).xdb" />
+	<BackLayer href="../../Common/Textures/AuctionPanelEditable.(WidgetLayerTiledTexture).xdb" />
 	<Placement>
 		<X>
 			<Align>WIDGET_ALIGN_BOTH</Align>

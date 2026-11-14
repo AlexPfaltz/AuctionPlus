@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <WidgetPanel>
 	<Name>Separator</Name>
-	<BackLayer href="../PriceInTooltip/Textures/Separator.(WidgetLayerTiledTexture).xdb" />
+	<BackLayer href="../Common/Textures/Separator.(WidgetLayerTiledTexture).xdb" />
 	<Placement>
 		<X>
 			<Align>WIDGET_ALIGN_LOW</Align>

@@ -12,7 +12,7 @@
 		<Item href="../Cards/CardSpeed.(WidgetPanel).xdb" />
 		<Item href="../Cards/CardRecorded.(WidgetPanel).xdb" />
 	</Children>
-	<BackLayer href="../../../Options/GroupFrames/Textures/GroupFrame.(WidgetLayerTiledTexture).xdb" />
+	<BackLayer href="../../../Common/Textures/GroupFrame.(WidgetLayerTiledTexture).xdb" />
 	<Placement>
 		<X>
 			<Align>WIDGET_ALIGN_CENTER</Align>

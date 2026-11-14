@@ -6,7 +6,7 @@
 		<Item href="PriceEdit/Silver.(WidgetEditLine).xdb" />
 		<Item href="PriceEdit/Copper.(WidgetEditLine).xdb" />
 	</Children>
-	<BackLayer href="Textures/AuctionPanelMoneyEditable.(WidgetLayerTiledTexture).xdb" />
+	<BackLayer href="../Textures/AuctionPanelMoneyEditable.(WidgetLayerTiledTexture).xdb" />
 	<Placement>
 		<X>
 			<Align>WIDGET_ALIGN_HIGH</Align>

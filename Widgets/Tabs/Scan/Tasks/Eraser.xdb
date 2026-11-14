@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WidgetButton>
+	<Variants>
+		<Item>
+			<StateHighlighted>
+				<LayerMain href="../Textures/StrikeOutLine.(WidgetLayerSimpleTexture).xdb" />
+			</StateHighlighted>
+			<Reaction>DeleteLine</Reaction>
+			<ReactionOnUp>true</ReactionOnUp>
+		</Item>
+	</Variants>
+	<Name>Eraser</Name>
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_LOW</Align>
+			<Pos>-6</Pos>
+			<Size>40</Size>
+		</X>
+		<Y>
+			<Align>WIDGET_ALIGN_CENTER</Align>
+			<Pos>2</Pos>
+			<Size>20</Size>
+		</Y>
+	</Placement>
+	<Visible>true</Visible>
+	<TransparentInput>false</TransparentInput>
+	<IgnoreDblClick>true</IgnoreDblClick>
+</WidgetButton>

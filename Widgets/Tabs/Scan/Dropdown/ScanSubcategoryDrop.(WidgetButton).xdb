@@ -3,17 +3,17 @@
 	<TextTag>button_label</TextTag>
 	<Variants>
 		<Item>
-			<LayerHighlight href="../../Buy/Line/Textures/AuctionLineHighlight.(WidgetLayerSimpleTexture).xdb" />
+			<LayerHighlight href="../../../Common/Textures/AuctionLineHighlight.(WidgetLayerSimpleTexture).xdb" />
 			<StateNormal>
-				<LayerMain href="../../Sell/InfoBar/Textures/AuctionPanelDropDown.(WidgetLayerTiledTexture).xdb" />
+				<LayerMain href="../../../Common/Textures/AuctionPanelDropDown.(WidgetLayerTiledTexture).xdb" />
 				<FormatFileRef href="DropBtn.txt" />
 			</StateNormal>
 			<StatePushed>
-				<LayerMain href="../../Sell/InfoBar/Textures/AuctionPanelDropDown.(WidgetLayerTiledTexture).xdb" />
+				<LayerMain href="../../../Common/Textures/AuctionPanelDropDown.(WidgetLayerTiledTexture).xdb" />
 				<FormatFileRef href="DropBtn.txt" />
 			</StatePushed>
 			<StateDisabled>
-				<LayerMain href="../../Sell/InfoBar/Textures/AuctionPanelDropDown.(WidgetLayerTiledTexture).xdb" />
+				<LayerMain href="../../../Common/Textures/AuctionPanelDropDown.(WidgetLayerTiledTexture).xdb" />
 				<FormatFileRef href="DropBtnDisabled.txt" />
 			</StateDisabled>
 			<Reaction>ScanSubcategoryDrop</Reaction>

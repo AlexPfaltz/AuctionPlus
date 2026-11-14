@@ -3,7 +3,7 @@
 	<Name>Line</Name>
 	<Children>
 		<Item href="TaskText.(WidgetTextView).xdb" />
-		<Item href="../../../SearchList/Eraser.xdb" />
+		<Item href="Eraser.xdb" />
 	</Children>
 	<Placement>
 		<X>

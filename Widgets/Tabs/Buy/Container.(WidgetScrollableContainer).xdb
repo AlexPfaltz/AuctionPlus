@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <WidgetScrollableContainer>
 	<scrollBar href="../Resources/ScrollBar/GlideScrollBar.xdb" />
-	<border href="Border.xdb" />
+	<border href="../Resources/Border.xdb" />
 	<widgetsArrangement>WIDGETS_ARRANGEMENT_T2B</widgetsArrangement>
 	<Name>Container</Name>
 	<Placement>

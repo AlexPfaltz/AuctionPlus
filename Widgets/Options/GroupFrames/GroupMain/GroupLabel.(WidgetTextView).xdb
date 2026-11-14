@@ -2,7 +2,7 @@
 <WidgetTextView>
 	<FormatFileRef href="GroupLabel.txt" />
 	<Name>GroupLabel</Name>
-	<BackLayer href="../Textures/GroupLabel.(WidgetLayerTiledTexture).xdb" />
+	<BackLayer href="../../../Common/Textures/GroupLabel.(WidgetLayerTiledTexture).xdb" />
 	<Placement>
 		<X>
 			<Align>WIDGET_ALIGN_CENTER</Align>

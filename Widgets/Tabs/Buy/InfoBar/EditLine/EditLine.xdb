@@ -2,8 +2,8 @@
 <WidgetEditLine>
 	<isPassword>false</isPassword>
 	<ReactionEnter>LotsEditLineEnter</ReactionEnter>
-	<Cursor1Layer href="Cursor.xdb" />
-	<Cursor2Layer href="Cursor2.xdb" />
+	<Cursor1Layer href="../../../../Common/EditLine/Cursor.xdb" />
+	<Cursor2Layer href="../../../../Common/EditLine/Cursor2.xdb" />
 	<CursorWidth>2</CursorWidth>
 	<CursorChangeTimeMs>500</CursorChangeTimeMs>
 	<maxSymbolsCount>6</maxSymbolsCount>
@@ -18,13 +18,13 @@
 		<Align>ALIGNY_MIDDLE</Align>
 	</TextStyle>
 	<globalClassName>EditLineGlobalCenter</globalClassName>
-	<selectionLayer href="Selection.xdb" />
+	<selectionLayer href="../../../../Common/EditLine/Selection.xdb" />
 	<filterAlias>NUMBERS</filterAlias>
 	<ReactionEsc>EditLineEsc</ReactionEsc>
 	<ReactionChanged>EditLineChanged</ReactionChanged>
 	<reactionFocusChanged>EditLineFocusChanged</reactionFocusChanged>
 	<Name>EditLine</Name>
-	<BackLayer href="../Textures/AuctionPanelEditable.(WidgetLayerTiledTexture).xdb" />
+	<BackLayer href="../../../../Common/Textures/AuctionPanelEditable.(WidgetLayerTiledTexture).xdb" />
 	<Placement>
 		<X>
 			<Align>WIDGET_ALIGN_CENTER</Align>
