@@ -15,6 +15,7 @@ local CurItem = 1
 local TaskNames = {}              -- имена для режимов "из сумки" и "свой список"
 local ScanStockTab = nil          -- "родная" вкладка, выбранная в момент запуска
 local PauseState = nil
+local PendingLaunch = nil         -- "start"/"resume": скан ждёт окончания чужого поиска
 local LastRequest = { page = 0, ms = 0, retries = 0 }
 local WATCHDOG_MS = 15000         -- если страница не пришла за это время, запрашиваем её снова
 local MAX_RETRIES = 3
@@ -250,11 +251,38 @@ function GetResumeInfo()
 	return { leftMs = left, info = PauseState.info, item = PauseState.item }
 end
 
+-- Отложенный запуск: скан стартует, когда аукцион освободится от чужого
+-- поиска (его результат пришёл или таймер подтвердил, что поиска нет)
+local function TryLaunchPending()
+	if not PendingLaunch then return end
+	if auction.IsSearchInProgress() then return end
+	local pending = PendingLaunch
+	PendingLaunch = nil
+	ScanInfo.blocked = false
+	local started
+	if pending == "resume" then
+		started = ResumeScan()
+	else
+		started = StartScan()
+	end
+	if started then
+		TabScan.OnStarted()
+	end
+end
+
+-- Отмена отложенного запуска (уход со вкладки, закрытие окна аукциона)
+function CancelPendingScan()
+	PendingLaunch = nil
+	ScanInfo.blocked = false
+end
+
 function StartScan()
 	-- Не начинаем скан поверх чужого поиска: его результат придёт с другим
-	-- фильтром и будет ошибочно обработан как страница скана.
+	-- фильтром и будет ошибочно обработан как страница скана. Скан
+	-- откладывается и запустится, когда поиск завершится.
 	if auction.IsSearchInProgress() then
 		ScanInfo.blocked = true
+		PendingLaunch = "start"
 		return false
 	end
 	PauseState = nil
@@ -264,6 +292,7 @@ end
 function ResumeScan()
 	if auction.IsSearchInProgress() then
 		ScanInfo.blocked = true
+		PendingLaunch = "resume"
 		return false
 	end
 	if not GetResumeInfo() then return false end
@@ -279,11 +308,17 @@ ScanAuction.AuctionSearch = function(params)
        and params.sysResult ~= AuctionSearchSuccess then
 		-- неудачный поиск посреди скана: останавливаем, иначе скан зависнет
 		if scanning then StopScan() end
+		TryLaunchPending()
 		return
 	end
 
 	CheckTabVariant()
-	if not scanning then return end
+	if not scanning then
+		-- пришёл результат чужого поиска: аукцион освободился,
+		-- запускаем отложенный скан, если он ждал
+		TryLaunchPending()
+		return
+	end
 
 	-- игрок переключил "родную" вкладку: пришедшие результаты не наши
 	if ScanStockTab ~= GetCurrentStockTab() then
@@ -349,6 +384,11 @@ end
 
 -- Если запрос страницы потерялся (например, предыдущий поиск ещё шёл), повторяем его
 ScanAuction.OnSecondTimer = function()
+	-- подстраховка отложенного запуска: вдруг результат чужого поиска
+	-- пришёл без события или событие обработалось раньше времени
+	if PendingLaunch then
+		TryLaunchPending()
+	end
 	if not (StartFullScan or StartScanForList) then return end
 	if NowMs() - LastRequest.ms < WATCHDOG_MS then return end
 	if LastRequest.retries >= MAX_RETRIES then
@@ -373,6 +413,7 @@ ScanAuction.AuctionIsVisible = function(params)
 			end
 		else
 			-- окно закрыто: скан ставится на паузу
+			CancelPendingScan()
 			PauseScan()
 			PriceDB.Save()
 		end

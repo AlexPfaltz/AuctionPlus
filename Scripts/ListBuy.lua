@@ -352,18 +352,19 @@ ListBuy.AuctionSearch = function(params)
 
 	if AddonTab ~= "buy" then return end
 
-	-- результат чужого запроса (например, страница скана, поставленного
-	-- на паузу при уходе с вкладки): не обрабатываем и не листаем дальше
-	if not SearchRequested then return end
-
+	-- Проверяется до SearchRequested: при перезапуске StartSearch очищает
+	-- вкладку (SearchRequested = false), и результат старого поиска -
+	-- единственный сигнал, что аукцион освободился и можно стартовать
+	-- с новым фильтром.
 	if RestartPending then
-		-- это результат старого поиска; он уже закончил работу (иначе событие
-		-- бы не пришло), значит можно стартовать с новым фильтром
 		RestartPending = false
-		ClearTabBuy()
 		SearchRequested = GetPage(1)
 		return
 	end
+
+	-- результат чужого запроса (например, страница скана, поставленного
+	-- на паузу при уходе с вкладки): не обрабатываем и не листаем дальше
+	if not SearchRequested then return end
 
 	if AuctionSearchSuccess ~= nil and params and params.sysResult ~= nil
        and params.sysResult ~= AuctionSearchSuccess then

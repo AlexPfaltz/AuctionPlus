@@ -565,6 +565,13 @@ function TabScan.OnStopped(completed)
 	end
 end
 
+-- Скан запустился (в том числе отложенный запуск после чужого поиска)
+function TabScan.OnStarted()
+	if AddonTab == "scan" then
+		ShowView("run")
+	end
+end
+
 --------------------------------------------------------------------------------
 -- Открытие и закрытие вкладки
 --------------------------------------------------------------------------------
@@ -595,7 +602,9 @@ function OpenTabScan()
 end
 
 function CloseTabScan()
-	-- идущий скан ставится на паузу: продолжить можно ограниченное время
+	-- отложенный запуск отменяется, идущий скан ставится на паузу:
+	-- продолжить можно ограниченное время
+	CancelPendingScan()
 	PauseScan()
 	if AddonTab == "scan" then AddonTab = false end
 	CloseDrop()
