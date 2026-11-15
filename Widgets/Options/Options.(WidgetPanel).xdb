@@ -8,6 +8,7 @@
 		<Item href="../Common/Buttons/DefaultOptions.(WidgetButton).xdb" />
 		<Item href="Container.(WidgetScrollableContainer).xdb" />
 		<Item href="GroupFrames/GroupMain.(WidgetPanel).xdb" />
+		<Item href="GroupFrames/GroupBuy.(WidgetPanel).xdb" />
 		<Item href="GroupFrames/GroupToolTip.(WidgetPanel).xdb" />
 	</Children>
 	<BackLayer href="Textures/MainFrame.(WidgetLayerTiledTexture).xdb" />

@@ -354,8 +354,8 @@ local function fillTooltip(content)
     cTooltip:PushBack(itemaname)
     Track(itemaname, smartLinePool)
 
-    -- Выгодная покупка (вкладка "Купить": цена заметно ниже рыночной)
-    if content.isGoodDeal then
+    -- Выгодная покупка (вкладка "Купить": цена заметно ниже опорной по базе)
+    if content.isGoodDeal and Options.ShowDeals ~= false then
         local deal = AcquireSmartLine()
         SafeSetVal(deal, "value", L("GoodDeal"))
         deal:SetClassVal("class", "tip_golden")

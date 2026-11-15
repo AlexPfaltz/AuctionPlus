@@ -186,22 +186,34 @@ function GetMoneyFromSearchBar(self)
 	return c
 end
 
--- Порог выгодной покупки: цена за единицу ниже рыночной из базы цен
+-- Порог выгодной покупки: цена за единицу ниже опорной из базы цен
 -- (PriceDB) минус DEAL_DISCOUNT
 local DEAL_DISCOUNT = 0.15
 -- Данные базы старше этого срока не считаются рыночными
 local DEAL_MAX_AGE_MS = 7 * 86400000
 
--- Рыночная цена предмета по базе сканирования: нижняя четверть,
--- при её отсутствии - медиана или минимум (nil, если предмета нет в базе
--- или снимок устарел)
+-- Опорная цена предмета по базе сканирования. Вид зависит от настройки
+-- Options.DealBase: 1 - медиана, 2 - рыночная (нижняя четверть).
+-- В режиме 3 (только минимум) база не используется - возвращается nil.
+-- nil также, если предмета нет в базе или снимок устарел.
 local function GetMarketPrice(name, isCursed)
+	if Options.DealBase == 3 then return nil end
 	local entry = PriceDB.GetEntry(name, isCursed)
 	local cur = entry and entry.cur
 	if not cur or not cur.t or common.GetLocalDateTimeMs() - cur.t > DEAL_MAX_AGE_MS then
 		return nil
 	end
-	return cur.q1 or cur.med or cur.min
+	if Options.DealBase == 2 then
+		return cur.q1 or cur.med or cur.min
+	end
+	return cur.med or cur.q1 or cur.min
+end
+
+-- Выгоден ли лот: цена за единицу заметно ниже опорной по базе сканирования
+local function EvalGoodDeal(infoForBuy)
+	local marketPrice = GetMarketPrice(userMods.FromWString(infoForBuy.name), infoForBuy.isCursed)
+	return marketPrice ~= nil and marketPrice > 0
+		and infoForBuy.priceperunit <= marketPrice * (1 - DEAL_DISCOUNT)
 end
 
 -- Экипировка или оружие (такие лоты группируются по характеристикам)
@@ -279,14 +291,12 @@ ListBuy.CreateLine = function(auctionInfo, key)
 	line.itemName:SetClassVal( "class", ItemQualityClass[quality] or "tip_base")
 	line.itemName:SetVal("itemname", itemInfo.name)
 
-	-- Подсветка выгодной покупки: цена за единицу заметно ниже рыночной
-	-- по базе сканирования. Пока поиск идёт, база не меняется, поэтому
-	-- флаг достаточно выставить при создании строки.
+	-- Подсветка выгодной покупки. Пока поиск идёт, база не меняется, поэтому
+	-- флаг достаточно выставить при создании строки; при смене настроек
+	-- строки обновляет RefreshDealHighlights.
 	line.dealHighlight = line.widget:GetChildChecked("DealHighlight", false)
-	local marketPrice = GetMarketPrice(itemName, isCursed)
-	line.isGoodDeal = marketPrice ~= nil and marketPrice > 0
-		and PricePerUnit <= marketPrice * (1 - DEAL_DISCOUNT)
-	line.dealHighlight:Show(line.isGoodDeal)
+	line.isGoodDeal = EvalGoodDeal(infoForBuy)
+	line.dealHighlight:Show(Options.ShowDeals ~= false and line.isGoodDeal)
 	
 	--Заполняем виджет цены за штуку
 	line.gold1 = line.widget:GetChildChecked("PricePerUnit", false):GetChildChecked("Gold", false)
@@ -326,6 +336,32 @@ ListBuy.CreateLine = function(auctionInfo, key)
 		Container:PushBack(line.widget)
 	end
 	line.widget:Show(true)
+end
+
+-- Пересчитать флаги выгодности уже показанных строк и применить текущие
+-- настройки подсветки. Вызывается из панели настроек при смене опций, а
+-- в режиме "только минимум" - по завершении поиска (минимальная цена
+-- становится известна, только когда собраны все строки).
+function RefreshDealHighlights()
+	local minPrice = nil
+	if Options.DealBase == 3 then
+		for _, line in pairs(Lines) do
+			local price = line.infoForBuy and line.infoForBuy.priceperunit
+			if price and (not minPrice or price < minPrice) then
+				minPrice = price
+			end
+		end
+	end
+	for _, line in pairs(Lines) do
+		if line.infoForBuy and line.dealHighlight then
+			if Options.DealBase == 3 then
+				line.isGoodDeal = minPrice ~= nil and line.infoForBuy.priceperunit == minPrice
+			else
+				line.isGoodDeal = EvalGoodDeal(line.infoForBuy)
+			end
+			line.dealHighlight:Show(Options.ShowDeals ~= false and line.isGoodDeal)
+		end
+	end
 end
 
 ListBuy.AddLine = function(auctionInfo)
@@ -419,6 +455,9 @@ ListBuy.AuctionSearch = function(params)
 			SearchRequested = false
 			StatusBar:SetVal("value", userMods.ToWString(GetLocalizedText("SearchFinished")..tostring(CountAuctions)))
 			CountAuctions = 0
+			-- в режиме "только минимум" подсветка выставляется, когда
+			-- собраны все строки
+			if Options.DealBase == 3 then RefreshDealHighlights() end
 		end
 		return
 	end

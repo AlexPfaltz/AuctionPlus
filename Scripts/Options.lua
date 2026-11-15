@@ -2,6 +2,7 @@ Global ("listCSS", common.GetCSSList())
 local wtOptions = mainForm:GetChildChecked("Options", false)
 local Container = wtOptions:GetChildChecked("Container", false)
 local GroupMain = wtOptions:GetChildChecked("GroupMain", false)
+local GroupBuy = wtOptions:GetChildChecked("GroupBuy", false)
 local GroupToolTip = wtOptions:GetChildChecked("GroupToolTip", false)
 local wtShowHeader = GroupToolTip:GetChildChecked("ShowHeader", true)
 local CbShowHeader = wtShowHeader:GetChildChecked("CheckBox", false)
@@ -26,6 +27,10 @@ local wtHeaderStyle = GroupToolTip:GetChildChecked("HeaderStyle", true)
 local ValueHeaderStyle = wtHeaderStyle:GetChildChecked("Value", false)
 local wtDateStyle = GroupToolTip:GetChildChecked("DateStyle", true)
 local ValueDateStyle = wtDateStyle:GetChildChecked("Value", false)
+local wtShowDeals = GroupBuy:GetChildChecked("ShowDeals", true)
+local CbShowDeals = wtShowDeals:GetChildChecked("CheckBox", false)
+local wtDealBase = GroupBuy:GetChildChecked("DealBase", true)
+local ValueDealBase = wtDealBase:GetChildChecked("Value", false)
 local defaultOptions = {
     ["ShowHeader"] = true,
     ["ShowDate"] = false,
@@ -42,7 +47,12 @@ local defaultOptions = {
     ["ScanBy"] = 1,
     ["ScanModesVer"] = 1,
     ["ScanRootCategory"] = 0,
-    ["ScanChildCategory"] = 0
+    ["ScanChildCategory"] = 0,
+    -- подсветка выгодных лотов во вкладке "Купить" и строка в тултипе
+    ["ShowDeals"] = true,
+    -- опорная цена выгоды: 1 - медиана, 2 - рыночная (нижняя четверть),
+    -- 3 - только минимальная цена среди найденных лотов
+    ["DealBase"] = 1
 }
 
 local function CopyDefaults()
@@ -103,6 +113,7 @@ function SetLocalizedText()
     wtOptions:GetChildChecked("Header", false):GetChildChecked("Text", false):SetVal("text", GetLocalizedText("AuctionPlus: Options"))
     wtOptions:GetChildChecked("DefaultOptions", false):SetVal("button_label", userMods.ToWString(GetLocalizedText("Default Options")))
     GroupMain:GetChildChecked("GroupLabel", false):SetVal("text", GetLocalizedText("Main"))
+    GroupBuy:GetChildChecked("GroupLabel", false):SetVal("text", GetLocalizedText("Buy tab"))
     GroupToolTip:GetChildChecked("GroupLabel", false):SetVal("text", GetLocalizedText("Tooltip"))
     GroupMain:GetChildChecked("ClearBase", true):GetChildChecked("Text", false):SetVal("text", GetLocalizedText("Clear base"))
     GroupMain:GetChildChecked("ClearBase", true):GetChildChecked("ClearButton", false):SetVal("button_label", userMods.ToWString(GetLocalizedText("Clear")))
@@ -117,6 +128,8 @@ function SetLocalizedText()
     wtHistoryCount:GetChildChecked("Text", false):SetVal("text", GetLocalizedText("History items count"))
     wtHeaderStyle:GetChildChecked("Text", false):SetVal("text", GetLocalizedText("Style text - header"))
     wtDateStyle:GetChildChecked("Text", false):SetVal("text", GetLocalizedText("Style text - date"))
+    SetRowText(wtShowDeals, "Show good deals")
+    SetRowText(wtDealBase, "Deal base price")
 end
 
 local function SetCheckbox(checkbox, value)
@@ -149,6 +162,8 @@ function FillValues()
     VariantShowHeader(Options.ShowHeader)
     VariantShowDate(Options.ShowDate)
     VariantHistoryCount(Options.HistoryCount)
+    SetCheckbox(CbShowDeals, Options.ShowDeals)
+    VariantDealBase(Options.DealBase)
 end
 
 function VariantShowHeader(variant)
@@ -282,6 +297,49 @@ function showHistory(reaction)
     ToggleOption("ShowHistory", CbShowHistory)
 end
 
+-- Опорная цена для подсветки выгодных лотов: 1 - медиана, 2 - рыночная,
+-- 3 - только минимум среди найденных. Стрелки листают значения по кругу.
+local DealBaseLabels = { "PriceMedian", "PriceMarket", "DealBaseMin" }
+
+-- Строка выбора опорной цены активна, только когда включена сама
+-- подсветка выгодных лотов: без неё выбор не имеет смысла
+local function UpdateDealBaseState()
+    local enabled = Options.ShowDeals ~= false
+    wtDealBase:GetChildChecked("BtnLeft", false):Enable(enabled)
+    wtDealBase:GetChildChecked("BtnRight", false):Enable(enabled)
+end
+
+function VariantDealBase(variant)
+    if type(variant) ~= "number" or variant < 1 or variant > 3 then variant = 1 end
+    Options.DealBase = variant
+    ValueDealBase:SetVal("value", GetLocalizedText(DealBaseLabels[variant]))
+    UpdateDealBaseState()
+end
+
+local function DealBaseStep(step)
+    local variant = (Options.DealBase or 1) + step
+    if variant > 3 then variant = 1 end
+    if variant < 1 then variant = 3 end
+    VariantDealBase(variant)
+    userMods.SetGlobalConfigSection("Options", Options)
+    -- функция из ListBuy: отсутствует, если вкладки аукциона не загружены
+    if RefreshDealHighlights then RefreshDealHighlights() end
+end
+
+function DealBaseNext(reaction)
+    DealBaseStep(1)
+end
+
+function DealBasePrev(reaction)
+    DealBaseStep(-1)
+end
+
+function showDeals(reaction)
+    ToggleOption("ShowDeals", CbShowDeals)
+    UpdateDealBaseState()
+    if RefreshDealHighlights then RefreshDealHighlights() end
+end
+
 function DefaultOptions(reaction)
     Options = CopyDefaults()
     userMods.SetGlobalConfigSection("Options", Options)
@@ -294,6 +352,9 @@ function ShowOptionsPanel()
     -- панель могла остаться в контейнере после прошлого показа
     if not Container:IsContain(GroupMain) then
         Container:PushBack(GroupMain)
+    end
+    if not Container:IsContain(GroupBuy) then
+        Container:PushBack(GroupBuy)
     end
     if not Container:IsContain(GroupToolTip) then
         Container:PushBack(GroupToolTip)
@@ -324,6 +385,9 @@ function OptionsInit()
     common.RegisterReactionHandler(showMedian, "showMedian")
     common.RegisterReactionHandler(showLots, "showLots")
     common.RegisterReactionHandler(showHistory, "showHistory")
+    common.RegisterReactionHandler(showDeals, "showDeals")
+    common.RegisterReactionHandler(DealBaseNext, "DealBaseNext")
+    common.RegisterReactionHandler(DealBasePrev, "DealBasePrev")
     common.RegisterReactionHandler(ClearBase, "ClearBase")
     common.RegisterReactionHandler(DefaultOptions, "DefaultOptions")
     common.RegisterReactionHandler(ShowOptionsPanel, "ShowOptionsPanel")
