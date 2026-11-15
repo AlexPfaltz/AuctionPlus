@@ -186,6 +186,24 @@ function GetMoneyFromSearchBar(self)
 	return c
 end
 
+-- Порог выгодной покупки: цена за единицу ниже рыночной из базы цен
+-- (PriceDB) минус DEAL_DISCOUNT
+local DEAL_DISCOUNT = 0.15
+-- Данные базы старше этого срока не считаются рыночными
+local DEAL_MAX_AGE_MS = 7 * 86400000
+
+-- Рыночная цена предмета по базе сканирования: нижняя четверть,
+-- при её отсутствии - медиана или минимум (nil, если предмета нет в базе
+-- или снимок устарел)
+local function GetMarketPrice(name, isCursed)
+	local entry = PriceDB.GetEntry(name, isCursed)
+	local cur = entry and entry.cur
+	if not cur or not cur.t or common.GetLocalDateTimeMs() - cur.t > DEAL_MAX_AGE_MS then
+		return nil
+	end
+	return cur.q1 or cur.med or cur.min
+end
+
 -- Экипировка или оружие (такие лоты группируются по характеристикам)
 local function IsGearItem(itemInfo)
 	local slot = itemInfo.dressSlot
@@ -260,6 +278,15 @@ ListBuy.CreateLine = function(auctionInfo, key)
 	line.itemName = line.widget:GetChildChecked("ItemName", false)
 	line.itemName:SetClassVal( "class", ItemQualityClass[quality] or "tip_base")
 	line.itemName:SetVal("itemname", itemInfo.name)
+
+	-- Подсветка выгодной покупки: цена за единицу заметно ниже рыночной
+	-- по базе сканирования. Пока поиск идёт, база не меняется, поэтому
+	-- флаг достаточно выставить при создании строки.
+	line.dealHighlight = line.widget:GetChildChecked("DealHighlight", false)
+	local marketPrice = GetMarketPrice(itemName, isCursed)
+	line.isGoodDeal = marketPrice ~= nil and marketPrice > 0
+		and PricePerUnit <= marketPrice * (1 - DEAL_DISCOUNT)
+	line.dealHighlight:Show(line.isGoodDeal)
 	
 	--Заполняем виджет цены за штуку
 	line.gold1 = line.widget:GetChildChecked("PricePerUnit", false):GetChildChecked("Gold", false)
@@ -577,6 +604,7 @@ ListBuy.slot_over = function(params)
     local line = Lines[nameParent]
     if not line then return end
     local content = line.infoForTooltip or {}
+    content.isGoodDeal = line.isGoodDeal
 
     if params.active then
         CallTooltipItem(content, params.widget)

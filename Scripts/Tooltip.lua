@@ -354,6 +354,15 @@ local function fillTooltip(content)
     cTooltip:PushBack(itemaname)
     Track(itemaname, smartLinePool)
 
+    -- Выгодная покупка (вкладка "Купить": цена заметно ниже рыночной)
+    if content.isGoodDeal then
+        local deal = AcquireSmartLine()
+        SafeSetVal(deal, "value", L("GoodDeal"))
+        deal:SetClassVal("class", "tip_golden")
+        cTooltip:PushBack(deal)
+        Track(deal, smartLinePool)
+    end
+
     -- Binding
     if content.binding and content.binding > 0 then
         local Binding = AcquireSmartLine()

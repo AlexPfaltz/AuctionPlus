@@ -3,6 +3,7 @@
 	<Name>ItemLine</Name>
 	<Children>
 		<Item href="Line/Button.xdb" />
+		<Item href="Line/DealHighlight.(WidgetPanel).xdb" />
 		<Item href="Line/Lots.xdb" />
 		<Item href="Line/ItemName.xdb" />
 		<Item href="Line/ItemSlot.(WidgetPanel).xdb" />
