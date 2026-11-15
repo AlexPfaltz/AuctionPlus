@@ -110,6 +110,7 @@ local function BuildRow(label, price, dateText)
 	if label then
 		local labelWidget = NewWidget(DescLabel)
 		labelWidget:SetVal("value", label)
+		labelWidget:SetClassVal("class", userMods.FromWString(StyleClass("styleLabel")))
 		container:PushBack(labelWidget)
 	end
 

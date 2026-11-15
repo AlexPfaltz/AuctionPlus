@@ -27,6 +27,16 @@ local wtHeaderStyle = GroupToolTip:GetChildChecked("HeaderStyle", true)
 local ValueHeaderStyle = wtHeaderStyle:GetChildChecked("Value", false)
 local wtDateStyle = GroupToolTip:GetChildChecked("DateStyle", true)
 local ValueDateStyle = wtDateStyle:GetChildChecked("Value", false)
+local wtLabelStyle = GroupToolTip:GetChildChecked("LabelStyle", true)
+local ValueLabelStyle = wtLabelStyle:GetChildChecked("Value", false)
+
+-- Индекс CSS-класса клиента по имени (для дефолта стиля подписей цен)
+local function IndexOfCSS(name)
+    for i, cssName in ipairs(listCSS) do
+        if cssName == name then return i end
+    end
+    return nil
+end
 local wtShowDeals = GroupBuy:GetChildChecked("ShowDeals", true)
 local CbShowDeals = wtShowDeals:GetChildChecked("CheckBox", false)
 local wtDealBase = GroupBuy:GetChildChecked("DealBase", true)
@@ -43,6 +53,8 @@ local defaultOptions = {
     ["ShowCoins"] = 3,
     ["styleHeader"] = 81,
     ["styleDate"] = 240,
+    -- подписи видов цен изначально рисовались классом tip_grey
+    ["styleLabel"] = IndexOfCSS("tip_grey") or 240,
     -- режимы сканирования: 1 - весь аукцион, 2 - категория, 3 - сумка, 4 - свой список
     ["ScanBy"] = 1,
     ["ScanModesVer"] = 1,
@@ -128,6 +140,7 @@ function SetLocalizedText()
     wtHistoryCount:GetChildChecked("Text", false):SetVal("text", GetLocalizedText("History items count"))
     wtHeaderStyle:GetChildChecked("Text", false):SetVal("text", GetLocalizedText("Style text - header"))
     wtDateStyle:GetChildChecked("Text", false):SetVal("text", GetLocalizedText("Style text - date"))
+    wtLabelStyle:GetChildChecked("Text", false):SetVal("text", GetLocalizedText("Style text - label"))
     SetRowText(wtShowDeals, "Show good deals")
     SetRowText(wtDealBase, "Deal base price")
 end
@@ -153,6 +166,7 @@ end
 function FillValues()
     ApplyStyle(wtHeaderStyle, ValueHeaderStyle, "styleHeader", Options.styleHeader)
     ApplyStyle(wtDateStyle, ValueDateStyle, "styleDate", Options.styleDate)
+    ApplyStyle(wtLabelStyle, ValueLabelStyle, "styleLabel", Options.styleLabel)
     SetCheckbox(CbShowMin, Options.ShowMin)
     SetCheckbox(CbShowMarket, Options.ShowMarket)
     SetCheckbox(CbShowMedian, Options.ShowMedian)
@@ -247,6 +261,14 @@ end
 
 function DateStylePrev(reaction)
     ApplyStyle(wtDateStyle, ValueDateStyle, "styleDate", Options.styleDate - 1)
+end
+
+function LabelStyleNext(reaction)
+    ApplyStyle(wtLabelStyle, ValueLabelStyle, "styleLabel", Options.styleLabel + 1)
+end
+
+function LabelStylePrev(reaction)
+    ApplyStyle(wtLabelStyle, ValueLabelStyle, "styleLabel", Options.styleLabel - 1)
 end
 
 function showHeader(reaction)
@@ -376,6 +398,8 @@ function OptionsInit()
     common.RegisterReactionHandler(HeaderStylePrev, "HeaderStylePrev")
     common.RegisterReactionHandler(DateStyleNext, "DateStyleNext")
     common.RegisterReactionHandler(DateStylePrev, "DateStylePrev")
+    common.RegisterReactionHandler(LabelStyleNext, "LabelStyleNext")
+    common.RegisterReactionHandler(LabelStylePrev, "LabelStylePrev")
     common.RegisterReactionHandler(HistoryCountNext, "HistoryCountNext")
     common.RegisterReactionHandler(HistoryCountPrev, "HistoryCountPrev")
     common.RegisterReactionHandler(showHeader, "showHeader")

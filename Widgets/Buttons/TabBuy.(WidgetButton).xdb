@@ -55,4 +55,5 @@
 	</Placement>
 	<Visible>true</Visible>
 	<IgnoreDblClick>true</IgnoreDblClick>
+	<reactionOnPointing>TabHintOver</reactionOnPointing>
 </WidgetButton>

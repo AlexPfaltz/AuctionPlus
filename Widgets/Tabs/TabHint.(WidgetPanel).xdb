@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WidgetPanel>
+	<Name>TabHint</Name>
+	<Priority>200</Priority>
+	<Children>
+		<Item href="TabHint/Title.(WidgetTextView).xdb" />
+		<Item href="TabHint/Description.(WidgetTextView).xdb" />
+	</Children>
+	<BackLayer href="../Tooltip/Textures/Tooltip.(WidgetLayerTiledTexture).xdb" />
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_LOW</Align>
+			<Pos>4</Pos>
+			<Size>250</Size>
+		</X>
+		<Y>
+			<Align>WIDGET_ALIGN_LOW</Align>
+			<Pos>0</Pos>
+			<Size>98</Size>
+		</Y>
+	</Placement>
+	<Visible>false</Visible>
+	<TransparentInput>true</TransparentInput>
+</WidgetPanel>

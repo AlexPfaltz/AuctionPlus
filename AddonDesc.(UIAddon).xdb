@@ -15,6 +15,7 @@
 		<Item href="Scripts/Options.lua"/>
 		<Item href="Scripts/SearchList.lua"/>
 		<Item href="Scripts/Tooltip.lua"/>
+		<Item href="Scripts/TabHint.lua"/>
 	</ScriptFileRefs>
 	<Form href="Widgets/Main.(WidgetForm).xdb"/>
 	<texturesGroups>
