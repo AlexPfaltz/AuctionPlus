@@ -24,13 +24,13 @@
 	<Placement>
 		<X>
 			<Align>WIDGET_ALIGN_BOTH</Align>
-			<Pos>12</Pos>
-			<HighPos>12</HighPos>
+			<Pos>32</Pos>
+			<HighPos>28</HighPos>
 		</X>
 		<Y>
 			<Align>WIDGET_ALIGN_BOTH</Align>
-			<Pos>40</Pos>
-			<HighPos>52</HighPos>
+			<Pos>45</Pos>
+			<HighPos>56</HighPos>
 		</Y>
 	</Placement>
 	<Visible>false</Visible>
