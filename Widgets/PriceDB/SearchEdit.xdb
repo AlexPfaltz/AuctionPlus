@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WidgetEditLine>
+	<isPassword>false</isPassword>
+	<ReactionEnter>PriceDBSearchEnter</ReactionEnter>
+	<Cursor1Layer href="../Common/EditLine/CursorDark.xdb" />
+	<Cursor2Layer href="../Common/EditLine/Cursor2.xdb" />
+	<CursorWidth>2</CursorWidth>
+	<CursorChangeTimeMs>500</CursorChangeTimeMs>
+	<TextStyle>
+		<multiline>false</multiline>
+		<wrapText>true</wrapText>
+		<showClippedSymbol>false</showClippedSymbol>
+		<showClippedLine>true</showClippedLine>
+		<lineSpacing>0</lineSpacing>
+		<ellipsis>true</ellipsis>
+		<Align>ALIGNY_MIDDLE</Align>
+	</TextStyle>
+	<globalClassName>EditLineGlobalCenter</globalClassName>
+	<selectionLayer href="../Common/EditLine/Selection.xdb" />
+	<ReactionEsc>PriceDBSearchEsc</ReactionEsc>
+	<reactionFocusChanged>PriceDBSearchFocus</reactionFocusChanged>
+	<Name>EditLine</Name>
+	<BackLayer href="../Common/Textures/AuctionPanelEditable.(WidgetLayerTiledTexture).xdb" />
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_LOW</Align>
+			<Pos>30</Pos>
+			<Size>240</Size>
+		</X>
+		<Y>
+			<Align>WIDGET_ALIGN_LOW</Align>
+			<Pos>50</Pos>
+			<Size>28</Size>
+		</Y>
+	</Placement>
+	<Visible>true</Visible>
+	<TabOrder>0</TabOrder>
+	<TransparentInput>false</TransparentInput>
+	<IgnoreDblClick>false</IgnoreDblClick>
+	<fade>1</fade>
+</WidgetEditLine>

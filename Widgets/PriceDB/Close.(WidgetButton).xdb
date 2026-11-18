@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WidgetButton>
+	<Variants>
+		<Item>
+			<Reaction>PriceDBClose</Reaction>
+		</Item>
+	</Variants>
+	<Name>Close</Name>
+	<Header>
+		<Prototype href="../Common/Buttons/GoldenCorner/CornerCross.(WidgetButton).xdb" />
+	</Header>
+</WidgetButton>

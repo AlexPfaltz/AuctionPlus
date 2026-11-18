@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WidgetTextView>
+	<FormatFileRef href="ChartTick.txt" />
+	<Name>DateTick</Name>
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_LOW</Align>
+			<Pos>0</Pos>
+			<Size>56</Size>
+		</X>
+		<Y>
+			<Align>WIDGET_ALIGN_HIGH</Align>
+			<HighPos>6</HighPos>
+			<Size>20</Size>
+		</Y>
+	</Placement>
+	<Visible>false</Visible>
+	<TransparentInput>true</TransparentInput>
+</WidgetTextView>

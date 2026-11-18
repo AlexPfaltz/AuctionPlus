@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WidgetPanel>
+	<Name>PriceDBPanel</Name>
+	<Priority>1000</Priority>
+	<Children>
+		<Item href="InnerBg.(WidgetPanel).xdb" />
+		<Item href="../Options/Header/Header.(WidgetPanel).xdb" />
+		<Item href="Close.(WidgetButton).xdb" />
+		<Item href="SearchEdit.xdb" />
+		<Item href="SearchButton.(WidgetButton).xdb" />
+		<Item href="ResetButton.(WidgetButton).xdb" />
+		<Item href="CountLabel.(WidgetTextView).xdb" />
+		<Item href="ItemsList.(WidgetScrollableContainer).xdb" />
+		<Item href="ItemRow.(WidgetPanel).xdb" />
+		<Item href="Details.(WidgetPanel).xdb" />
+	</Children>
+	<BackLayer href="../Options/Textures/MainFrame.(WidgetLayerTiledTexture).xdb" />
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_CENTER</Align>
+			<Pos>0</Pos>
+			<Size>740</Size>
+		</X>
+		<Y>
+			<Align>WIDGET_ALIGN_CENTER</Align>
+			<Pos>0</Pos>
+			<Size>580</Size>
+		</Y>
+	</Placement>
+	<Visible>false</Visible>
+	<TransparentInput>false</TransparentInput>
+	<PickChildrenOnly>false</PickChildrenOnly>
+	<clipContent>false</clipContent>
+</WidgetPanel>

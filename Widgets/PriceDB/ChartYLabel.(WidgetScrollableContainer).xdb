@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WidgetScrollableContainer>
+	<widgetsArrangement>WIDGETS_ARRANGEMENT_L2R</widgetsArrangement>
+	<Name>YLabel</Name>
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_LOW</Align>
+			<Pos>3</Pos>
+			<Size>86</Size>
+		</X>
+		<Y>
+			<Align>WIDGET_ALIGN_LOW</Align>
+			<Pos>2</Pos>
+			<Size>18</Size>
+		</Y>
+	</Placement>
+	<Visible>false</Visible>
+	<TransparentInput>true</TransparentInput>
+	<PickChildrenOnly>true</PickChildrenOnly>
+	<IgnoreDblClick>true</IgnoreDblClick>
+	<clipContent>false</clipContent>
+</WidgetScrollableContainer>

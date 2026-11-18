@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WidgetPanel>
+	<Name>Chart</Name>
+	<Children>
+		<Item href="ChartCaption.(WidgetTextView).xdb" />
+		<Item href="ChartYLabel.(WidgetScrollableContainer).xdb" />
+		<Item href="ChartDateTick.(WidgetTextView).xdb" />
+		<Item href="ChartNoData.(WidgetTextView).xdb" />
+		<Item href="Bar.(WidgetPanel).xdb" />
+	</Children>
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_BOTH</Align>
+			<Pos>14</Pos>
+			<HighPos>14</HighPos>
+		</X>
+		<Y>
+			<Align>WIDGET_ALIGN_BOTH</Align>
+			<Pos>178</Pos>
+			<HighPos>14</HighPos>
+		</Y>
+	</Placement>
+	<Visible>true</Visible>
+	<TransparentInput>true</TransparentInput>
+</WidgetPanel>

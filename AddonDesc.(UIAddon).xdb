@@ -7,6 +7,7 @@
 		<Item href="Scripts/Localization.lua"/>
 		<Item href="Scripts/Common.lua"/>
 		<Item href="Scripts/PriceDB.lua"/>
+		<Item href="Scripts/PriceDBView.lua"/>
 		<Item href="Scripts/ListBuy.lua"/>
 		<Item href="Scripts/ListSell.lua"/>
 		<Item href="Scripts/TabScan.lua"/>

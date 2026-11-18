@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WidgetTextView>
+	<FormatFileRef href="LotsLine.txt" />
+	<Name>LotsLine</Name>
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_BOTH</Align>
+			<Pos>14</Pos>
+			<HighPos>14</HighPos>
+		</X>
+		<Y>
+			<Align>WIDGET_ALIGN_LOW</Align>
+			<Pos>134</Pos>
+			<Size>20</Size>
+		</Y>
+	</Placement>
+	<Visible>true</Visible>
+	<TransparentInput>true</TransparentInput>
+</WidgetTextView>

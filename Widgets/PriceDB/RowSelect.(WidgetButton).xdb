@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WidgetButton>
+	<Variants>
+		<Item>
+			<LayerHighlight href="RowHoverLayer.(WidgetLayerSimpleTexture).xdb" />
+			<StatePushed>
+				<LayerMain href="RowSelectLayer.(WidgetLayerSimpleTexture).xdb" />
+			</StatePushed>
+			<Reaction>PriceDBSelectItem</Reaction>
+			<ReactionOnUp>true</ReactionOnUp>
+		</Item>
+		<Item>
+			<LayerHighlight href="RowHoverLayer.(WidgetLayerSimpleTexture).xdb" />
+			<StateNormal>
+				<LayerMain href="RowSelectLayer.(WidgetLayerSimpleTexture).xdb" />
+			</StateNormal>
+			<StatePushed>
+				<LayerMain href="RowSelectLayer.(WidgetLayerSimpleTexture).xdb" />
+			</StatePushed>
+			<Reaction>PriceDBSelectItem</Reaction>
+			<ReactionOnUp>true</ReactionOnUp>
+		</Item>
+	</Variants>
+	<Name>Select</Name>
+	<Priority>10</Priority>
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_BOTH</Align>
+			<Pos>0</Pos>
+			<HighPos>0</HighPos>
+		</X>
+		<Y>
+			<Align>WIDGET_ALIGN_BOTH</Align>
+			<Pos>0</Pos>
+			<HighPos>0</HighPos>
+		</Y>
+	</Placement>
+	<Visible>true</Visible>
+	<TransparentInput>false</TransparentInput>
+	<IgnoreDblClick>true</IgnoreDblClick>
+</WidgetButton>

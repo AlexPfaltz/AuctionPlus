@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WidgetScrollableContainer>
+	<scrollBar href="../Tabs/Scan/ScrollBar/GlideScrollBar.xdb" />
+	<widgetsArrangement>WIDGETS_ARRANGEMENT_T2B</widgetsArrangement>
+	<Name>ItemsList</Name>
+	<BackLayer href="../Common/Textures/PaperTile.(WidgetLayerTiledTexture).xdb" />
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_LOW</Align>
+			<Pos>30</Pos>
+			<Size>330</Size>
+		</X>
+		<Y>
+			<Align>WIDGET_ALIGN_BOTH</Align>
+			<Pos>88</Pos>
+			<HighPos>20</HighPos>
+		</Y>
+	</Placement>
+	<Visible>true</Visible>
+	<TransparentInput>false</TransparentInput>
+	<PickChildrenOnly>true</PickChildrenOnly>
+	<IgnoreDblClick>true</IgnoreDblClick>
+	<clipContent>true</clipContent>
+</WidgetScrollableContainer>

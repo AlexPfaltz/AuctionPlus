@@ -1,9 +1,8 @@
 -- Всплывающие подсказки для вкладок аддона (Купить/Продать/Скан),
--- аналог подсказок стоковых вкладок аукциона. Панель лежит в форме
+-- аналог подсказок стоковых вкладок аукциона. Та же панель показывает
+-- подсказку плавающей кнопки базы цен (работает и без окна аукциона). Панель лежит в форме
 -- аддона поверх всех окон, поэтому позиционируется в координатах
 -- экрана (правый нижний угол вкладки), а не относительно окна аукциона.
-if AuctionPlusNoAuction then return end
-
 local wtTabHint = mainForm:GetChildChecked("TabHint", false)
 local wtHintTitle = wtTabHint:GetChildChecked("Title", false)
 local wtHintText = wtTabHint:GetChildChecked("Description", false)
@@ -13,6 +12,7 @@ local HINTS = {
 	TabBuy = { title = "btTabBuy", text = "TabBuyHint" },
 	TabSell = { title = "btTabSell", text = "TabSellHint" },
 	TabScan = { title = "btTabScan", text = "TabScanHint" },
+	PriceDBFloat = { title = "PriceDBOpen", text = "PriceDBFloatHint" },
 }
 
 local function TabHintOver(params)
@@ -44,4 +44,5 @@ local function TabHintOver(params)
 	wtTabHint:Show(true)
 end
 
+Global("ShowAuctionPlusHint", TabHintOver)
 common.RegisterReactionHandler(TabHintOver, "TabHintOver")

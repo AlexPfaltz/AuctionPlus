@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WidgetButton>
+	<Variants>
+		<Item>
+			<Reaction>PriceDBToggle</Reaction>
+			<ReactionOnUp>true</ReactionOnUp>
+		</Item>
+	</Variants>
+	<Name>PriceDBFloat</Name>
+	<Priority>1001</Priority>
+	<Children>
+		<Item href="FloatIconPanel.(WidgetPanel).xdb" />
+		<Item href="FloatGlowPanel.(WidgetPanel).xdb" />
+	</Children>
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_CENTER</Align>
+			<Pos>613</Pos>
+			<Size>36</Size>
+		</X>
+		<Y>
+			<Align>WIDGET_ALIGN_HIGH</Align>
+			<HighPos>8</HighPos>
+			<Size>36</Size>
+		</Y>
+	</Placement>
+	<Visible>true</Visible>
+	<TransparentInput>false</TransparentInput>
+	<IgnoreDblClick>true</IgnoreDblClick>
+	<clipContent>false</clipContent>
+	<reactionOnPointing>PriceDBFloatOver</reactionOnPointing>
+</WidgetButton>

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WidgetButton>
+	<Variants>
+		<Item>
+			<Reaction>PriceDBSearchReset</Reaction>
+		</Item>
+	</Variants>
+	<Name>Reset</Name>
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_LOW</Align>
+			<Pos>368</Pos>
+			<Size>84</Size>
+		</X>
+		<Y>
+			<Align>WIDGET_ALIGN_LOW</Align>
+			<Pos>50</Pos>
+			<Size>28</Size>
+		</Y>
+	</Placement>
+	<Visible>true</Visible>
+	<Enabled>true</Enabled>
+	<Header>
+		<Prototype href="../Tabs/Resources/AuctionButtonCommon/AuctionButtonCommon.Prototype.(WidgetButton).xdb" />
+	</Header>
+</WidgetButton>

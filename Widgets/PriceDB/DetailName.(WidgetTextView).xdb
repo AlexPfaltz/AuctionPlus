@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WidgetTextView>
+	<FormatFileRef href="DetailName.txt" />
+	<TextStyle>
+		<multiline>true</multiline>
+	</TextStyle>
+	<Name>Name</Name>
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_BOTH</Align>
+			<Pos>14</Pos>
+			<HighPos>14</HighPos>
+		</X>
+		<Y>
+			<Align>WIDGET_ALIGN_LOW</Align>
+			<Pos>10</Pos>
+			<Size>44</Size>
+		</Y>
+	</Placement>
+	<Visible>true</Visible>
+	<TransparentInput>true</TransparentInput>
+</WidgetTextView>

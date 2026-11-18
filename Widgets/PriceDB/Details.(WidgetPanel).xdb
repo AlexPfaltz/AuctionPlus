@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WidgetPanel>
+	<Name>Details</Name>
+	<Children>
+		<Item href="DetailName.(WidgetTextView).xdb" />
+		<Item href="PriceLine.(WidgetPanel).xdb" />
+		<Item href="PriceValue.(WidgetTextView).xdb" />
+		<Item href="CoinIcon.(WidgetPanel).xdb" />
+		<Item href="Space.(WidgetPanel).xdb" />
+		<Item href="LotsLine.(WidgetTextView).xdb" />
+		<Item href="DateLine.(WidgetTextView).xdb" />
+		<Item href="Chart.(WidgetPanel).xdb" />
+		<Item href="HelpTitle.(WidgetTextView).xdb" />
+		<Item href="HelpLine.(WidgetTextView).xdb" />
+	</Children>
+	<BackLayer href="../Common/Textures/ContentFrame.(WidgetLayerTiledTexture).xdb" />
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_BOTH</Align>
+			<Pos>376</Pos>
+			<HighPos>30</HighPos>
+		</X>
+		<Y>
+			<Align>WIDGET_ALIGN_BOTH</Align>
+			<Pos>88</Pos>
+			<HighPos>20</HighPos>
+		</Y>
+	</Placement>
+	<Visible>true</Visible>
+	<TransparentInput>true</TransparentInput>
+</WidgetPanel>

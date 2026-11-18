@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WidgetTextView>
+	<FormatFileRef href="HelpLine.txt" />
+	<TextStyle>
+		<multiline>true</multiline>
+	</TextStyle>
+	<Name>HelpLine</Name>
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_BOTH</Align>
+			<Pos>20</Pos>
+			<HighPos>20</HighPos>
+		</X>
+		<Y>
+			<Align>WIDGET_ALIGN_LOW</Align>
+			<Pos>56</Pos>
+			<Size>70</Size>
+		</Y>
+	</Placement>
+	<Visible>false</Visible>
+	<TransparentInput>true</TransparentInput>
+</WidgetTextView>
