@@ -21,6 +21,6 @@
 	<Visible>true</Visible>
 	<Enabled>true</Enabled>
 	<Header>
-		<Prototype href="../Tabs/Resources/AuctionButtonCommon/AuctionButtonCommon.Prototype.(WidgetButton).xdb" />
+		<Prototype href="../Tabs/Resources/SearchButtonCommon/SearchButtonCommon.Prototype.(WidgetButton).xdb" />
 	</Header>
 </WidgetButton>

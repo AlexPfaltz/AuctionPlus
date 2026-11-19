@@ -20,7 +20,7 @@
 	<ReactionEsc>PriceDBSearchEsc</ReactionEsc>
 	<reactionFocusChanged>PriceDBSearchFocus</reactionFocusChanged>
 	<Name>EditLine</Name>
-	<BackLayer href="../Common/Textures/AuctionPanelEditable.(WidgetLayerTiledTexture).xdb" />
+	<BackLayer href="../Common/Textures/SearchField.(WidgetLayerTiledTexture).xdb" />
 	<Placement>
 		<X>
 			<Align>WIDGET_ALIGN_LOW</Align>

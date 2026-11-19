@@ -13,7 +13,6 @@ local wtPanel = mainForm:GetChildChecked("PriceDBPanel", false)
 local wtTitle = wtPanel:GetChildChecked("Header", false):GetChildChecked("Text", false)
 local wtEditLine = wtPanel:GetChildChecked("EditLine", false)
 local btSearch = wtPanel:GetChildChecked("Search", false)
-local btReset = wtPanel:GetChildChecked("Reset", false)
 local wtCountLabel = wtPanel:GetChildChecked("CountLabel", false)
 local wtItems = wtPanel:GetChildChecked("ItemsList", false)
 local wtDetails = wtPanel:GetChildChecked("Details", false)
@@ -596,6 +595,10 @@ local function ApplySearch()
 	searchText = EffectiveSearchText()
 	ApplyFilter()
 	RenderList()
+	-- пустое поле = сброс поиска: показываем справочную страницу
+	if searchText == "" then
+		ShowHelp()
+	end
 end
 
 function PriceDBSearchEnter()
@@ -607,21 +610,18 @@ function PriceDBSearchPressed()
 	ApplySearch()
 end
 
-function PriceDBSearchReset()
-	searchText = ""
-	selectedKey = nil
-	wtEditLine:SetText(userMods.ToWString(L("PriceDBSearchHint")))
-	wtEditLine:SetFocus(false)
-	ApplyFilter()
-	RenderList()
-	ShowHelp()
-end
-
 function PriceDBSearchEsc()
-	wtEditLine:SetFocus(false)
-	if searchText == "" then
+	-- сброс поиска по Esc (без отдельной кнопки «Сброс»): очищаем поле и
+	-- возвращаем справочную страницу, если в поле был реальный текст
+	if EffectiveSearchText() ~= "" then
+		searchText = ""
+		selectedKey = nil
 		wtEditLine:SetText(userMods.ToWString(L("PriceDBSearchHint")))
+		ApplyFilter()
+		RenderList()
+		ShowHelp()
 	end
+	wtEditLine:SetFocus(false)
 end
 
 -- Подсказка в поле поиска: прячем при фокусе, возвращаем на пустой текст
@@ -690,7 +690,6 @@ common.RegisterReactionHandler(PriceDBClose, "PriceDBClose")
 common.RegisterReactionHandler(PriceDBToggle, "PriceDBToggle")
 common.RegisterReactionHandler(PriceDBSearchEnter, "PriceDBSearchEnter")
 common.RegisterReactionHandler(PriceDBSearchPressed, "PriceDBSearchPressed")
-common.RegisterReactionHandler(PriceDBSearchReset, "PriceDBSearchReset")
 common.RegisterReactionHandler(PriceDBSearchEsc, "PriceDBSearchEsc")
 common.RegisterReactionHandler(PriceDBSearchFocus, "PriceDBSearchFocus")
 common.RegisterReactionHandler(PriceDBSelectItem, "PriceDBSelectItem")
@@ -747,7 +746,6 @@ MakeChartLine(PLOT_LEFT, axisW, PLOT_BOTTOM, 2, AXIS_COLOR)
 
 wtTitle:SetVal("text", userMods.ToWString(L("PriceDBTitle")))
 btSearch:SetVal("button_label", userMods.ToWString(L("ButtonSearch")))
-btReset:SetVal("button_label", userMods.ToWString(L("PriceDBReset")))
 wtEditLine:SetText(userMods.ToWString(L("PriceDBSearchHint")))
 DnD.Init(wtFloatBtn, wtFloatBtn, true, true)
 ShowHelp()
