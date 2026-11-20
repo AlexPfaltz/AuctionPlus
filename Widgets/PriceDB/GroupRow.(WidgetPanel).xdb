@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WidgetPanel>
+	<Name>GroupRow</Name>
+	<Children>
+		<Item href="GroupName.(WidgetTextView).xdb" />
+		<Item href="GroupSign.(WidgetTextView).xdb" />
+		<Item href="GroupToggle.(WidgetButton).xdb" />
+	</Children>
+	<BackLayer href="../Common/Textures/GroupHeader.(WidgetLayerTiledTexture).xdb" />
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_BOTH</Align>
+			<Pos>12</Pos>
+			<HighPos>36</HighPos>
+		</X>
+		<Y>
+			<Align>WIDGET_ALIGN_LOW</Align>
+			<Pos>0</Pos>
+			<Size>30</Size>
+		</Y>
+	</Placement>
+	<Visible>false</Visible>
+</WidgetPanel>

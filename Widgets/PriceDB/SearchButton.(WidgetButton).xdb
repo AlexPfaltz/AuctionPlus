@@ -2,25 +2,33 @@
 <WidgetButton>
 	<Variants>
 		<Item>
+			<StateNormal>
+				<LayerMain href="../Common/Textures/SearchButtonNormal.(WidgetLayerSimpleTexture).xdb" />
+			</StateNormal>
+			<StateHighlighted>
+				<LayerMain href="../Common/Textures/SearchButtonOver.(WidgetLayerSimpleTexture).xdb" />
+			</StateHighlighted>
+			<StatePushed>
+				<LayerMain href="../Common/Textures/SearchButtonPressed.(WidgetLayerSimpleTexture).xdb" />
+			</StatePushed>
 			<Reaction>PriceDBSearchPressed</Reaction>
+			<ReactionOnUp>true</ReactionOnUp>
 		</Item>
 	</Variants>
 	<Name>Search</Name>
 	<Placement>
 		<X>
 			<Align>WIDGET_ALIGN_LOW</Align>
-			<Pos>278</Pos>
-			<Size>84</Size>
+			<Pos>324</Pos>
+			<Size>30</Size>
 		</X>
 		<Y>
 			<Align>WIDGET_ALIGN_LOW</Align>
 			<Pos>50</Pos>
-			<Size>28</Size>
+			<Size>30</Size>
 		</Y>
 	</Placement>
 	<Visible>true</Visible>
 	<Enabled>true</Enabled>
-	<Header>
-		<Prototype href="../Tabs/Resources/SearchButtonCommon/SearchButtonCommon.Prototype.(WidgetButton).xdb" />
-	</Header>
+	<IgnoreDblClick>true</IgnoreDblClick>
 </WidgetButton>

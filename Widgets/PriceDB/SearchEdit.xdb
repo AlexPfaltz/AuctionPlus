@@ -2,7 +2,7 @@
 <WidgetEditLine>
 	<isPassword>false</isPassword>
 	<ReactionEnter>PriceDBSearchEnter</ReactionEnter>
-	<Cursor1Layer href="../Common/EditLine/CursorDark.xdb" />
+	<Cursor1Layer href="SearchCursor.xdb" />
 	<Cursor2Layer href="../Common/EditLine/Cursor2.xdb" />
 	<CursorWidth>2</CursorWidth>
 	<CursorChangeTimeMs>500</CursorChangeTimeMs>
@@ -20,17 +20,16 @@
 	<ReactionEsc>PriceDBSearchEsc</ReactionEsc>
 	<reactionFocusChanged>PriceDBSearchFocus</reactionFocusChanged>
 	<Name>EditLine</Name>
-	<BackLayer href="../Common/Textures/SearchField.(WidgetLayerTiledTexture).xdb" />
 	<Placement>
 		<X>
 			<Align>WIDGET_ALIGN_LOW</Align>
-			<Pos>30</Pos>
-			<Size>240</Size>
+			<Pos>42</Pos>
+			<Size>306</Size>
 		</X>
 		<Y>
 			<Align>WIDGET_ALIGN_LOW</Align>
-			<Pos>50</Pos>
-			<Size>28</Size>
+			<Pos>54</Pos>
+			<Size>22</Size>
 		</Y>
 	</Placement>
 	<Visible>true</Visible>

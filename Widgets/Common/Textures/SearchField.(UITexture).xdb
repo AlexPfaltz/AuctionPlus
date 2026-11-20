@@ -4,13 +4,13 @@
     <mipsNumber>1</mipsNumber>
     <generateMipChain>false</generateMipChain>
     <type>DXT5</type>
-    <width>128</width>
-    <height>128</height>
-    <realWidth>128</realWidth>
-    <realHeight>128</realHeight>
+    <width>64</width>
+    <height>32</height>
+    <realWidth>64</realWidth>
+    <realHeight>32</realHeight>
     <disableLODControl>false</disableLODControl>
     <alphaTex>true</alphaTex>
-    <binaryFileSize>2102</binaryFileSize>
+    <binaryFileSize>2056</binaryFileSize>
     <binaryFile href="SearchField.(UITexture).bin" />
     <binaryFileSize2>0</binaryFileSize2>
     <binaryFile2 href="" />

@@ -1,7 +1,8 @@
 --------------------------------------------------------------------------------
 -- PriceDBView.lua: окно просмотра базы цен.
--- Слева - список наименований текущего шарда с живым поиском по подстроке
--- без учёта регистра (кнопка "Сброс" возвращает полный список), справа -
+-- Слева - список наименований текущего шарда, сгруппированный по первой букве
+-- (раскрыта одна группа, крупные группы делятся по двум буквам) с живым
+-- поиском по подстроке без учёта регистра (Esc очищает поиск), справа -
 -- сводка текущих цен выбранного предмета (минимальная / рыночная / медиана
 -- с иконками монет) и столбчатый график динамики медианы по дням.
 -- Открывается командой /apdb и плавающей кнопкой на экране (перетаскивается,
@@ -12,7 +13,6 @@
 local wtPanel = mainForm:GetChildChecked("PriceDBPanel", false)
 local wtTitle = wtPanel:GetChildChecked("Header", false):GetChildChecked("Text", false)
 local wtEditLine = wtPanel:GetChildChecked("EditLine", false)
-local btSearch = wtPanel:GetChildChecked("Search", false)
 local wtCountLabel = wtPanel:GetChildChecked("CountLabel", false)
 local wtItems = wtPanel:GetChildChecked("ItemsList", false)
 local wtDetails = wtPanel:GetChildChecked("Details", false)
@@ -30,6 +30,10 @@ local wtHelpTitle = wtDetails:GetChildChecked("HelpTitle", false)
 
 -- Шаблоны для клонирования (оригиналы остаются скрытыми)
 local DescRow = wtPanel:GetChildChecked("ItemRow", false):GetWidgetDesc()
+local DescGroup = wtPanel:GetChildChecked("GroupRow", false):GetWidgetDesc()
+local DescGroupOpen = wtPanel:GetChildChecked("GroupRowOpen", false):GetWidgetDesc()
+local DescBody = wtPanel:GetChildChecked("GroupBody", false):GetWidgetDesc()
+local DescPad = wtPanel:GetChildChecked("ListPad", false):GetWidgetDesc()
 local DescBar = wtChart:GetChildChecked("Bar", false):GetWidgetDesc()
 local DescLine = wtDetails:GetChildChecked("PriceLine", false):GetWidgetDesc()
 local DescValue = wtDetails:GetChildChecked("Value", false):GetWidgetDesc()
@@ -56,7 +60,15 @@ local PLOT_TOP = 46
 local PLOT_BOTTOM = 28
 local BAR_MAX_W = 26
 local TICK_STEP_PX = 44         -- минимальный шаг между подписями дат
-local MAX_ROWS = 300         -- предел строк списка, дальше - просьба уточнить поиск
+local MAX_ROWS = 300         -- предел строк в одной раскрытой группе (страховка)
+local FLAT_LIMIT = 80        -- результатов поиска не больше - показываем без групп
+local SPLIT_LIMIT = 120      -- группа крупнее делится на подгруппы по двум буквам
+local BODY_PAD = 12          -- отступ строк от краёв бумаги
+local ROW_INSET = 12         -- строки внутри бумаги
+local LEVEL1_X = 12          -- отступ заголовков и бумаги от кожаной рамки
+local LEVEL2_X = 22
+local LIST_PAD = 12          -- пустое место сверху и снизу списка (внутри рамки)
+local STATE_TTL_MS = 600000  -- сколько помним раскрытую группу после закрытия окна
 local HELP_LINES = 5
 local FLOAT_SIZE = 36
 local FLOAT_SIZE_HOVER = 42
@@ -66,7 +78,14 @@ local GRID_COLOR = { a = 0.35, r = 0.4, g = 0.35, b = 0.28 }
 
 local allRows = {}           -- { key, name, cursed, lower, cur, entry }
 local filtered = {}          -- подмножество allRows после поиска
-local rowSelects = {}        -- кнопки выбора видимых строк (для подсветки)
+local rowSelects = {}        -- кнопки выбора видимых строк по номеру в filtered
+local groups = {}            -- { key, label, rows, subs } по алфавиту
+local headerByName = {}      -- виджеты заголовков групп по имени кнопки
+local openGroup = nil        -- ключ раскрытой группы (nil - всё свёрнуто)
+local openSub = nil          -- то же для подгруппы
+local savedGroup, savedSub   -- состояние до начала поиска
+local closedAtMs = nil       -- когда окно закрыли (для срока хранения состояния)
+local leafTruncated = false
 local bars = {}
 local decor = {}             -- сетка, подписи шкалы и дат текущего графика
 local helpLines = {}
@@ -81,37 +100,15 @@ local function L(key)
 	return GetLocalizedText(key)
 end
 
--- Нижний регистр для ASCII и кириллицы UTF-8 (string.lower работает
--- побайтово и русские буквы не складывает)
-local function LowerUtf8(s)
-	local out = {}
-	local i = 1
-	local n = string.len(s)
-	while i <= n do
-		local b1 = string.byte(s, i)
-		if b1 < 0x80 then
-			if b1 >= 0x41 and b1 <= 0x5A then b1 = b1 + 0x20 end
-			out[#out + 1] = string.char(b1)
-			i = i + 1
-		elseif b1 == 0xD0 and i < n then
-			local b2 = string.byte(s, i + 1)
-			if b2 >= 0x90 and b2 <= 0x9F then          -- А-П -> а-п
-				out[#out + 1] = string.char(0xD0, b2 + 0x20)
-			elseif b2 >= 0xA0 and b2 <= 0xAF then      -- Р-Я -> р-я
-				out[#out + 1] = string.char(0xD1, b2 - 0x20)
-			elseif b2 == 0x81 then                     -- Ё -> ё
-				out[#out + 1] = string.char(0xD1, 0x91)
-			else
-				out[#out + 1] = string.char(b1, b2)
-			end
-			i = i + 2
-		else
-			local len = (b1 >= 0xF0) and 4 or (b1 >= 0xE0) and 3 or 2
-			out[#out + 1] = string.sub(s, i, i + len - 1)
-			i = i + len
-		end
-	end
-	return table.concat(out)
+-- Строки Lua в игре - в кодировке cp1251 (так же, как Localization.lua), поэтому
+-- кириллица однобайтовая: А-Я = 0xC0-0xDF, а-я = 0xE0-0xFF, Ё = 0xA8, ё = 0xB8.
+-- string.lower их не складывает, поэтому нижний регистр считаем сами.
+local function LowerAnsi(s)
+	return (string.gsub(s, "[A-Z\192-\223\168]", function(c)
+		local b = string.byte(c)
+		if b == 0xA8 then return string.char(0xB8) end
+		return string.char(b + 0x20)
+	end))
 end
 
 local function Trim(s)
@@ -155,6 +152,7 @@ end
 local function ClearItems()
 	ClearContainer(wtItems)
 	rowSelects = {}
+	headerByName = {}
 end
 
 --------------------------------------------------------------------------------
@@ -174,20 +172,114 @@ local function RebuildCache()
 			end
 			allRows[#allRows + 1] = {
 				key = key, name = name, cursed = cursed,
-				lower = LowerUtf8(name), cur = entry.cur, entry = entry,
+				lower = LowerAnsi(name), cur = entry.cur, entry = entry,
 			}
+			allRows[#allRows].sk = string.gsub(allRows[#allRows].lower, "\184", "\229")
 		end
 	end
-	table.sort(allRows, function(a, b) return a.lower < b.lower end)
+	table.sort(allRows, function(a, b) return a.sk < b.sk end)
 end
 
 local function ApplyFilter()
-	local needle = searchText ~= "" and LowerUtf8(searchText) or nil
+	local needle = searchText ~= "" and LowerAnsi(searchText) or nil
 	filtered = {}
 	for i = 1, #allRows do
-		if not needle or string.find(allRows[i].lower, needle, 1, true) then
-			filtered[#filtered + 1] = allRows[i]
+		local row = allRows[i]
+		if not needle or string.find(row.lower, needle, 1, true) then
+			filtered[#filtered + 1] = row
+			row.fi = #filtered
 		end
+	end
+end
+
+--------------------------------------------------------------------------------
+-- Группировка по первой букве названия
+--------------------------------------------------------------------------------
+-- Ранг группы (1 - кириллица, 2 - латиница, 3 - цифры) и код строчной буквы
+-- по однобайтовому коду cp1251. "Ё" приравнивается к "Е", прочие символы
+-- (кавычки, скобки, пробелы) пропускаются.
+local function Classify(b)
+	if b >= 0x61 and b <= 0x7A then return 2, b end
+	if b >= 0x41 and b <= 0x5A then return 2, b + 32 end
+	if b >= 0x30 and b <= 0x39 then return 3, 0x30 end
+	if b == 0xB8 or b == 0xA8 then return 1, 0xE5 end
+	if b >= 0xE0 then return 1, b end
+	if b >= 0xC0 then return 1, b + 32 end
+	return nil
+end
+
+-- Первые две значащие буквы названия (в нижнем регистре)
+local function LeadingLetters(lower)
+	local found = {}
+	for i = 1, string.len(lower) do
+		local rank, code = Classify(string.byte(lower, i))
+		if rank then
+			found[#found + 1] = { rank = rank, code = code }
+			if #found == 2 then break end
+		end
+	end
+	return found
+end
+
+local function BuildGroups()
+	groups = {}
+	local byKey = {}
+	for i = 1, #filtered do
+		local row = filtered[i]
+		local lead = LeadingLetters(row.lower)
+		local first, second = lead[1], lead[2]
+		local key = first and (first.rank * 1000000 + first.code) or 4000000
+		local group = byKey[key]
+		if not group then
+			local label = "#"
+			local splittable = false
+			if first and first.rank == 3 then
+				label = "0-9"
+			elseif first then
+				label = string.char(first.code - 32)
+				splittable = true
+			end
+			group = { key = key, label = label, rows = {}, splittable = splittable }
+			byKey[key] = group
+			groups[#groups + 1] = group
+		end
+		group.rows[#group.rows + 1] = row
+		row.subKey = second and (second.rank * 1000000 + second.code) or 0
+		row.subCode = second and second.code or nil
+	end
+	table.sort(groups, function(a, b) return a.key < b.key end)
+
+	-- крупные группы делим по второй букве: "С" -> "Св", "Се", "Си"...
+	for g = 1, #groups do
+		local group = groups[g]
+		if group.splittable and #group.rows > SPLIT_LIMIT then
+			local subBy = {}
+			group.subs = {}
+			for i = 1, #group.rows do
+				local row = group.rows[i]
+				local sub = subBy[row.subKey]
+				if not sub then
+					sub = {
+						key = row.subKey,
+						label = group.label .. (row.subCode and string.char(row.subCode) or ""),
+						rows = {},
+					}
+					subBy[row.subKey] = sub
+					group.subs[#group.subs + 1] = sub
+				end
+				sub.rows[#sub.rows + 1] = row
+			end
+			table.sort(group.subs, function(a, b) return a.key < b.key end)
+		end
+	end
+
+	-- раскрытая группа могла исчезнуть после поиска или обновления базы
+	if openGroup then
+		local exists = false
+		for g = 1, #groups do
+			if groups[g].key == openGroup then exists = true end
+		end
+		if not exists then openGroup = nil end
 	end
 end
 
@@ -198,7 +290,7 @@ local function UpdateCountLabel()
 	else
 		text = L("PriceDBCount") .. tostring(#allRows)
 	end
-	if #filtered > MAX_ROWS then
+	if leafTruncated then
 		text = text .. " " .. L("PriceDBLimit")
 	end
 	wtCountLabel:SetVal("value", userMods.ToWString(text))
@@ -213,36 +305,127 @@ local function RowHeight(name)
 	return lines == 1 and 24 or (6 + 17 * lines)
 end
 
+-- Пергаментная подложка: строки группы лежат внутри неё (как в "Достижениях")
+local function CreateBody()
+	local body = mainForm:CreateWidgetByDesc(DescBody)
+	mainForm:AddChild(body)
+	return body
+end
+
+local function FinishBody(body, bottomY, posX)
+	local place = body:GetPlacementPlain()
+	place.posX = posX
+	place.sizeY = bottomY + BODY_PAD
+	body:SetPlacementPlain(place)
+	body:Show(true)
+	wtItems:PushBack(body)
+end
+
+-- Строка внутри подложки; возвращает высоту строки
+local function AddRowTo(body, y, row, text)
+	local widget = mainForm:CreateWidgetByDesc(DescRow)
+	body:AddChild(widget)
+	local name = text or (row.name .. (row.cursed and L("PriceDBCursedMark") or ""))
+	widget:GetChildChecked("Text", false):SetVal("text", userMods.ToWString(name))
+	local height = RowHeight(name)
+	local place = widget:GetPlacementPlain()
+	place.posX = ROW_INSET
+	place.highPosX = ROW_INSET
+	place.posY = y
+	place.sizeY = height
+	widget:SetPlacementPlain(place)
+	local select = widget:GetChildChecked("Select", false)
+	if row then
+		select:SetName("sel: " .. row.fi)
+		select:SetVariant(row.key == selectedKey and 1 or 0)
+		rowSelects[row.fi] = select
+	else
+		select:Enable(false)
+	end
+	widget:Show(true)
+	return height
+end
+
+-- Строки предметов на одной подложке; posX - отступ подложки слева
+local function AddRows(rows, posX)
+	local count = math.min(#rows, MAX_ROWS)
+	if #rows > MAX_ROWS then leafTruncated = true end
+	local body = CreateBody()
+	local y = BODY_PAD
+	for i = 1, count do
+		y = y + AddRowTo(body, y, rows[i])
+	end
+	FinishBody(body, y, posX)
+end
+
+-- Заголовок группы: буква, число записей; знак "+"/"-" - в самой кнопке
+local function AddHeader(label, count, open, buttonName, level)
+	local widget = mainForm:CreateWidgetByDesc(open and DescGroupOpen or DescGroup)
+	mainForm:AddChild(widget)
+	widget:GetChildChecked("Text", false):SetVal("text", userMods.ToWString(label))
+	widget:GetChildChecked("Sign", false):SetVal("text", userMods.ToWString("(" .. tostring(count) .. ")"))
+	local place = widget:GetPlacementPlain()
+	place.posX = level == 1 and LEVEL1_X or LEVEL2_X
+	widget:SetPlacementPlain(place)
+	widget:GetChildChecked("Toggle", false):SetName(buttonName)
+	widget:Show(true)
+	wtItems:PushBack(widget)
+	headerByName[buttonName] = widget
+end
+
+-- Прозрачная распорка высотой LIST_PAD: отступ от рамки подложки
+local function AddPad()
+	local pad = mainForm:CreateWidgetByDesc(DescPad)
+	mainForm:AddChild(pad)
+	local place = pad:GetPlacementPlain()
+	place.sizeY = LIST_PAD
+	pad:SetPlacementPlain(place)
+	pad:Show(true)
+	wtItems:PushBack(pad)
+end
+
 local function RenderList()
 	ClearItems()
+	leafTruncated = false
+	AddPad()
 	if #filtered == 0 then
 		-- пустая база или пустой результат поиска - строка-подсказка
-		local widget = mainForm:CreateWidgetByDesc(DescRow)
-		mainForm:AddChild(widget)
-		widget:GetChildChecked("Text", false):SetVal("text", userMods.ToWString(L("PriceDBEmpty")))
-		widget:GetChildChecked("Select", false):Enable(false)
-		widget:Show(true)
-		wtItems:PushBack(widget)
+		local body = CreateBody()
+		local height = AddRowTo(body, BODY_PAD, nil, L("PriceDBEmpty"))
+		FinishBody(body, BODY_PAD + height, LEVEL1_X)
+		AddPad()
 		UpdateCountLabel()
 		return
 	end
-	local count = math.min(#filtered, MAX_ROWS)
-	for i = 1, count do
-		local row = filtered[i]
-		local widget = mainForm:CreateWidgetByDesc(DescRow)
-		mainForm:AddChild(widget)
-		local name = row.name .. (row.cursed and L("PriceDBCursedMark") or "")
-		widget:GetChildChecked("Text", false):SetVal("text", userMods.ToWString(name))
-		local rowPlace = widget:GetPlacementPlain()
-		rowPlace.sizeY = RowHeight(name)
-		widget:SetPlacementPlain(rowPlace)
-		local select = widget:GetChildChecked("Select", false)
-		select:SetName("sel: " .. i)
-		select:SetVariant(row.key == selectedKey and 1 or 0)
-		rowSelects[i] = select
-		widget:Show(true)
-		wtItems:PushBack(widget)
+
+	-- небольшой результат поиска показываем плоским списком, без групп
+	if searchText ~= "" and #filtered <= FLAT_LIMIT then
+		AddRows(filtered, LEVEL1_X)
+		AddPad()
+		UpdateCountLabel()
+		return
 	end
+
+	for g = 1, #groups do
+		local group = groups[g]
+		local isOpen = group.key == openGroup
+		AddHeader(group.label, #group.rows, isOpen, "grp: " .. g, 1)
+		if isOpen then
+			if group.subs then
+				for s = 1, #group.subs do
+					local sub = group.subs[s]
+					local subOpen = sub.key == openSub
+					AddHeader(sub.label, #sub.rows, subOpen, "sub: " .. g .. ":" .. s, 2)
+					if subOpen then
+						AddRows(sub.rows, LEVEL2_X)
+					end
+				end
+			else
+				AddRows(group.rows, LEVEL1_X)
+			end
+		end
+	end
+	AddPad()
 	UpdateCountLabel()
 end
 
@@ -474,6 +657,23 @@ local function RenderChart(entry)
 	end
 end
 
+-- Высота абзаца подсказки: число строк оценивается по символам с переносом по словам
+local HELP_CHARS_PER_LINE = 34
+local HELP_LINE_H = 17
+local function HelpLineCount(text)
+	local lines, cur = 1, 0
+	for word in string.gmatch(text, "%S+") do
+		local len = string.len(word)
+		if cur > 0 and cur + 1 + len > HELP_CHARS_PER_LINE then
+			lines = lines + 1
+			cur = len
+		else
+			cur = cur + (cur > 0 and 1 or 0) + len
+		end
+	end
+	return lines
+end
+
 -- Страница подсказок: пока предмет не выбран (и после сброса)
 local function ShowHelpBody()
 	wtName:SetVal("text", userMods.ToWString(""))
@@ -489,16 +689,17 @@ local function ShowHelpBody()
 	wtChart:Show(false)
 	wtHelpTitle:SetVal("value", userMods.ToWString(L("PriceDBHelpTitle")))
 	wtHelpTitle:Show(true)
+	local y = 56
 	for i = 1, #helpLines do
-		helpLines[i]:SetVal("value", userMods.ToWString(L("PriceDBHelp" .. i)))
+		local text = L("PriceDBHelp" .. i)
+		local height = HelpLineCount(text) * HELP_LINE_H + 4
+		helpLines[i]:SetVal("value", userMods.ToWString(text))
+		local place = helpLines[i]:GetPlacementPlain()
+		place.posY = y
+		place.sizeY = height
+		helpLines[i]:SetPlacementPlain(place)
 		helpLines[i]:Show(true)
-	end
-end
-
-local function ShowHelp()
-	local ok, err = pcall(ShowHelpBody)
-	if not ok then
-		LogInfo("AuctionPlus PriceDB help: ", tostring(err))
+		y = y + height + 12
 	end
 end
 
@@ -533,7 +734,7 @@ end
 -- Повторная подсветка выбранной строки после перестроения списка
 local function ReselectDetails()
 	if not selectedKey then
-		ShowHelp()
+		ShowHelpBody()
 		return
 	end
 	for i = 1, #allRows do
@@ -543,7 +744,7 @@ local function ReselectDetails()
 		end
 	end
 	selectedKey = nil
-	ShowHelp()
+	ShowHelpBody()
 end
 
 --------------------------------------------------------------------------------
@@ -552,6 +753,7 @@ end
 local function RefreshPanel()
 	RebuildCache()
 	ApplyFilter()
+	BuildGroups()
 	RenderList()
 	ReselectDetails()
 	lastCommitted = PriceDB.stats.committed or 0
@@ -559,6 +761,11 @@ end
 
 local function Open()
 	selectedKey = nil
+	-- раскрытую группу помним STATE_TTL_MS после закрытия окна
+	if closedAtMs and common.GetLocalDateTimeMs() - closedAtMs > STATE_TTL_MS then
+		openGroup, openSub, savedGroup, savedSub = nil, nil, nil, nil
+	end
+	closedAtMs = nil
 	RefreshPanel()
 	wtPanel:Show(true)
 end
@@ -568,6 +775,9 @@ function PriceDBOpen()
 end
 
 function PriceDBClose()
+	if wtPanel:IsVisible() then
+		closedAtMs = common.GetLocalDateTimeMs()
+	end
 	wtPanel:Show(false)
 end
 
@@ -592,13 +802,26 @@ local function EffectiveSearchText()
 end
 
 local function ApplySearch()
-	searchText = EffectiveSearchText()
-	ApplyFilter()
-	RenderList()
-	-- пустое поле = сброс поиска: показываем справочную страницу
-	if searchText == "" then
-		ShowHelp()
+	local newText = EffectiveSearchText()
+	if searchText == "" and newText ~= "" then
+		savedGroup, savedSub = openGroup, openSub
 	end
+	searchText = newText
+	if newText == "" then
+		openGroup, openSub = savedGroup, savedSub
+	else
+		openGroup, openSub = nil, nil
+	end
+	ApplyFilter()
+	BuildGroups()
+	-- единственная группа в результатах поиска раскрывается сама
+	if newText ~= "" and #groups == 1 then
+		openGroup = groups[1].key
+		if groups[1].subs and #groups[1].subs == 1 then
+			openSub = groups[1].subs[1].key
+		end
+	end
+	RenderList()
 end
 
 function PriceDBSearchEnter()
@@ -610,18 +833,15 @@ function PriceDBSearchPressed()
 	ApplySearch()
 end
 
+-- Esc: снимает фокус и очищает поиск (вместо прежней кнопки "Сброс")
 function PriceDBSearchEsc()
-	-- сброс поиска по Esc (без отдельной кнопки «Сброс»): очищаем поле и
-	-- возвращаем справочную страницу, если в поле был реальный текст
-	if EffectiveSearchText() ~= "" then
-		searchText = ""
-		selectedKey = nil
-		wtEditLine:SetText(userMods.ToWString(L("PriceDBSearchHint")))
-		ApplyFilter()
-		RenderList()
-		ShowHelp()
-	end
 	wtEditLine:SetFocus(false)
+	if searchText ~= "" or EffectiveSearchText() ~= "" then
+		wtEditLine:SetText(userMods.ToWString(L("PriceDBSearchHint")))
+		ApplySearch()
+	else
+		wtEditLine:SetText(userMods.ToWString(L("PriceDBSearchHint")))
+	end
 end
 
 -- Подсказка в поле поиска: прячем при фокусе, возвращаем на пустой текст
@@ -643,12 +863,40 @@ function PriceDBSelectItem(reaction)
 	local row = index and filtered[index]
 	if not row then return end
 	selectedKey = row.key
-	for i = 1, #rowSelects do
-		if rowSelects[i] then
-			rowSelects[i]:SetVariant(i == index and 1 or 0)
-		end
+	for i, button in pairs(rowSelects) do
+		button:SetVariant(i == index and 1 or 0)
 	end
 	ShowDetails(row)
+end
+
+-- Заголовок группы: раскрывает её (предыдущая сворачивается) или сворачивает
+function PriceDBToggleGroup(reaction)
+	local kind, g, s = string.match(reaction.sender, "^(%a+): (%d+):?(%d*)$")
+	local group = g and groups[tonumber(g)]
+	if not group then return end
+	if kind == "grp" then
+		if openGroup == group.key then
+			openGroup = nil
+		else
+			openGroup = group.key
+		end
+		openSub = nil
+	elseif kind == "sub" then
+		local sub = group.subs and group.subs[tonumber(s)]
+		if not sub then return end
+		if openSub == sub.key then
+			openSub = nil
+		else
+			openSub = sub.key
+		end
+	else
+		return
+	end
+	RenderList()
+	local header = headerByName[reaction.sender]
+	if header and wtItems:IsContain(header) then
+		wtItems:EnsureVisible(header)
+	end
 end
 
 --------------------------------------------------------------------------------
@@ -693,6 +941,7 @@ common.RegisterReactionHandler(PriceDBSearchPressed, "PriceDBSearchPressed")
 common.RegisterReactionHandler(PriceDBSearchEsc, "PriceDBSearchEsc")
 common.RegisterReactionHandler(PriceDBSearchFocus, "PriceDBSearchFocus")
 common.RegisterReactionHandler(PriceDBSelectItem, "PriceDBSelectItem")
+common.RegisterReactionHandler(PriceDBToggleGroup, "PriceDBToggleGroup")
 common.RegisterReactionHandler(PriceDBFloatOver, "PriceDBFloatOver")
 common.RegisterEventHandler(OnSlashCommand, "EVENT_UNKNOWN_SLASH_COMMAND")
 common.RegisterEventHandler(OnSecondTimer, "EVENT_SECOND_TIMER")
@@ -745,7 +994,9 @@ MakeChartLine(PLOT_LEFT, 2, PLOT_BOTTOM, axisH, AXIS_COLOR)
 MakeChartLine(PLOT_LEFT, axisW, PLOT_BOTTOM, 2, AXIS_COLOR)
 
 wtTitle:SetVal("text", userMods.ToWString(L("PriceDBTitle")))
-btSearch:SetVal("button_label", userMods.ToWString(L("ButtonSearch")))
 wtEditLine:SetText(userMods.ToWString(L("PriceDBSearchHint")))
+-- Инициализация DnD для плавающей кнопки
 DnD.Init(wtFloatBtn, wtFloatBtn, true, true)
-ShowHelp()
+-- Инициализация DnD для самого окна (для перетаскивания по заголовку)
+DnD.Init(wtPanel, wtTitle, true, true)
+ShowHelpBody()
