@@ -13,7 +13,6 @@
 local wtPanel = mainForm:GetChildChecked("PriceDBPanel", false)
 local wtTitle = wtPanel:GetChildChecked("Header", false):GetChildChecked("Text", false)
 local wtEditLine = wtPanel:GetChildChecked("EditLine", false)
-local wtCountLabel = wtPanel:GetChildChecked("CountLabel", false)
 local wtItems = wtPanel:GetChildChecked("ItemsList", false)
 local wtDetails = wtPanel:GetChildChecked("Details", false)
 local wtName = wtDetails:GetChildChecked("Name", false)
@@ -50,10 +49,10 @@ local CoinTex = {
 }
 
 -- Размеры области графика: совпадают с раскладкой Details/Chart в XDB
--- (Details: 740-376-30 x 580-88-20, Chart: внутренние отступы 14 и 158/14).
+-- (Details: 740-376-30 x 540-42-20, Chart: отступы 14 и 178/14).
 -- Слева - полоса под подписи шкалы цен, снизу - риски и подписи дат.
 local CHART_W = 306
-local CHART_H = 280
+local CHART_H = 286
 local PLOT_LEFT = 92
 local PLOT_RIGHT = 8
 local PLOT_TOP = 46
@@ -64,9 +63,11 @@ local MAX_ROWS = 300         -- предел строк в одной раскр
 local FLAT_LIMIT = 80        -- результатов поиска не больше - показываем без групп
 local SPLIT_LIMIT = 120      -- группа крупнее делится на подгруппы по двум буквам
 local BODY_PAD = 12          -- отступ строк от краёв бумаги
-local ROW_INSET = 12         -- строки внутри бумаги
-local LEVEL1_X = 12          -- отступ заголовков и бумаги от кожаной рамки
-local LEVEL2_X = 22
+local ROW_INSET = 14         -- строки внутри бумаги
+local PAPER_OUT = 6          -- бумага шире заголовка с каждого края (правый край - в XDB)
+local ROW_RIGHT = 36         -- правый отступ строк: прозрачное поле текстуры бумаги + отступ
+local LEVEL1_X = 16          -- отступ заголовков и бумаги от кожаной рамки
+local LEVEL2_X = 26
 local LIST_PAD = 12          -- пустое место сверху и снизу списка (внутри рамки)
 local STATE_TTL_MS = 600000  -- сколько помним раскрытую группу после закрытия окна
 local HELP_LINES = 5
@@ -283,22 +284,9 @@ local function BuildGroups()
 	end
 end
 
-local function UpdateCountLabel()
-	local text
-	if searchText ~= "" then
-		text = L("PriceDBFound") .. tostring(#filtered) .. L("PriceDBOf") .. tostring(#allRows)
-	else
-		text = L("PriceDBCount") .. tostring(#allRows)
-	end
-	if leafTruncated then
-		text = text .. " " .. L("PriceDBLimit")
-	end
-	wtCountLabel:SetVal("value", userMods.ToWString(text))
-end
-
 -- Высота строки списка: длинные названия переносятся на 2-3 строки
 -- (оценка по числу символов: ширина текста заранее неизвестна)
-local CHARS_PER_LINE = 30
+local CHARS_PER_LINE = 25
 local function RowHeight(name)
 	local chars = select(2, name:gsub("[^\128-\191]", ""))
 	local lines = math.max(1, math.min(3, math.ceil(chars / CHARS_PER_LINE)))
@@ -314,7 +302,7 @@ end
 
 local function FinishBody(body, bottomY, posX)
 	local place = body:GetPlacementPlain()
-	place.posX = posX
+	place.posX = posX - PAPER_OUT
 	place.sizeY = bottomY + BODY_PAD
 	body:SetPlacementPlain(place)
 	body:Show(true)
@@ -330,7 +318,7 @@ local function AddRowTo(body, y, row, text)
 	local height = RowHeight(name)
 	local place = widget:GetPlacementPlain()
 	place.posX = ROW_INSET
-	place.highPosX = ROW_INSET
+	place.highPosX = ROW_RIGHT
 	place.posY = y
 	place.sizeY = height
 	widget:SetPlacementPlain(place)
@@ -394,7 +382,6 @@ local function RenderList()
 		local height = AddRowTo(body, BODY_PAD, nil, L("PriceDBEmpty"))
 		FinishBody(body, BODY_PAD + height, LEVEL1_X)
 		AddPad()
-		UpdateCountLabel()
 		return
 	end
 
@@ -402,7 +389,6 @@ local function RenderList()
 	if searchText ~= "" and #filtered <= FLAT_LIMIT then
 		AddRows(filtered, LEVEL1_X)
 		AddPad()
-		UpdateCountLabel()
 		return
 	end
 
@@ -426,7 +412,6 @@ local function RenderList()
 		end
 	end
 	AddPad()
-	UpdateCountLabel()
 end
 
 --------------------------------------------------------------------------------
@@ -689,7 +674,7 @@ local function ShowHelpBody()
 	wtChart:Show(false)
 	wtHelpTitle:SetVal("value", userMods.ToWString(L("PriceDBHelpTitle")))
 	wtHelpTitle:Show(true)
-	local y = 56
+	local y = 40
 	for i = 1, #helpLines do
 		local text = L("PriceDBHelp" .. i)
 		local height = HelpLineCount(text) * HELP_LINE_H + 4
@@ -699,7 +684,7 @@ local function ShowHelpBody()
 		place.sizeY = height
 		helpLines[i]:SetPlacementPlain(place)
 		helpLines[i]:Show(true)
-		y = y + height + 12
+		y = y + height + 4
 	end
 end
 
@@ -995,8 +980,7 @@ MakeChartLine(PLOT_LEFT, axisW, PLOT_BOTTOM, 2, AXIS_COLOR)
 
 wtTitle:SetVal("text", userMods.ToWString(L("PriceDBTitle")))
 wtEditLine:SetText(userMods.ToWString(L("PriceDBSearchHint")))
--- Инициализация DnD для плавающей кнопки
 DnD.Init(wtFloatBtn, wtFloatBtn, true, true)
--- Инициализация DnD для самого окна (для перетаскивания по заголовку)
-DnD.Init(wtPanel, wtTitle, true, true)
+-- Окно базы цен тоже перетаскивается (за любое свободное место), положение хранится в конфиге
+DnD.Init(wtPanel, wtPanel, true, true)
 ShowHelpBody()

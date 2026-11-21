@@ -8,7 +8,7 @@
 		<Item href="Close.(WidgetButton).xdb" />
 		<Item href="SearchFrame.(WidgetPanel).xdb" />
 		<Item href="SearchEdit.xdb" />
-		<Item href="CountLabel.(WidgetTextView).xdb" />
+		<Item href="ListBack.(WidgetPanel).xdb" />
 		<Item href="ItemsList.(WidgetScrollableContainer).xdb" />
 		<Item href="ItemRow.(WidgetPanel).xdb" />
 		<Item href="GroupRow.(WidgetPanel).xdb" />
@@ -17,7 +17,7 @@
 		<Item href="ListPad.(WidgetPanel).xdb" />
 		<Item href="Details.(WidgetPanel).xdb" />
 	</Children>
-	<BackLayer href="../Options/Textures/MainFrame.(WidgetLayerTiledTexture).xdb" />
+	<BackLayer href="PriceDBFrame.(WidgetLayerTiledTexture).xdb" />
 	<Placement>
 		<X>
 			<Align>WIDGET_ALIGN_CENTER</Align>
@@ -27,7 +27,7 @@
 		<Y>
 			<Align>WIDGET_ALIGN_CENTER</Align>
 			<Pos>0</Pos>
-			<Size>580</Size>
+			<Size>540</Size>
 		</Y>
 	</Placement>
 	<Visible>false</Visible>

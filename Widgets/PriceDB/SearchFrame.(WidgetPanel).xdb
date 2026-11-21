@@ -5,12 +5,12 @@
 	<Placement>
 		<X>
 			<Align>WIDGET_ALIGN_LOW</Align>
-			<Pos>30</Pos>
-			<Size>330</Size>
+			<Pos>38</Pos>
+			<Size>316</Size>
 		</X>
 		<Y>
 			<Align>WIDGET_ALIGN_LOW</Align>
-			<Pos>50</Pos>
+			<Pos>42</Pos>
 			<Size>30</Size>
 		</Y>
 	</Placement>

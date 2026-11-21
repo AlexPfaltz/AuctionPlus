@@ -3,17 +3,16 @@
 	<scrollBar href="../Tabs/Scan/ScrollBar/GlideScrollBar.xdb" />
 	<widgetsArrangement>WIDGETS_ARRANGEMENT_T2B</widgetsArrangement>
 	<Name>ItemsList</Name>
-	<BackLayer href="../Common/Textures/LeatherTile.(WidgetLayerTiledTexture).xdb" />
 	<Placement>
 		<X>
 			<Align>WIDGET_ALIGN_LOW</Align>
-			<Pos>30</Pos>
-			<Size>330</Size>
+			<Pos>38</Pos>
+			<Size>316</Size>
 		</X>
 		<Y>
 			<Align>WIDGET_ALIGN_BOTH</Align>
-			<Pos>78</Pos>
-			<HighPos>20</HighPos>
+			<Pos>73</Pos>
+			<HighPos>31</HighPos>
 		</Y>
 	</Placement>
 	<Visible>true</Visible>
